@@ -30,17 +30,17 @@ git clone https://github.com/theol-tuc/TTGD.git
 ```
 2. Access and open the repository in an IDE of ypur choice.
 3. Install dependencies
-3.1 Navigate to the directory in which requirements.txt is and execute:
+4. Navigate to the directory in which requirements.txt is and execute:
 ```sh
 npm install  OR
 pip install -r requirements.txt
 ```
-4. Repeat the Steps sunder 3 for the backend.
-5. To start the backend run:
+5. Repeat the Steps 3 & 4 for the backend.
+6. To start the backend run:
 ```sh
-
+python manage.py runserver
 ```
-6. Return to the Frontend to the main directory and run:
+7. Return to the Frontend to the main directory and run:
 ```sh
 npm start
 ```
@@ -51,5 +51,5 @@ npm start
 <!-- MARKDOWN LINKS & IMAGES -->
 [Python-img]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python-url]: https://www.python.org/
-[React-img]: 
+[React-img]: https://shields.io/badge/react-black?logo=react&style=for-the-badge
 [React-url]: https://www.react.dev/
