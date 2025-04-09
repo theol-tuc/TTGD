@@ -8,3 +8,5 @@ interface BoardCellComponentProps {
     onCellClick: (row: number, col: number) => void;
     getColorForPart: (type: string) => string;
 }
+
+
