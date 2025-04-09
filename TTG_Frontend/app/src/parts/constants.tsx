@@ -14,7 +14,8 @@ export enum ItemType {
     LeverRed = "lever_red",
     BorderVertical = "border_vertical",
     BorderHorizontal = "border_horizontal",
-    BorderDiagonal = "border_diagonal_left",
+    BorderDiagonalLeft = "border_diagonal_left",
+    BorderDiagonalRight = "border_diagonal_right",
 }
 
 export const IMAGE_FILENAMES: Record<ItemType, string> = {
@@ -33,7 +34,8 @@ export const IMAGE_FILENAMES: Record<ItemType, string> = {
     [ItemType.LeverRed]: '/images/Turnstile-t.png',
     [ItemType.BorderVertical]: '/images/Side-t.png',
     [ItemType.BorderHorizontal]: '/images/Side-horizontal-t.png',
-    [ItemType.BorderDiagonal]: '/images/Slope-t.png',
+    [ItemType.BorderDiagonalLeft]: '/images/Slope-t.png',
+    [ItemType.BorderDiagonalRight]: '/images/Slope-t.png',
 };
 
 export const ITEM_COLORS: Record<ItemType, string> = {
@@ -52,5 +54,6 @@ export const ITEM_COLORS: Record<ItemType, string> = {
     [ItemType.LeverRed]: '#FFB6C1', // lightpink
     [ItemType.BorderVertical]: '#946635',
     [ItemType.BorderHorizontal]: '#49331b',
-    [ItemType.BorderDiagonal]: '#88694a'
+    [ItemType.BorderDiagonalLeft]: '#88694a',
+    [ItemType.BorderDiagonalRight]: '#88694a'
 };

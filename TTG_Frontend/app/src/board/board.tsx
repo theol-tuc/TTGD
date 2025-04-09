@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from "react";
 import { MarblePathGraph, Direction } from '../parts/marble_path';
-import { ItemType, IMAGE_FILENAMES } from '../parts/constants';
+import { ItemType, ITEM_COLORS } from '../parts/constants';
+import { IMAGE_FILENAMES } from '../parts/constants';
 import './board.css';
 
 export type BoardCell = {
@@ -11,7 +12,6 @@ const numRows = 17;
 const numCols = 15;
 
 const Board: React.FC = () => {
-    // Initialize the board with the specified pattern
     const [board, setBoard] = useState<BoardCell[][]>(() => {
         const initialBoard: BoardCell[][] = Array.from({length: numRows}, () =>
             Array.from({length: numCols}, () => ({type: ItemType.Empty}))
@@ -33,8 +33,11 @@ const Board: React.FC = () => {
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || (col >= 3 && col <= 11) || col === 13) {
                 initialBoard[0][col].type = ItemType.Invalid;
-            } else if (col === 2 || col === 12) {
-                initialBoard[0][col].type = ItemType.BorderDiagonal;
+            } else if (col === 2 ) {
+                initialBoard[0][col].type = ItemType.BorderDiagonalLeft;
+            }
+            else if (col === 12) {
+                initialBoard[0][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
@@ -42,8 +45,11 @@ const Board: React.FC = () => {
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || col === 2 || (col >= 4 && col <= 10) || col === 12 || col === 13) {
                 initialBoard[1][col].type = ItemType.Invalid;
-            } else if (col === 3 || col === 11) {
-                initialBoard[1][col].type = ItemType.BorderDiagonal;
+            } else if (col === 3 ) {
+                initialBoard[1][col].type = ItemType.BorderDiagonalLeft;
+            }
+            else if (col === 11) {
+                initialBoard[1][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
@@ -51,8 +57,11 @@ const Board: React.FC = () => {
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || col === 2 || col === 3 || (col >= 5 && col <= 9) || col === 11 || col === 12 || col === 13) {
                 initialBoard[2][col].type = ItemType.Invalid;
-            } else if (col === 4 || col === 10) {
-                initialBoard[2][col].type = ItemType.BorderDiagonal;
+            } else if (col === 4 ) {
+                initialBoard[2][col].type = ItemType.BorderDiagonalLeft;
+            }
+            else if (col === 4 || col === 10) {
+                initialBoard[2][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
@@ -104,7 +113,7 @@ const Board: React.FC = () => {
             for (let col = 0; col < numCols; col++) {
                 // Skip if cell is already set
                 if (initialBoard[row][col].type !== ItemType.Empty) continue;
-                
+
                 // Create checkerboard pattern
                 if ((row + col) % 2 === 0) {
                     initialBoard[row][col].type = ItemType.Empty;
@@ -113,6 +122,7 @@ const Board: React.FC = () => {
                 }
             }
         }
+        initialBoard[14][7].type = ItemType.Invalid;
 
         return initialBoard;
     });
