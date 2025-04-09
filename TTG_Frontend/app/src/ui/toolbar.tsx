@@ -9,7 +9,7 @@ export const Toolbar: React.FC = () => {
 
     return (
         <div className="toolbar">
-            <div className="toolbar-buttons">
+            <div className="toolbar-button">
                 <button onClick={handleClick('zoom-in')}>Zoom In</button>
                 <button onClick={handleClick('zoom-out')}>Zoom Out</button>
                 <button onClick={handleClick('slow-down')}>Slow Down</button>

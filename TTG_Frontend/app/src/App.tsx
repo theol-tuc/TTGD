@@ -1,7 +1,7 @@
-import React, {JSX} from 'react';
+import React, { JSX } from 'react';
 import './App.css';
-import { Board } from './board/board';
-import {Toolbar} from "./ui/toolbar";
+import Board from './board/board';
+import { Toolbar } from "./ui/toolbar";
 
 function App(): JSX.Element {
     return (
@@ -9,10 +9,10 @@ function App(): JSX.Element {
             <header className="App-header">
                 <h4>Welcome to Turing Tumble</h4>
             </header>
-            <main>
+            <div className="main-content">
                 <Board />
-                <Toolbar/>
-            </main>
+                <Toolbar />
+            </div>
         </div>
     );
 }
