@@ -1,4 +1,4 @@
-import { PartType } from './board';
+import { ItemType } from '../parts/constants';
 
 // Define the possible directions a marble can move (only downward due to gravity)
 export enum Direction {
@@ -10,7 +10,7 @@ export enum Direction {
 export interface GraphNode {
     row: number;
     col: number;
-    type: PartType;
+    type: ItemType;
     connections: Map<Direction, GraphNode | null>;
 }
 
@@ -36,7 +36,7 @@ export class MarblePathGraph {
                 graph[row][col] = {
                     row,
                     col,
-                    type: PartType.Empty,
+                    type: ItemType.Empty,
                     connections: new Map<Direction, GraphNode | null>()
                 };
             }
@@ -61,7 +61,7 @@ export class MarblePathGraph {
     }
 
     // Update a node's type (e.g., when a part is placed)
-    public updateNode(row: number, col: number, type: PartType): void {
+    public updateNode(row: number, col: number, type: ItemType): void {
         if (row >= 0 && row < this.numRows && col >= 0 && col < this.numCols) {
             this.nodes[row][col].type = type;
         }
@@ -74,36 +74,36 @@ export class MarblePathGraph {
 
             // Handle different part types
             switch (node.type) {
-                case PartType.RampRight:
+                case ItemType.RampRight:
                     // RampRight always sends marble down-right
                     return node.connections.get(Direction.DownRight) || null;
 
-                case PartType.RampLeft:
+                case ItemType.RampLeft:
                     // RampLeft always sends marble down-left
                     return node.connections.get(Direction.DownLeft) || null;
 
-                case PartType.BitRight:
+                case ItemType.BitRight:
                     // BitRight sends marble down-right if set to 1, down-left if set to 0
                     // TODO: Add state tracking for bits
                     return node.connections.get(Direction.DownLeft) || null;
 
-                case PartType.BitLeft:
+                case ItemType.BitLeft:
                     // BitLeft sends marble down-left if set to 1, down-right if set to 0
                     // TODO: Add state tracking for bits
                     return node.connections.get(Direction.DownRight) || null;
 
-                case PartType.Crossover:
+                case ItemType.Crossover:
                     // Crossover preserves the incoming direction
                     return node.connections.get(direction) || null;
 
-                case PartType.Intercept:
+                case ItemType.Intercept:
                     return null;
 
-                case PartType.GraySpace:
-                case PartType.Empty:
+                case ItemType.GraySpace:
+                case ItemType.Empty:
                     return null;
 
-                case PartType.Invalid:
+                case ItemType.Invalid:
                     // Invalid spaces stop the marble
                     return null;
 

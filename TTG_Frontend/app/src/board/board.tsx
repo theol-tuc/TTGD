@@ -1,4 +1,3 @@
-//put the board and its functions here
 import React, {useState, useRef, useEffect} from "react";
 import { MarblePathGraph, Direction } from '../parts/marble_path';
 import { ItemType, ITEM_COLORS } from '../parts/constants';

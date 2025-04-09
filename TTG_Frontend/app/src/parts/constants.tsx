@@ -1,4 +1,3 @@
-// src/constants/index.ts
 export enum ItemType {
     Empty = "empty",
     RampRight = "ramp_right",
