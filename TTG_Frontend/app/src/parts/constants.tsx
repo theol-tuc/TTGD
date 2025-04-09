@@ -1,46 +1,58 @@
 // src/constants/index.ts
-import { ItemType } from './types';
+export enum ItemType {
+    Empty = "empty",
+    RampRight = "ramp_right",
+    RampLeft = "ramp_left",
+    BitRight = "bit_right",
+    BitLeft = "bit_left",
+    Crossover = "crossover",
+    Intercept = "intercept",
+    Invalid = "invalid",
+    GraySpace = "gray_space",
+    BallBlue = "ball_blue",
+    BallRed = "ball_red",
+    LeverBlue = "lever_blue",
+    LeverRed = "lever_red",
+    BorderVertical = "border_vertical",
+    BorderHorizontal = "border_horizontal",
+    BorderDiagonal = "border_diagonal_left",
+}
 
-export const IMAGE_FILENAMES: Record<ItemType, string> = {
-  [ItemType.EMPTY]: '/img/elements/empty.png',
-  [ItemType.EMPTY_GEAR_ONLY]: '/img/elements/empty_gear_only.png',
-  [ItemType.RAMP_GOING_LEFT]: '/img/elements/ramp_going_left.png',
-  [ItemType.RAMP_GOING_RIGHT]: '/img/elements/ramp_going_right.png',
-  [ItemType.BIT_POINTING_LEFT]: '/img/elements/bit_pointing_left.png',
-  [ItemType.BIT_POINTING_RIGHT]: '/img/elements/bit_pointing_right.png',
-  [ItemType.GEAR_BIT_POINTING_LEFT]: '/img/elements/gear_bit_pointing_left.png',
-  [ItemType.GEAR_BIT_POINTING_RIGHT]: '/img/elements/gear_bit_pointing_right.png',
-  [ItemType.GEAR]: '/img/elements/gear.png',
-  [ItemType.CROSS_OVER]: '/img/elements/crossover.png',
-  [ItemType.INTER_CEPTER]: '/img/elements/interceptor.png',
-  [ItemType.SPAWN_BALL_BLUE]: '/img/elements/releaser_blue.png',
-  [ItemType.SPAWN_BALL_RED]: '/img/elements/releaser_red.png',
-  [ItemType.LEVER_BLUE]: '/img/elements/lever_blue.png',
-  [ItemType.LEVER_RED]: '/img/elements/lever_red.png',
-};
+// export const IMAGE_FILENAMES: Record<ItemType, string> = {
+//     [ItemType.Empty]: '/img/elements/empty.png',
+//     [ItemType.RampRight]: '/img/elements/ramp_right.png',
+//     [ItemType.RampLeft]: '/img/elements/ramp_left.png',
+//     [ItemType.BitRight]: '/img/elements/bit_right.png',
+//     [ItemType.BitLeft]: '/img/elements/bit_left.png',
+//     [ItemType.Crossover]: '/img/elements/crossover.png',
+//     [ItemType.Intercept]: '/img/elements/intercept.png',
+//     [ItemType.GraySpace]: '/img/elements/gray_space.png',
+//     [ItemType.Invalid]: '/img/elements/invalid.png',
+//     [ItemType.BallBlue]: '/img/elements/ball_blue.png',
+//     [ItemType.BallRed]: '/img/elements/ball_red.png',
+//     [ItemType.LeverBlue]: '/img/elements/lever_blue.png',
+//     [ItemType.LeverRed]: '/img/elements/lever_red.png'
+//     [ItemType.BorderVertical]: '/img/elements/border.png',
+//     [ItemType.BorderHorizontal]: '/img/elements/border.png',
+//     [ItemType.BorderDiagonal]: '/img/elements/border.png',
+//
+// };
 
 export const ITEM_COLORS: Record<ItemType, string> = {
-  [ItemType.EMPTY]: '#FFFFFF', // white
-  [ItemType.EMPTY_GEAR_ONLY]: '#FFFFFF', // white
-  [ItemType.RAMP_GOING_LEFT]: '#008000', // green
-  [ItemType.RAMP_GOING_RIGHT]: '#006400', // darkGreen
-  [ItemType.BIT_POINTING_LEFT]: '#0000FF', // blue
-  [ItemType.BIT_POINTING_RIGHT]: '#00008B', // darkBlue
-  [ItemType.GEAR_BIT_POINTING_LEFT]: '#FF0000', // red
-  [ItemType.GEAR_BIT_POINTING_RIGHT]: '#8B0000', // darkRed
-  [ItemType.GEAR]: '#FF00FF', // magenta
-  [ItemType.CROSS_OVER]: '#FFFF00', // yellow
-  [ItemType.INTER_CEPTER]: '#808080', // gray
-  [ItemType.SPAWN_BALL_BLUE]: '#6495ED', // cornflowerblue
-  [ItemType.SPAWN_BALL_RED]: '#FF7F50', // coral
-  [ItemType.LEVER_BLUE]: '#87CEFA', // lightskyblue
-  [ItemType.LEVER_RED]: '#FFB6C1', // lightpink
-};
-
-export const hasGear = (item: ItemType): boolean => {
-  return (
-    item === ItemType.GEAR ||
-    item === ItemType.GEAR_BIT_POINTING_LEFT ||
-    item === ItemType.GEAR_BIT_POINTING_RIGHT
-  );
+    [ItemType.Empty]: '#ffffff', // white
+    [ItemType.RampRight]: '#60bb46', // green
+    [ItemType.RampLeft]: '#a9ff18', // light green
+    [ItemType.BitRight]: '#1649b2', // dark blue
+    [ItemType.BitLeft]: '#006fff', // blue
+    [ItemType.Crossover]: '#fa9d00', // orange
+    [ItemType.Intercept]: '#34302f', // dark gray
+    [ItemType.GraySpace]: '#e0e0e0', // light gray
+    [ItemType.Invalid]: '#000000', // black
+    [ItemType.BallBlue]: '#6495ED', // cornflowerblue
+    [ItemType.BallRed]: '#FF7F50', // coral
+    [ItemType.LeverBlue]: '#87CEFA', // lightskyblue
+    [ItemType.LeverRed]: '#FFB6C1', // lightpink
+    [ItemType.BorderVertical]: '#946635',
+    [ItemType.BorderHorizontal]: '#49331b',
+    [ItemType.BorderDiagonal]: '#88694a'
 };
