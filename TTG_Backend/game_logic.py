@@ -38,6 +38,16 @@ class GameBoard:
                                                    for x in range(width)]
                                                   for y in range(height)]
         self.launchers: List[Tuple[int, int]] = []  # Positions of launchers
+        self.score = 0
+
+    def reset(self) -> None:
+        """Reset the game board to its initial state"""
+        self.marbles.clear()
+        self.launchers.clear()
+        self.score = 0
+        self.components = [[Component(ComponentType.EMPTY, x, y)
+                          for x in range(self.width)]
+                         for y in range(self.height)]
 
     def add_component(self, type: ComponentType, x: int, y: int) -> bool:
         """Add a component to the board if the position is valid and empty"""
@@ -53,7 +63,9 @@ class GameBoard:
         if 0 <= x < self.width and 0 <= y < self.height:
             component = self.components[y][x]
             if component.type == ComponentType.EMPTY and not component.is_occupied:
-                self.marbles.append(Marble(x, y))
+                marble = Marble(x, y)
+                marble.is_moving = True  # Initialize marble as moving
+                self.marbles.append(marble)
                 component.is_occupied = True
                 return True
         return False
@@ -65,8 +77,17 @@ class GameBoard:
             return self.add_marble(x, y)
         return False
 
+    def check_collision(self, x: int, y: int) -> bool:
+        """Check if a position is occupied by another marble"""
+        for marble in self.marbles:
+            if marble.x == x and marble.y == y:
+                return True
+        return False
+
     def update_marble_positions(self) -> None:
         """Update all marble positions based on components and physics"""
+        marbles_to_remove = []
+        
         for marble in self.marbles:
             if not marble.is_moving:
                 continue
@@ -80,6 +101,7 @@ class GameBoard:
                 marble.direction = "right"
             elif component.type == ComponentType.INTERCEPTOR:
                 marble.is_moving = False
+                self.score += 1  # Increment score when marble is intercepted
                 continue
             elif component.type == ComponentType.CROSSOVER:
                 # Allow marble to continue in its current direction
@@ -99,6 +121,11 @@ class GameBoard:
                     0 <= new_y < self.height):
                 new_component = self.components[new_y][new_x]
 
+                # Check for collisions with other marbles
+                if self.check_collision(new_x, new_y):
+                    marble.is_moving = False
+                    continue
+
                 # Update positions if new spot is empty or a crossover
                 if (new_component.type == ComponentType.EMPTY or
                         new_component.type == ComponentType.CROSSOVER):
@@ -107,6 +134,14 @@ class GameBoard:
                     self.components[new_y][new_x].is_occupied = True
                 else:
                     marble.is_moving = False
+            else:
+                # Marble is out of bounds, mark for removal
+                marbles_to_remove.append(marble)
+
+        # Remove marbles that went out of bounds
+        for marble in marbles_to_remove:
+            self.components[marble.y][marble.x].is_occupied = False
+            self.marbles.remove(marble)
 
     def get_board_state(self) -> List[List[int]]:
         """Return the current state of the board"""
@@ -124,3 +159,7 @@ class GameBoard:
                 if self.components[y][x].type != ComponentType.EMPTY:
                     components.append((x, y, self.components[y][x].type.value))
         return components
+
+    def get_score(self) -> int:
+        """Return the current game score"""
+        return self.score
