@@ -81,11 +81,7 @@
 .board-cell[title*="bit_left"] .cell-image {
     transform: rotate(180deg);
 }
+.board-cell[title*=""] .cell-image {
 
-.board-cell[title*="border_vertical"] .cell-image {
-    transform: rotate(90deg);
 }
 
-.board-cell[title*="border_diagonal"] .cell-image {
-    transform: rotate(45deg);
-}

@@ -157,9 +157,9 @@ const Board: React.FC = () => {
                                 }}
                                 title={`${cell.type} (${rowIndex},${colIndex})`}
                             >
-                                {cell.type !== ItemType.Empty && cell.type !== ItemType.GraySpace && imagePath && (
+                                {cell.type !== ItemType.GraySpace && imagePath && (
                                     <img
-                                        src={process.env.PUBLIC_URL + imagePath}
+                                        src={imagePath}
                                         alt={cell.type}
                                         className="cell-image"
                                         onError={(e) => {
@@ -178,5 +178,3 @@ const Board: React.FC = () => {
 }
 
 export default Board;
-
-

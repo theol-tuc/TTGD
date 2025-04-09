@@ -18,22 +18,22 @@ export enum ItemType {
 }
 
 export const IMAGE_FILENAMES: Record<ItemType, string> = {
-    [ItemType.Empty]: 'TTG_Frontend/app/docs/images/PartLocation-t.png',
-    [ItemType.RampRight]: 'TTG_Frontend/app/docs/images/Ramp-t.png',
-    [ItemType.RampLeft]: 'TTG_Frontend/app/docs/images/Ramp-t.png',
-    [ItemType.BitRight]: './docs/images/Ramp-t.png',
-    [ItemType.BitLeft]: './docs/images/Ramp-t.png',
-    [ItemType.Crossover]: './docs/images/Crossover-t.png',
-    [ItemType.Intercept]: './docs/images/Interceptor-t.png',
+    [ItemType.Empty]: '/images/PartLocation-t.png',
+    [ItemType.RampRight]: '/images/Ramp-t.png',
+    [ItemType.RampLeft]: '/images/Ramp-t.png',
+    [ItemType.BitRight]: '/images/Ramp-t.png',
+    [ItemType.BitLeft]: '/images/Ramp-t.png',
+    [ItemType.Crossover]: '/images/Crossover-t.png',
+    [ItemType.Intercept]: '/images/Interceptor-t.png',
     [ItemType.GraySpace]: '',
     [ItemType.Invalid]: '',
-    [ItemType.BallBlue]: './docs/images/Ball-m.png',
-    [ItemType.BallRed]: './docs/images/Ball-m.png',
-    [ItemType.LeverBlue]: './docs/images/Turnstile-t.png',
-    [ItemType.LeverRed]: './docs/images/Turnstile-t.png',
-    [ItemType.BorderVertical]: 'TTG_Frontend/app/docs/images/Side-t.png',
-    [ItemType.BorderHorizontal]: './docs/images/Side-horizontal-t.png',
-    [ItemType.BorderDiagonal]: './docs/images/Slope-t.png',
+    [ItemType.BallBlue]: '/images/Ball-m.png',
+    [ItemType.BallRed]: '/images/Ball-m.png',
+    [ItemType.LeverBlue]: '/images/Turnstile-t.png',
+    [ItemType.LeverRed]: '/images/Turnstile-t.png',
+    [ItemType.BorderVertical]: '/images/Side-t.png',
+    [ItemType.BorderHorizontal]: '/images/Side-horizontal-t.png',
+    [ItemType.BorderDiagonal]: '/images/Slope-t.png',
 };
 
 export const ITEM_COLORS: Record<ItemType, string> = {
