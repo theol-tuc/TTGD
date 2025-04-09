@@ -1,6 +1,6 @@
 import React, {JSX} from 'react';
 import './App.css';
-import { Board } from './board/board';
+import Board  from './board/board';
 import {Toolbar} from "./ui/toolbar";
 
 function App(): JSX.Element {
