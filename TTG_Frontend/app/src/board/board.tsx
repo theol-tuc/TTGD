@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from "react";
 import { MarblePathGraph, Direction } from '../parts/marble_path';
-import { ItemType, ITEM_COLORS } from '../parts/constants';
+import { ItemType, IMAGE_FILENAMES } from '../parts/constants';
 import './board.css';
 
 export type BoardCell = {
@@ -49,7 +49,7 @@ const Board: React.FC = () => {
 
         // Row 3 (index 2)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 1 || col === 3 || col === 2 || (col >= 5 && col <= 9) || col === 11 || col === 12 || col === 13) {
+            if (col === 1 || col === 2 || col === 3 || (col >= 5 && col <= 9) || col === 11 || col === 12 || col === 13) {
                 initialBoard[2][col].type = ItemType.Invalid;
             } else if (col === 4 || col === 10) {
                 initialBoard[2][col].type = ItemType.BorderDiagonal;
@@ -58,7 +58,7 @@ const Board: React.FC = () => {
 
         // Row 4 (index 3)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 1 || col === 3 || col === 2 || col === 7 || col === 12 || col === 13 || col === 11) {
+            if (col === 1 || col === 2 || col === 3 || col === 7 || col === 12 || col === 13 || col === 11) {
                 initialBoard[3][col].type = ItemType.Invalid;
             }
         }
@@ -104,8 +104,8 @@ const Board: React.FC = () => {
             for (let col = 0; col < numCols; col++) {
                 // Skip if cell is already set
                 if (initialBoard[row][col].type !== ItemType.Empty) continue;
-
-                // Start checkerboard from [4,5]
+                
+                // Create checkerboard pattern
                 if ((row + col) % 2 === 0) {
                     initialBoard[row][col].type = ItemType.Empty;
                 } else {
@@ -113,7 +113,6 @@ const Board: React.FC = () => {
                 }
             }
         }
-        initialBoard[14][7].type = ItemType.Empty;
 
         return initialBoard;
     });
@@ -143,24 +142,35 @@ const Board: React.FC = () => {
         <div className="board">
             {board.map((row, rowIndex) => (
                 <div key={rowIndex} className="board-row">
-                    {row.map((cell, colIndex) => (
-                        <div
-                            key={`${rowIndex}-${colIndex}`}
-                            className="board-cell"
-                            style={{
-                                backgroundColor: ITEM_COLORS[cell.type],
-                                gridColumn: colIndex + 1,
-                                gridRow: rowIndex + 1
-                            }}
-                            title={`${cell.type} (${rowIndex},${colIndex})`}
-                        >
-                            {cell.type !== ItemType.Empty && cell.type !== ItemType.GraySpace && (
-                                <span className="cell-label">
-                                    {cell.type.split('_').map(word => word.charAt(0)).join('')}
-                                </span>
-                            )}
-                        </div>
-                    ))}
+                    {row.map((cell, colIndex) => {
+                        const imagePath = IMAGE_FILENAMES[cell.type];
+                        console.log(`Cell (${rowIndex},${colIndex}) type: ${cell.type}, image path: ${imagePath}`);
+
+                        return (
+                            <div
+                                key={`${rowIndex}-${colIndex}`}
+                                className="board-cell"
+                                style={{
+                                    gridColumn: colIndex + 1,
+                                    gridRow: rowIndex + 1,
+                                    backgroundColor: cell.type === ItemType.GraySpace ? '#e0e0e0' : 'white'
+                                }}
+                                title={`${cell.type} (${rowIndex},${colIndex})`}
+                            >
+                                {cell.type !== ItemType.Empty && cell.type !== ItemType.GraySpace && imagePath && (
+                                    <img
+                                        src={process.env.PUBLIC_URL + imagePath}
+                                        alt={cell.type}
+                                        className="cell-image"
+                                        onError={(e) => {
+                                            console.error(`Failed to load image for ${cell.type} at path: ${imagePath}`);
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             ))}
         </div>

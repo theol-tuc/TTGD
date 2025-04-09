@@ -17,25 +17,24 @@ export enum ItemType {
     BorderDiagonal = "border_diagonal_left",
 }
 
-// export const IMAGE_FILENAMES: Record<ItemType, string> = {
-//     [ItemType.Empty]: '/img/elements/empty.png',
-//     [ItemType.RampRight]: '/img/elements/ramp_right.png',
-//     [ItemType.RampLeft]: '/img/elements/ramp_left.png',
-//     [ItemType.BitRight]: '/img/elements/bit_right.png',
-//     [ItemType.BitLeft]: '/img/elements/bit_left.png',
-//     [ItemType.Crossover]: '/img/elements/crossover.png',
-//     [ItemType.Intercept]: '/img/elements/intercept.png',
-//     [ItemType.GraySpace]: '/img/elements/gray_space.png',
-//     [ItemType.Invalid]: '/img/elements/invalid.png',
-//     [ItemType.BallBlue]: '/img/elements/ball_blue.png',
-//     [ItemType.BallRed]: '/img/elements/ball_red.png',
-//     [ItemType.LeverBlue]: '/img/elements/lever_blue.png',
-//     [ItemType.LeverRed]: '/img/elements/lever_red.png'
-//     [ItemType.BorderVertical]: '/img/elements/border.png',
-//     [ItemType.BorderHorizontal]: '/img/elements/border.png',
-//     [ItemType.BorderDiagonal]: '/img/elements/border.png',
-//
-// };
+export const IMAGE_FILENAMES: Record<ItemType, string> = {
+    [ItemType.Empty]: 'TTG_Frontend/app/docs/images/PartLocation-t.png',
+    [ItemType.RampRight]: 'TTG_Frontend/app/docs/images/Ramp-t.png',
+    [ItemType.RampLeft]: 'TTG_Frontend/app/docs/images/Ramp-t.png',
+    [ItemType.BitRight]: './docs/images/Ramp-t.png',
+    [ItemType.BitLeft]: './docs/images/Ramp-t.png',
+    [ItemType.Crossover]: './docs/images/Crossover-t.png',
+    [ItemType.Intercept]: './docs/images/Interceptor-t.png',
+    [ItemType.GraySpace]: '',
+    [ItemType.Invalid]: '',
+    [ItemType.BallBlue]: './docs/images/Ball-m.png',
+    [ItemType.BallRed]: './docs/images/Ball-m.png',
+    [ItemType.LeverBlue]: './docs/images/Turnstile-t.png',
+    [ItemType.LeverRed]: './docs/images/Turnstile-t.png',
+    [ItemType.BorderVertical]: 'TTG_Frontend/app/docs/images/Side-t.png',
+    [ItemType.BorderHorizontal]: './docs/images/Side-horizontal-t.png',
+    [ItemType.BorderDiagonal]: './docs/images/Slope-t.png',
+};
 
 export const ITEM_COLORS: Record<ItemType, string> = {
     [ItemType.Empty]: '#ffffff', // white
