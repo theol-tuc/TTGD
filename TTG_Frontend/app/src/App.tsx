@@ -8,7 +8,7 @@ const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
     return (
-        <Layout style={{ minHeight: '100vh', background: '#f0f0f0' }}>
+        <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
             <Header style={{
                 textAlign: 'left',
                 color: '#fff',
@@ -20,7 +20,7 @@ const App: React.FC = () => {
                 fontWeight: 'bold'}}>
                 Welcome to Turing Tumble
             </Header>
-            <Layout>
+            <Layout style={{ overflow: 'hidden' }}>
                 <Sider
                     width={200}
                     style={{
@@ -36,16 +36,23 @@ const App: React.FC = () => {
                 </Sider>
                 <Content style={{
                     marginLeft: '200px',
-                    marginRight: '300px',
+                    marginRight: '200px',
                     padding: '24px',
-                    minHeight: 'calc(100vh - 64px)',
+                    height: 'calc(100vh - 64px)',
                     background: '#f0f0f0',
                     display: 'flex',
-                    justifyContent: 'center'}}>
-                    <Board />
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    overflow: 'hidden'}}>
+                    <div style={{
+                        transform: 'scale(0.8)', // Adjust this value as needed
+                        transformOrigin: 'center'
+                    }}>
+                        <Board />
+                    </div>
                 </Content>
                 <Sider
-                    width={300}
+                    width={200}
                     style={{
                         background: '#fff',
                         boxShadow: '-2px 0 8px 0 rgba(29, 35, 41, 0.05)',
@@ -53,7 +60,7 @@ const App: React.FC = () => {
                         position: 'fixed',
                         right: 0,
                         top: 64,
-                        overflowY: 'hidden',
+                        overflowY: 'auto',
                         padding: '10px'}}>
                     <PartsPanel />
                 </Sider>

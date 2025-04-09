@@ -23,33 +23,30 @@ export const PartsPanel: React.FC = () => {
     };
 
     return (
-        <Card title="Parts" bordered={false}>
+        <Card title="Parts to use" bordered={false}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                <Title level={5} style={{ margin: 0 }}>Parts</Title>
                 <Space wrap>
                     {partItems.map((part) => (
                         <Card.Grid
                             key={part.type}
                             style={{
-                                width: '13vw',
-                                height: '12vh',
+                                width: '10vw',
+                                height: '11vh',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                overflow: "hidden"
-                            }}
-                            onClick={() => handlePartClick(part.type)}
-                        >
+                                borderRadius: '6px',
+                                overflow: "hidden"}}
+                            onClick={() => handlePartClick(part.type)}>
                             <div style={{
                                 width: '10vw',
                                 height: '10vh',
                                 backgroundColor: '#f0f0f0',
                                 borderRadius: '4px',
-                                marginBottom: '8px'
-                            }} />
-                            <span style={{ fontSize: '12px' }}>{part.name}</span>
+                                marginBottom: '8px'}} />
+                            <span style={{ fontSize: '11px' }}>{part.name}</span>
                         </Card.Grid>
                     ))}
                 </Space>
