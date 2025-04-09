@@ -1,7 +1,7 @@
-//put the board and its functions here
 import React, {useState, useRef, useEffect} from "react";
 import { MarblePathGraph, Direction } from '../parts/marble_path';
 import { ItemType, ITEM_COLORS } from '../parts/constants';
+import { IMAGE_FILENAMES } from '../parts/constants';
 import './board.css';
 
 export type BoardCell = {
@@ -12,7 +12,6 @@ const numRows = 17;
 const numCols = 15;
 
 const Board: React.FC = () => {
-    // Initialize the board with the specified pattern
     const [board, setBoard] = useState<BoardCell[][]>(() => {
         const initialBoard: BoardCell[][] = Array.from({length: numRows}, () =>
             Array.from({length: numCols}, () => ({type: ItemType.Empty}))
@@ -34,8 +33,11 @@ const Board: React.FC = () => {
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || (col >= 3 && col <= 11) || col === 13) {
                 initialBoard[0][col].type = ItemType.Invalid;
-            } else if (col === 2 || col === 12) {
-                initialBoard[0][col].type = ItemType.BorderDiagonal;
+            } else if (col === 2 ) {
+                initialBoard[0][col].type = ItemType.BorderDiagonalLeft;
+            }
+            else if (col === 12) {
+                initialBoard[0][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
@@ -43,23 +45,29 @@ const Board: React.FC = () => {
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || col === 2 || (col >= 4 && col <= 10) || col === 12 || col === 13) {
                 initialBoard[1][col].type = ItemType.Invalid;
-            } else if (col === 3 || col === 11) {
-                initialBoard[1][col].type = ItemType.BorderDiagonal;
+            } else if (col === 3 ) {
+                initialBoard[1][col].type = ItemType.BorderDiagonalLeft;
+            }
+            else if (col === 11) {
+                initialBoard[1][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
         // Row 3 (index 2)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 1 || col === 3 || col === 2 || (col >= 5 && col <= 9) || col === 11 || col === 12 || col === 13) {
+            if (col === 1 || col === 2 || col === 3 || (col >= 5 && col <= 9) || col === 11 || col === 12 || col === 13) {
                 initialBoard[2][col].type = ItemType.Invalid;
-            } else if (col === 4 || col === 10) {
-                initialBoard[2][col].type = ItemType.BorderDiagonal;
+            } else if (col === 4 ) {
+                initialBoard[2][col].type = ItemType.BorderDiagonalLeft;
+            }
+            else if (col === 4 || col === 10) {
+                initialBoard[2][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
         // Row 4 (index 3)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 1 || col === 3 || col === 2 || col === 7 || col === 12 || col === 13 || col === 11) {
+            if (col === 1 || col === 2 || col === 3 || col === 7 || col === 12 || col === 13 || col === 11) {
                 initialBoard[3][col].type = ItemType.Invalid;
             }
         }
@@ -105,8 +113,8 @@ const Board: React.FC = () => {
             for (let col = 0; col < numCols; col++) {
                 // Skip if cell is already set
                 if (initialBoard[row][col].type !== ItemType.Empty) continue;
-                
-                // Start checkerboard from [4,5]
+
+                // Create checkerboard pattern
                 if ((row + col) % 2 === 0) {
                     initialBoard[row][col].type = ItemType.Empty;
                 } else {
@@ -114,11 +122,11 @@ const Board: React.FC = () => {
                 }
             }
         }
-        initialBoard[14][7].type = ItemType.Empty;
+        initialBoard[14][7].type = ItemType.Invalid;
 
         return initialBoard;
     });
-    
+
     // Initialize the marble path graph
     const marblePathGraph = useRef<MarblePathGraph>(new MarblePathGraph(numRows, numCols));
 
@@ -144,24 +152,35 @@ const Board: React.FC = () => {
         <div className="board">
             {board.map((row, rowIndex) => (
                 <div key={rowIndex} className="board-row">
-                    {row.map((cell, colIndex) => (
-                        <div
-                            key={`${rowIndex}-${colIndex}`}
-                            className="board-cell"
-                            style={{
-                                backgroundColor: ITEM_COLORS[cell.type],
-                                gridColumn: colIndex + 1,
-                                gridRow: rowIndex + 1
-                            }}
-                            title={`${cell.type} (${rowIndex},${colIndex})`}
-                        >
-                            {cell.type !== ItemType.Empty && cell.type !== ItemType.GraySpace && (
-                                <span className="cell-label">
-                                    {cell.type.split('_').map(word => word.charAt(0)).join('')}
-                                </span>
-                            )}
-                        </div>
-                    ))}
+                    {row.map((cell, colIndex) => {
+                        const imagePath = IMAGE_FILENAMES[cell.type];
+                        console.log(`Cell (${rowIndex},${colIndex}) type: ${cell.type}, image path: ${imagePath}`);
+
+                        return (
+                            <div
+                                key={`${rowIndex}-${colIndex}`}
+                                className="board-cell"
+                                style={{
+                                    gridColumn: colIndex + 1,
+                                    gridRow: rowIndex + 1,
+                                    backgroundColor: cell.type === ItemType.GraySpace ? '#e0e0e0' : 'white'
+                                }}
+                                title={`${cell.type} (${rowIndex},${colIndex})`}
+                            >
+                                {cell.type !== ItemType.GraySpace && imagePath && (
+                                    <img
+                                        src={imagePath}
+                                        alt={cell.type}
+                                        className="cell-image"
+                                        onError={(e) => {
+                                            console.error(`Failed to load image for ${cell.type} at path: ${imagePath}`);
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             ))}
         </div>
@@ -169,5 +188,3 @@ const Board: React.FC = () => {
 }
 
 export default Board;
-
-

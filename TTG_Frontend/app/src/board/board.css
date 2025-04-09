@@ -3,24 +3,26 @@
     grid-template-columns: repeat(15, 1fr);
     grid-template-rows: repeat(17, 1fr);
     gap: 1px;
-    background-color: #333;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    width: fit-content;
-    margin: 20px auto;
+    background-color: #ccc;
+    padding: 1px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.board-row {
+    display: contents;
 }
 
 .board-cell {
-    aspect-ratio: 1;
-    border: 1px solid #666;
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    color: #333;
-    transition: all 0.2s ease;
     position: relative;
+    aspect-ratio: 1;
+    border: 1px solid #666;
+    overflow: hidden;
 }
 
 .board-cell:hover {
@@ -54,4 +56,35 @@
 /* Add a subtle shadow to make cells pop */
 .board-cell:not([style*="Empty"]) {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.cell-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 5px;
+}
+
+/* Rotate images for specific parts */
+.board-cell[title*="ramp_right"] .cell-image {
+    transform: rotate(0deg);
+}
+
+.board-cell[title*="ramp_left"] .cell-image {
+    transform: rotate(180deg);
+}
+
+.board-cell[title*="bit_right"] .cell-image {
+    transform: rotate(0deg);
+}
+
+.board-cell[title*="bit_left"] .cell-image {
+    transform: rotate(180deg);
+}
+.board-cell[title*=""] .cell-image {
+
+}
+
+.board-cell[title*="border_diagonal_right"] .cell-image {
+    transform: rotate(90deg);
 }
