@@ -123,6 +123,8 @@ const Board: React.FC = () => {
             }
         }
         initialBoard[14][7].type = ItemType.Invalid;
+        initialBoard[16][0].type = ItemType.CornerLeft;
+        initialBoard[16][14].type = ItemType.CornerRight;
 
         return initialBoard;
     });
@@ -163,11 +165,10 @@ const Board: React.FC = () => {
                                 style={{
                                     gridColumn: colIndex + 1,
                                     gridRow: rowIndex + 1,
-                                    backgroundColor: cell.type === ItemType.GraySpace ? '#e0e0e0' : 'white'
                                 }}
                                 title={`${cell.type} (${rowIndex},${colIndex})`}
                             >
-                                {cell.type !== ItemType.GraySpace && imagePath && (
+                                { imagePath && (
                                     <img
                                         src={imagePath}
                                         alt={cell.type}
