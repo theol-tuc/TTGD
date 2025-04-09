@@ -9,15 +9,26 @@
     gap: 10px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    margin-left: auto;
 }
 
-.toolbar button {
-    padding: 8px 12px;
-    cursor: pointer;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+.toolbar-container {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.toolbar-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 40px;
+    padding: 0 12px;
+    white-space: nowrap;
+    transition: all 0.2s;
 }
 
 .toolbar-bottom {
@@ -32,6 +43,24 @@ button {
     cursor: pointer;
 }
 
-.toolbar button:hover {
-    background-color: #e0e0e0;
+.toolbar-button:hover {
+    background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.toolbar-button > .anticon + span {
+    margin-left: 12px;
+}
+
+.ant-layout-sider-collapsed .toolbar-button {
+    justify-content: center;
+    padding: 0;
+}
+
+.ant-layout-sider-collapsed .toolbar-button > span {
+    display: none;
+}
+
+.ant-layout-sider-collapsed .ant-divider {
+    margin: 8px auto !important;
+    width: 24px;
 }
