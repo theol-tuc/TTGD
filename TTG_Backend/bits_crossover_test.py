@@ -92,7 +92,7 @@ def main():
     #tetrad challenge
     bit_L = ComponentType.BIT_LEFT
     bit_R = ComponentType.BIT_RIGHT
-    board.add_component(bit_R, 6, 3)
+    board.add_component(ComponentType.CROSSOVER, 6, 3)
     board.add_component(bit_L, 5, 4)
     board.add_component(bit_R, 6, 5)
     board.add_component(bit_L, 5, 6)
