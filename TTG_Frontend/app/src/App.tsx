@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Layout } from 'antd';
 import Board from "./board/board";
 import { Toolbar } from "./ui/toolbar";
@@ -7,6 +7,56 @@ import { PartsPanel } from "./ui/partsPanel";
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [isRunning, setIsRunning] = useState(false);
+    const [currentSpeed, setCurrentSpeed] = useState(1);
+
+    const handleZoomIn = () => {
+        setZoomLevel(prev => Math.min(prev + 0.1, 2));
+    };
+
+    const handleZoomOut = () => {
+        setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
+    };
+
+    const handleSlowDown = () => {
+        const speedOptions = [0.5, 1, 2, 5];
+        const currentIndex = speedOptions.indexOf(currentSpeed);
+        if (currentIndex > 0) {
+            setCurrentSpeed(speedOptions[currentIndex - 1]);
+        }
+        setIsRunning(false);
+    };
+
+    const handleSpeedUp = () => {
+        const speedOptions = [0.5, 1, 2, 5];
+        const currentIndex = speedOptions.indexOf(currentSpeed);
+        if (currentIndex < speedOptions.length - 1) {
+            setCurrentSpeed(speedOptions[currentIndex + 1]);
+        }
+        setIsRunning(true);
+    };
+
+    const handleClearBoard = () => {
+        console.log("Clearing board - functionality to be implemented");
+        // This will be implemented when we have board state management
+    };
+
+    const handleResetMarbles = () => {
+        console.log("Resetting marbles - functionality to be implemented");
+        // This will be implemented when we have marble state management
+    };
+
+    const handleTriggerLeft = () => {
+        console.log("Triggering left lever - functionality to be implemented");
+        // This will be implemented when we have lever functionality
+    };
+
+    const handleTriggerRight = () => {
+        console.log("Triggering right lever - functionality to be implemented");
+        // This will be implemented when we have lever functionality
+    };
+
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
             <Header style={{
@@ -32,7 +82,16 @@ const App: React.FC = () => {
                         top: 64,
                         overflowY: 'auto',
                         padding: '16px'}}>
-                    <Toolbar />
+                    <Toolbar onZoomIn={handleZoomIn}
+                             onZoomOut={handleZoomOut}
+                             onSlowDown={handleSlowDown}
+                             onSpeedUp={handleSpeedUp}
+                             onClearBoard={handleClearBoard}
+                             onResetMarbles={handleResetMarbles}
+                             onTriggerLeft={handleTriggerLeft}
+                             onTriggerRight={handleTriggerRight}
+                             isRunning={isRunning}
+                             currentSpeed={currentSpeed}/>
                 </Sider>
                 <Content style={{
                     marginLeft: '200px',
@@ -45,7 +104,7 @@ const App: React.FC = () => {
                     alignItems: 'center',
                     overflow: 'hidden'}}>
                     <div style={{
-                        transform: 'scale(0.8)', // Adjust this value as needed
+                        transform: `scale(${zoomLevel})`,
                         transformOrigin: 'center'
                     }}>
                         <Board />

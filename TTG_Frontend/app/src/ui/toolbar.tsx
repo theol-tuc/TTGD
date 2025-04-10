@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Space, Divider } from 'antd';
+import { Button, Space, Divider, Tooltip } from 'antd';
 import {
     ZoomInOutlined,
     ZoomOutOutlined,
@@ -8,79 +8,134 @@ import {
     ClearOutlined,
     VerticalAlignTopOutlined,
     CaretLeftOutlined,
-    CaretRightOutlined
+    CaretRightOutlined,
+    PlayCircleOutlined
 } from '@ant-design/icons';
 
-export const Toolbar: React.FC = () => {
-    const handleClick = (action: string) => {
-        console.log(`Action: ${action}`);
-    };
+interface ToolbarProps {
+    onZoomIn: () => void;
+    onZoomOut: () => void;
+    onSlowDown: () => void;
+    onSpeedUp: () => void;
+    onClearBoard: () => void;
+    onResetMarbles: () => void;
+    onTriggerLeft: () => void;
+    onTriggerRight: () => void;
+    isRunning: boolean;
+    currentSpeed: number;
+}
 
+export const Toolbar: React.FC<ToolbarProps> = ({onZoomIn, onZoomOut, onSlowDown, onSpeedUp, onClearBoard, onResetMarbles, onTriggerLeft, onTriggerRight, isRunning, currentSpeed,}) => {
+    const speedOptions = [0.5, 1, 2, 5];
     return (
         <div style={{ padding: '8px' }}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                    <Button
-                        icon={<ZoomInOutlined />}
-                        block
-                        onClick={() => handleClick('zoom-in')}
-                    >
-                        Zoom In
-                    </Button>
-                    <Button
-                        icon={<ZoomOutOutlined />}
-                        block
-                        onClick={() => handleClick('zoom-out')}
-                    >
-                        Zoom Out
-                    </Button>
-                    <Button
-                        icon={<PauseOutlined />}
-                        block
-                        onClick={() => handleClick('slow-down')}
-                    >
-                        Slow Down
-                    </Button>
-                    <Button
-                        icon={<ForwardOutlined />}
-                        block
-                        onClick={() => handleClick('speed-up')}
-                    >
-                        Speed Up
-                    </Button>
-                    <Button
-                        icon={<ClearOutlined />}
-                        block
-                        onClick={() => handleClick('clear-board')}
-                    >
-                        Clear Board
-                    </Button>
-                    <Button
-                        icon={<VerticalAlignTopOutlined />}
-                        block
-                        onClick={() => handleClick('reset-marbles')}
-                    >
-                        Move Marbles to Top
-                    </Button>
+                    <Tooltip title="Zoom in (Ctrl + Plus)">
+                        <Button
+                            icon={<ZoomInOutlined />}
+                            block
+                            onClick={onZoomIn}
+                        >
+                            Zoom In
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip title="Zoom out (Ctrl + Minus)">
+                        <Button
+                            icon={<ZoomOutOutlined />}
+                            block
+                            onClick={onZoomOut}
+                        >
+                            Zoom Out
+                        </Button>
+                    </Tooltip>
+
+                    <Divider style={{ margin: '12px 0' }} />
+
+                    <Tooltip title={isRunning ? "Pause simulation" : "Start simulation"}>
+                        <Button
+                            icon={isRunning ? <PauseOutlined /> : <PlayCircleOutlined />}
+                            block
+                            onClick={isRunning ? onSlowDown : onSpeedUp}
+                            type={isRunning ? 'default' : 'primary'}
+                        >
+                            {isRunning ? 'Pause' : 'Start'}
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip title="Increase simulation speed">
+                        <Button
+                            icon={<ForwardOutlined />}
+                            block
+                            onClick={onSpeedUp}
+                            disabled={currentSpeed >= speedOptions[speedOptions.length - 1]}
+                        >
+                            Speed Up ({currentSpeed}x)
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip title="Decrease simulation speed">
+                        <Button
+                            icon={<ForwardOutlined rotate={90} />}
+                            block
+                            onClick={onSlowDown}
+                            disabled={currentSpeed <= speedOptions[0]}
+                        >
+                            Slow Down ({currentSpeed}x)
+                        </Button>
+                    </Tooltip>
+
+                    <Divider style={{ margin: '12px 0' }} />
+
+                    <Tooltip title="Remove all parts from the board">
+                        <Button
+                            icon={<ClearOutlined />}
+                            block
+                            onClick={onClearBoard}
+                            danger
+                        >
+                            Clear Board
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip title="Reset all marbles to their starting positions">
+                        <Button
+                            icon={<VerticalAlignTopOutlined />}
+                            block
+                            onClick={onResetMarbles}
+                        >
+                            Reset Marbles
+                        </Button>
+                    </Tooltip>
                 </Space>
 
                 <Divider style={{ margin: '12px 0' }} />
 
                 <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                    <Button
-                        icon={<CaretLeftOutlined />}
-                        block
-                        onClick={() => handleClick('trigger-left')}
-                    >
-                        Trigger Left
-                    </Button>
-                    <Button
-                        icon={<CaretRightOutlined />}
-                        block
-                        onClick={() => handleClick('trigger-right')}
-                    >
-                        Trigger Right
-                    </Button>
+                    <Tooltip title="Trigger left lever (Blue)">
+                        <Button
+                            icon={<CaretLeftOutlined />}
+                            block
+                            onClick={onTriggerLeft}
+                            type="primary"
+                            ghost
+                        >
+                            Trigger Left
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip title="Trigger right lever (Red)">
+                        <Button
+                            icon={<CaretRightOutlined />}
+                            block
+                            onClick={onTriggerRight}
+                            danger
+                            ghost
+                        >
+                            Trigger Right
+                        </Button>
+                    </Tooltip>
                 </Space>
             </Space>
         </div>
