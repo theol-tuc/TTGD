@@ -13,17 +13,25 @@ def test_game_mechanics():
     board.add_component(ComponentType.LAUNCHER, 5, 0)
     print("✓ Added launcher (L) at (5,0)")
     
-    # Add some ramps
-    board.add_component(ComponentType.RAMP_LEFT, 4, 3)
-    board.add_component(ComponentType.RAMP_LEFT, 3, 4)
-    board.add_component(ComponentType.RAMP_LEFT, 5, 2)
-    board.add_component(ComponentType.RAMP_RIGHT, 6, 3)
-    print("✓ Added left ramp (<) at (4,3)")
-    print("✓ Added right ramp (>) at (6,3)")
+    # Add ramps in a zigzag pattern
+    # First set of ramps
+    board.add_component(ComponentType.RAMP_LEFT, 4, 2)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 2)
+    print("✓ Added first set of ramps at y=2")
     
-    # Add an interceptor
-    board.add_component(ComponentType.INTERCEPTOR, 5, 8)
-    print("✓ Added interceptor (X) at (5,8)")
+    # Second set of ramps
+    board.add_component(ComponentType.RAMP_LEFT, 3, 4)
+    board.add_component(ComponentType.RAMP_RIGHT, 7, 4)
+    print("✓ Added second set of ramps at y=4")
+    
+    # Third set of ramps
+    board.add_component(ComponentType.RAMP_LEFT, 2, 6)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 6)
+    print("✓ Added third set of ramps at y=6")
+    
+    # Add an interceptor at the bottom
+    board.add_component(ComponentType.INTERCEPTOR, 5, 10)
+    print("✓ Added interceptor (X) at (5,10)")
     
     # Print initial setup
     print("\n3. Initial Board Setup:")
@@ -45,7 +53,7 @@ def test_game_mechanics():
     # Update physics several times
     print("\n6. Physics Update Test:")
     print("Watching marble movement...")
-    for i in range(11):
+    for i in range(15):  # Increased range for longer path
         board.update_marble_positions()
         print(f"\nUpdate {i+1}:")
         print_board_state(board)

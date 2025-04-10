@@ -93,6 +93,7 @@ class GameBoard:
             if not marble.is_moving:
                 continue
 
+            # Get current component
             component = self.components[marble.y][marble.x]
 
             # Default to moving down unless ramp changes it
@@ -113,10 +114,8 @@ class GameBoard:
                 marble.is_moving = False
                 self.score += 1
                 continue
-            elif component.type == ComponentType.CROSSOVER:
-                direction = marble.direction  # keep current
 
-            # Calculate new position based on final direction
+            # Calculate new position based on current direction
             new_x, new_y = marble.x, marble.y
             if direction == "down":
                 new_y += 1
@@ -133,8 +132,11 @@ class GameBoard:
                     marble.is_moving = False
                     continue
 
-
-                if new_component.type in [ComponentType.EMPTY, ComponentType.CROSSOVER]:
+                # Update positions if new spot is empty or a crossover
+                if (new_component.type == ComponentType.EMPTY or
+                        new_component.type == ComponentType.CROSSOVER or
+                        new_component.type == ComponentType.RAMP_LEFT or
+                        new_component.type == ComponentType.RAMP_RIGHT):
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
                     marble.direction = direction  # update direction here
