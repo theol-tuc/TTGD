@@ -92,6 +92,7 @@ class GameBoard:
             if not marble.is_moving:
                 continue
 
+            # Get current component
             component = self.components[marble.y][marble.x]
 
             # Handle component interactions
@@ -101,13 +102,10 @@ class GameBoard:
                 marble.direction = "right"
             elif component.type == ComponentType.INTERCEPTOR:
                 marble.is_moving = False
-                self.score += 1  # Increment score when marble is intercepted
+                self.score += 1
                 continue
-            elif component.type == ComponentType.CROSSOVER:
-                # Allow marble to continue in its current direction
-                pass
 
-            # Calculate new position based on direction
+            # Calculate new position based on current direction
             new_x, new_y = marble.x, marble.y
             if marble.direction == "down":
                 new_y += 1
@@ -128,7 +126,9 @@ class GameBoard:
 
                 # Update positions if new spot is empty or a crossover
                 if (new_component.type == ComponentType.EMPTY or
-                        new_component.type == ComponentType.CROSSOVER):
+                        new_component.type == ComponentType.CROSSOVER or
+                        new_component.type == ComponentType.RAMP_LEFT or
+                        new_component.type == ComponentType.RAMP_RIGHT):
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
                     self.components[new_y][new_x].is_occupied = True
