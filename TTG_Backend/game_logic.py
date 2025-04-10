@@ -158,6 +158,22 @@ class GameBoard:
         """Check if a position is occupied"""
         return self.components[y][x].is_occupied
 
+    def set_bit_type(component: Component) -> None:
+        """
+        Set the correct bit type based on the current component type.
+        Flips BIT_LEFT to BIT_RIGHT and BIT_RIGHT to BIT_LEFT.
+        Updates the component type and returns the new direction for the marble.
+        """
+        if component.type == ComponentType.BIT_LEFT:
+            print(f"Flipping BIT_LEFT at ({component.x}, {component.y}) to BIT_RIGHT")
+            component.type = ComponentType.BIT_RIGHT
+            return "right"
+        elif component.type == ComponentType.BIT_RIGHT:
+            print(f"Flipping BIT_RIGHT at ({component.x}, {component.y}) to BIT_LEFT")
+            component.type = ComponentType.BIT_LEFT
+            return "left"
+        return None  # If no change is made, return None
+
     def update_marble_positions(self) -> None:
         """Update all marble positions based on components and physics"""
         marbles_to_remove = []

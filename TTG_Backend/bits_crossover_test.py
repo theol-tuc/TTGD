@@ -20,7 +20,7 @@ def print_board(board: GameBoard) -> None:
                 elif component.type == ComponentType.CROSSOVER:
                     grid[y][x] = '+'
                 elif component.type == ComponentType.BIT_LEFT:
-                    grid[y][x] = 'O'
+                    grid[y][x] = 'O'  # 'O' for bit
                 elif component.type == ComponentType.INTERCEPTOR:
                     grid[y][x] = 'X'
                 elif component.type == ComponentType.LAUNCHER:
