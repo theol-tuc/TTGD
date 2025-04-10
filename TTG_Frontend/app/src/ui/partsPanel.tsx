@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Space, Typography } from 'antd';
 import { ItemType, IMAGE_FILENAMES } from '../parts/constants';
+import { addComponent } from '../services/api';
 
 const { Title } = Typography;
 

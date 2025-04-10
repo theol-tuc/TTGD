@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Dict, Optional
+from pydantic import BaseModel, ConfigDict
+from typing import List, Dict, Optional, ForwardRef
 from game_logic import GameBoard, ComponentType, Marble
 
 app = FastAPI()
@@ -14,6 +14,8 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+GameBoardRef = Optional['GameBoard']
 
 # Initialize game board
 board = GameBoard()
@@ -29,7 +31,10 @@ class MarbleRequest(BaseModel):
     y: Optional[int] = None
 
 class BoardState(BaseModel):
-    components: List[List[Dict[str, str]]]
+    #maybe remove this line later:
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    components: List[List[Dict[str, any]]]
     marbles: List[Dict[str, any]]
     red_marbles: int
     blue_marbles: int
@@ -120,3 +125,6 @@ async def reset_board():
 async def get_counts():
     """Get marble counts"""
     return board.get_marble_counts()
+
+#maybe remove this line later:
+BoardState.model_rebuild(GameBoard=GameBoard)
