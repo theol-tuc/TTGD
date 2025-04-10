@@ -50,7 +50,6 @@
 
 }
 
-
 .board-cell[title*="border_diagonal_right"] .cell-image {
     transform: rotate(90deg);
 }
