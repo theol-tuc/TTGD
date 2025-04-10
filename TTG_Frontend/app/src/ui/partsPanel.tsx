@@ -33,7 +33,7 @@ export const PartsPanel: React.FC = () => {
                             key={part.type}
                             style={{
                                 width: '10vw',
-                                height: '11vh',
+                                height: '9vh',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
