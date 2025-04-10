@@ -64,10 +64,10 @@ class GameBoard:
         return False
 
     def add_marble(self, x: int, y: int) -> bool:
-        """Add a marble to the board if the position is valid and empty"""
+        """Add a marble to the board if the position is valid and empty or is a launcher"""
         if 0 <= x < self.width and 0 <= y < self.height:
             component = self.components[y][x]
-            if component.type == ComponentType.EMPTY and not component.is_occupied:
+            if (component.type == ComponentType.EMPTY or component.type == ComponentType.LAUNCHER) and not component.is_occupied:
                 marble = Marble(x, y)
                 marble.is_moving = True  # Initialize marble as moving
                 self.marbles.append(marble)

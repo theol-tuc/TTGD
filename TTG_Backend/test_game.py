@@ -1,117 +1,76 @@
+import sys
+import time
 from game_logic import GameBoard, ComponentType
 
-def test_game_mechanics():
-    print("=== Starting Game Test ===")
-    # Initialize game board
-    board = GameBoard(width=11, height=11)
-    print("\n1. Board Initialization:")
-    print("✓ Created 11x11 game board")
+def print_board(board: GameBoard) -> None:
+    """Print the current state of the board"""
+    # Create a grid with empty spaces
+    grid = [[' ' for _ in range(board.width)] for _ in range(board.height)]
     
-    # Test 1: Add components
-    print("\n2. Component Placement Test:")
-    # Add a launcher at the top
-    board.add_component(ComponentType.LAUNCHER, 5, 0)
-    print("✓ Added launcher (L) at (5,0)")
-    
-    # Add ramps in a zigzag pattern
-    # First set of ramps
-    board.add_component(ComponentType.RAMP_LEFT, 4, 2)
-    board.add_component(ComponentType.RAMP_RIGHT, 6, 2)
-    print("✓ Added first set of ramps at y=2")
-    
-    # Second set of ramps
-    board.add_component(ComponentType.RAMP_LEFT, 3, 4)
-    board.add_component(ComponentType.RAMP_RIGHT, 7, 4)
-    print("✓ Added second set of ramps at y=4")
-    
-    # Third set of ramps
-    board.add_component(ComponentType.RAMP_LEFT, 2, 6)
-    board.add_component(ComponentType.RAMP_RIGHT, 5, 6)
-    print("✓ Added third set of ramps at y=6")
-    
-    # Add an interceptor at the bottom
-    board.add_component(ComponentType.INTERCEPTOR, 5, 10)
-    print("✓ Added interceptor (X) at (5,10)")
-    
-    # Print initial setup
-    print("\n3. Initial Board Setup:")
-    print_board_state(board)
-    
-    # Test 2: Add marble directly below launcher
-    print("\n4. Marble Placement Test:")
-    # Add marble at (5,1) - just below the launcher
-    success = board.add_marble(5, 1)
-    if success:
-        print("✓ Added marble at (5,1)")
-    else:
-        print("✗ Failed to add marble")
-    
-    # Print initial state with marble
-    print("\n5. Initial State with Marble:")
-    print_board_state(board)
-    
-    # Update physics several times
-    print("\n6. Physics Update Test:")
-    print("Watching marble movement...")
-    for i in range(15):  # Increased range for longer path
-        board.update_marble_positions()
-        print(f"\nUpdate {i+1}:")
-        print_board_state(board)
-        # Add movement description
-        marble_pos = board.get_marble_positions()
-        if marble_pos:
-            x, y = marble_pos[0]
-            print(f"Marble position: ({x}, {y})")
-    
-    # Test 3: Reset game
-    print("\n7. Game Reset Test:")
-    board.reset()
-    print("✓ Game reset - all components and marbles cleared")
-    print("\nFinal Board State:")
-    print_board_state(board)
-    
-    print("\n=== Test Summary ===")
-    print("To verify the test was successful, check that:")
-    print("1. ✓ Board was created with correct size (11x11)")
-    print("2. ✓ Components were placed correctly")
-    print("3. ✓ Marble was added successfully")
-    print("4. ✓ Marble moved according to physics")
-    print("5. ✓ Marble interacted with ramps correctly")
-    print("6. ✓ Score increased when marble was intercepted")
-    print("7. ✓ Game reset cleared all components and marbles")
-
-def print_board_state(board):
-    """Helper function to print the current board state"""
-    # Get current state
-    board_state = board.get_board_state()
-    marble_positions = board.get_marble_positions()
-    
-    # Print column numbers
-    print("   " + " ".join(str(i).rjust(2) for i in range(board.width)))
-    print("  " + "-" * (board.width * 3 - 1))
-    
-    # Print board with components and marbles
+    # Add components
     for y in range(board.height):
-        row = [str(y).rjust(2) + "|"]
         for x in range(board.width):
-            cell = "."
-            # Check for marbles
-            if (x, y) in marble_positions:
-                cell = "M"
-            # Check for components
-            elif board_state[y][x] == ComponentType.LAUNCHER.value:
-                cell = "L"
-            elif board_state[y][x] == ComponentType.RAMP_LEFT.value:
-                cell = "<"
-            elif board_state[y][x] == ComponentType.RAMP_RIGHT.value:
-                cell = ">"
-            elif board_state[y][x] == ComponentType.INTERCEPTOR.value:
-                cell = "X"
-            row.append(cell.rjust(2))
-        print(" ".join(row))
+            component = board.components[y][x]
+            if component.type != ComponentType.EMPTY:
+                if component.type == ComponentType.RAMP_LEFT:
+                    grid[y][x] = '\\'
+                elif component.type == ComponentType.RAMP_RIGHT:
+                    grid[y][x] = '/'
+                elif component.type == ComponentType.CROSSOVER:
+                    grid[y][x] = '+'
+                elif component.type == ComponentType.INTERCEPTOR:
+                    grid[y][x] = 'X'
+                elif component.type == ComponentType.LAUNCHER:
+                    grid[y][x] = 'L'
     
-    print(f"\nScore: {board.get_score()}")
-    print(f"Active marbles: {len(marble_positions)}")
+    # Add marbles
+    for marble in board.marbles:
+        grid[marble.y][marble.x] = 'O'
+    
+    # Print the grid
+    print('-' * (board.width * 2 + 1))
+    for row in grid:
+        print('|' + ' '.join(row) + '|')
+    print('-' * (board.width * 2 + 1))
+    print(f"Score: {board.score}")
+    print(f"Active Launcher: {board.active_launcher}")
+    print(f"Number of marbles: {len(board.marbles)}")
+
+def main():
+    # Create a game board
+    board = GameBoard(11, 10)  # Width 11, Height 10
+    
+    # Add some components for testing
+    board.add_component(ComponentType.RAMP_LEFT, 3, 2)
+    board.add_component(ComponentType.RAMP_RIGHT, 7, 2)
+    board.add_component(ComponentType.INTERCEPTOR, 5, 5)
+    
+    # Test left launcher
+    print("\nTesting left launcher:")
+    board.set_active_launcher("left")
+    board.launch_marble()
+    
+    # Simulate a few steps
+    for _ in range(8):
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Reset and test right launcher
+    print("\nTesting right launcher:")
+    board.reset()
+    board.add_component(ComponentType.RAMP_LEFT, 3, 2)
+    board.add_component(ComponentType.RAMP_RIGHT, 7, 2)
+    board.add_component(ComponentType.INTERCEPTOR, 5, 5)
+    
+    board.set_active_launcher("right")
+    board.launch_marble()
+    
+    # Simulate a few steps
+    for _ in range(8):
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
 
 if __name__ == "__main__":
-    test_game_mechanics() 
+    main() 
