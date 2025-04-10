@@ -59,18 +59,47 @@ def main():
     # Create a game board with correct dimensions
     board = GameBoard(15, 17)  # Width 15, Height 17
     
-    # Add some components for testing
+    # Add components for testing
     board.add_component(ComponentType.RAMP_LEFT, 3, 2)
     board.add_component(ComponentType.RAMP_RIGHT, 11, 2)
     board.add_component(ComponentType.INTERCEPTOR, 7, 14)  # Place interceptor at bottom middle
     
-    # Test left launcher with red marble
-    print("\nTesting left launcher with red marble:")
+    # Test sequence 1: Blue marbles from left side
+    print("\nTest Sequence 1: Launching 3 blue marbles from left side")
     board.set_active_launcher("left")
-    board.launch_marble("red")
     
-    # Simulate a few steps
-    for _ in range(20):  # Increased steps to allow marble to reach bottom
+    # Launch first blue marble
+    print("\nLaunching first blue marble:")
+    board.launch_marble("blue")
+    for _ in range(20):
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Wait for marble to settle
+    while board.marbles:
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Launch second blue marble
+    print("\nLaunching second blue marble:")
+    board.launch_marble("blue")
+    for _ in range(20):
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Wait for marble to settle
+    while board.marbles:
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Launch third blue marble
+    print("\nLaunching third blue marble:")
+    board.launch_marble("blue")
+    for _ in range(20):
         print_board(board)
         board.update_marble_positions()
         time.sleep(0.5)
@@ -81,13 +110,48 @@ def main():
         board.update_marble_positions()
         time.sleep(0.5)
     
-    # Test right launcher with blue marble
-    print("\nTesting right launcher with blue marble:")
-    board.set_active_launcher("right")
-    board.launch_marble("blue")
+    # Print intermediate counts
+    print("\nIntermediate Counts after blue marbles:")
+    counts = board.get_marble_counts()
+    print(f"Total Red Marbles: {counts['red']}")
+    print(f"Total Blue Marbles: {counts['blue']}")
     
-    # Simulate a few steps
-    for _ in range(20):  # Increased steps to allow marble to reach bottom
+    # Test sequence 2: Red marbles from right side
+    print("\nTest Sequence 2: Launching 3 red marbles from right side")
+    board.set_active_launcher("right")
+    
+    # Launch first red marble
+    print("\nLaunching first red marble:")
+    board.launch_marble("red")
+    for _ in range(20):
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Wait for marble to settle
+    while board.marbles:
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Launch second red marble
+    print("\nLaunching second red marble:")
+    board.launch_marble("red")
+    for _ in range(20):
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Wait for marble to settle
+    while board.marbles:
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Launch third red marble
+    print("\nLaunching third red marble:")
+    board.launch_marble("red")
+    for _ in range(20):
         print_board(board)
         board.update_marble_positions()
         time.sleep(0.5)

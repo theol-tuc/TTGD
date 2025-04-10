@@ -75,16 +75,16 @@ class GameBoard:
         self.setup_diamond_pattern()
 
         # Add levers at the bottom
-        self.components[self.height - 3][6].type = ComponentType.LEVER_BLUE
-        self.components[self.height - 3][8].type = ComponentType.LEVER_RED
+        self.components[self.height - 3][6].type = ComponentType.LEVER_BLUE  # Left lever for blue marbles
+        self.components[self.height - 3][8].type = ComponentType.LEVER_RED   # Right lever for red marbles
 
         # Add corners
         self.components[self.height - 1][0].type = ComponentType.CORNER_LEFT
         self.components[self.height - 1][self.width - 1].type = ComponentType.CORNER_RIGHT
 
         # Add launchers at the top
-        self.components[0][3].type = ComponentType.LAUNCHER  # Left launcher
-        self.components[0][11].type = ComponentType.LAUNCHER  # Right launcher
+        self.components[0][3].type = ComponentType.LAUNCHER  # Left launcher for blue marbles
+        self.components[0][11].type = ComponentType.LAUNCHER  # Right launcher for red marbles
 
     def setup_diamond_pattern(self) -> None:
         """Set up the diamond pattern of invalid spaces"""
@@ -139,8 +139,12 @@ class GameBoard:
         """Launch a marble from the active launcher"""
         if self.active_launcher == "left":
             x = 3  # Left launcher position
+            # Left side always uses blue marbles
+            color = "blue"
         else:
             x = 11  # Right launcher position
+            # Right side always uses red marbles
+            color = "red"
         y = 0  # Top row
         
         # Check if position is valid
@@ -167,8 +171,18 @@ class GameBoard:
                 new_y += 1
             elif marble.direction == "left":
                 new_x -= 1
+                # After moving left, check if we should go down
+                if 0 <= new_x < self.width and 0 <= new_y < self.height:
+                    next_component = self.components[new_y][new_x]
+                    if next_component.type not in [ComponentType.RAMP_LEFT, ComponentType.RAMP_RIGHT]:
+                        marble.direction = "down"
             elif marble.direction == "right":
                 new_x += 1
+                # After moving right, check if we should go down
+                if 0 <= new_x < self.width and 0 <= new_y < self.height:
+                    next_component = self.components[new_y][new_x]
+                    if next_component.type not in [ComponentType.RAMP_LEFT, ComponentType.RAMP_RIGHT]:
+                        marble.direction = "down"
 
             # Check if new position is valid
             if (0 <= new_x < self.width and
@@ -193,6 +207,29 @@ class GameBoard:
                     marble.direction = "left"
                 elif component.type == ComponentType.RAMP_RIGHT:
                     marble.direction = "right"
+                elif component.type == ComponentType.BIT_LEFT:
+                    marble.direction = "right"
+                    component.type = ComponentType.BIT_RIGHT
+                elif component.type == ComponentType.BIT_RIGHT:
+                    marble.direction = "left"
+                    component.type = ComponentType.BIT_LEFT
+                elif component.type == ComponentType.CROSSOVER:
+                    if marble.direction == "down":
+                        marble.direction = "left"
+                    elif marble.direction == "left":
+                        marble.direction = "down"
+                    elif marble.direction == "right":
+                        marble.direction = "down"
+                elif component.type == ComponentType.LEVER_BLUE:
+                    self.set_active_launcher("left")
+                    self.launch_marble("blue")
+                    marble.is_moving = False
+                    self.active_launcher = None
+                elif component.type == ComponentType.LEVER_RED:
+                    self.set_active_launcher("right")
+                    self.launch_marble("red")
+                    marble.is_moving = False
+                    self.active_launcher = None
                 elif component.type == ComponentType.INTERCEPTOR:
                     marble.is_moving = False
                     # Count marble by color
