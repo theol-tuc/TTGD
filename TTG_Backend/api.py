@@ -1,61 +1,122 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Tuple
-from game_logic import GameBoard, ComponentType
+from typing import List, Dict, Optional
+from game_logic import GameBoard, ComponentType, Marble
 
 app = FastAPI()
 
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 # Initialize game board
-game_board = GameBoard(width=8, height=8)  # You can adjust the size as needed
-
-
-class Position(BaseModel):
-    x: int
-    y: int
-
+board = GameBoard()
 
 class ComponentRequest(BaseModel):
-    type: int  # ComponentType value
+    type: str
     x: int
     y: int
 
+class MarbleRequest(BaseModel):
+    color: str
+    x: Optional[int] = None
+    y: Optional[int] = None
 
-class LauncherRequest(BaseModel):
-    launcher_index: int
+class BoardState(BaseModel):
+    components: List[List[Dict[str, str]]]
+    marbles: List[Dict[str, any]]
+    red_marbles: int
+    blue_marbles: int
+    active_launcher: str
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to Turing Tumble API"}
 
-@app.post("/add_component")
+@app.get("/board")
+async def get_board():
+    """Get the current state of the board"""
+    components = []
+    for row in board.components:
+        component_row = []
+        for component in row:
+            component_row.append({
+                "type": component.type.value,
+                "is_occupied": component.is_occupied
+            })
+        components.append(component_row)
+    
+    marbles = []
+    for marble in board.marbles:
+        marbles.append({
+            "color": marble.color,
+            "x": marble.x,
+            "y": marble.y,
+            "direction": marble.direction,
+            "is_moving": marble.is_moving
+        })
+    
+    return BoardState(
+        components=components,
+        marbles=marbles,
+        red_marbles=board.red_marbles,
+        blue_marbles=board.blue_marbles,
+        active_launcher=board.active_launcher
+    )
+
+@app.post("/components")
 async def add_component(component: ComponentRequest):
+    """Add a component to the board"""
     try:
         component_type = ComponentType(component.type)
+        board.add_component(component_type, component.x, component.y)
+        return {"message": "Component added successfully"}
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid component type")
 
-    success = game_board.add_component(component_type, component.x, component.y)
-    if not success:
-        raise HTTPException(status_code=400, detail="Invalid position")
-    return {"message": "Component added successfully"}
+@app.post("/marbles")
+async def add_marble(marble: MarbleRequest):
+    """Add a marble to the board"""
+    if marble.x is not None and marble.y is not None:
+        # Add marble at specific position
+        if not board.check_collision(marble.x, marble.y):
+            board.marbles.append(Marble(marble.color, marble.x, marble.y))
+            board.components[marble.y][marble.x].is_occupied = True
+            return {"message": "Marble added successfully"}
+        else:
+            raise HTTPException(status_code=400, detail="Position is occupied")
+    else:
+        # Launch marble from active launcher
+        board.launch_marble(marble.color)
+        return {"message": "Marble launched successfully"}
 
+@app.post("/launcher")
+async def set_launcher(launcher: str):
+    """Set the active launcher"""
+    if launcher not in ["left", "right"]:
+        raise HTTPException(status_code=400, detail="Invalid launcher type")
+    board.set_active_launcher(launcher)
+    return {"message": f"Launcher set to {launcher}"}
 
-@app.post("/launch_marble")
-async def launch_marble(request: LauncherRequest):
-    success = game_board.launch_marble(request.launcher_index)
-    if not success:
-        raise HTTPException(status_code=400, detail="Invalid launcher index")
-    return {"message": "Marble launched successfully"}
+@app.post("/update")
+async def update_board():
+    """Update the board state"""
+    board.update_marble_positions()
+    return {"message": "Board updated successfully"}
 
+@app.post("/reset")
+async def reset_board():
+    """Reset the board"""
+    board.reset()
+    return {"message": "Board reset successfully"}
 
-@app.post("/update_physics")
-async def update_physics():
-    """Update all marble positions based on physics and components"""
-    game_board.update_marble_positions()
-    return {"message": "Physics updated successfully"}
-
-
-@app.get("/board_state")
-async def get_board_state():
-    return {
-        "board": game_board.get_board_state(),
-        "marbles": game_board.get_marble_positions(),
-        "components": game_board.get_component_positions()
-    }
+@app.get("/counts")
+async def get_counts():
+    """Get marble counts"""
+    return board.get_marble_counts()
