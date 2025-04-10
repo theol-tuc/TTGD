@@ -23,11 +23,12 @@ class Component:
         self.is_occupied = False
 
 class Marble:
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int, color: str = "red"):
         self.x = x
         self.y = y
         self.is_moving = False
         self.direction = "down"  # Default direction for falling
+        self.color = color  # "red" or "blue"
 
 
 class GameBoard:
@@ -42,13 +43,16 @@ class GameBoard:
         self.left_launcher = (2, 0)  # Left launcher position
         self.right_launcher = (8, 0)  # Right launcher position
         self.active_launcher = None  # Will be set by trigger
-        self.score = 0
+        # Track total marbles by color
+        self.red_marbles = 0
+        self.blue_marbles = 0
 
     def reset(self) -> None:
         """Reset the game board to its initial state"""
         self.marbles.clear()
         self.active_launcher = None
-        self.score = 0
+        self.red_marbles = 0
+        self.blue_marbles = 0
         self.components = [[Component(ComponentType.EMPTY, x, y)
                           for x in range(self.width)]
                          for y in range(self.height)]
@@ -63,26 +67,26 @@ class GameBoard:
             return True
         return False
 
-    def add_marble(self, x: int, y: int) -> bool:
+    def add_marble(self, x: int, y: int, color: str = "red") -> bool:
         """Add a marble to the board if the position is valid and empty or is a launcher"""
         if 0 <= x < self.width and 0 <= y < self.height:
             component = self.components[y][x]
             if (component.type == ComponentType.EMPTY or component.type == ComponentType.LAUNCHER) and not component.is_occupied:
-                marble = Marble(x, y)
+                marble = Marble(x, y, color)
                 marble.is_moving = True  # Initialize marble as moving
                 self.marbles.append(marble)
                 component.is_occupied = True
                 return True
         return False
 
-    def launch_marble(self) -> bool:
+    def launch_marble(self, color: str = "red") -> bool:
         """Launch a marble from the active launcher"""
         if self.active_launcher == "left":
             x, y = self.left_launcher
-            return self.add_marble(x, y)
+            return self.add_marble(x, y, color)
         elif self.active_launcher == "right":
             x, y = self.right_launcher
-            return self.add_marble(x, y)
+            return self.add_marble(x, y, color)
         return False
 
     def set_active_launcher(self, launcher: str) -> None:
@@ -105,20 +109,6 @@ class GameBoard:
             if not marble.is_moving:
                 continue
 
-            # Get current component
-            component = self.components[marble.y][marble.x]
-
-            # Handle component interactions
-            if component.type == ComponentType.RAMP_LEFT:
-                marble.direction = "left"
-            elif component.type == ComponentType.RAMP_RIGHT:
-                marble.direction = "right"
-            elif component.type == ComponentType.INTERCEPTOR:
-                marble.is_moving = False
-                self.score += 1
-                # Here we'll add trigger logic later
-                continue
-
             # Calculate new position based on current direction
             new_x, new_y = marble.x, marble.y
             if marble.direction == "down":
@@ -138,21 +128,36 @@ class GameBoard:
                     marble.is_moving = False
                     continue
 
-                # Update positions if new spot is empty or a crossover
-                if (new_component.type == ComponentType.EMPTY or
-                        new_component.type == ComponentType.CROSSOVER or
-                        new_component.type == ComponentType.RAMP_LEFT or
-                        new_component.type == ComponentType.RAMP_RIGHT):
-                    self.components[marble.y][marble.x].is_occupied = False
-                    marble.x, marble.y = new_x, new_y
-                    self.components[new_y][new_x].is_occupied = True
-                else:
+                # Update position and handle component interactions
+                self.components[marble.y][marble.x].is_occupied = False
+                marble.x, marble.y = new_x, new_y
+                self.components[new_y][new_x].is_occupied = True
+
+                # Get current component after movement
+                component = self.components[marble.y][marble.x]
+
+                # Handle component interactions
+                if component.type == ComponentType.RAMP_LEFT:
+                    marble.direction = "left"
+                elif component.type == ComponentType.RAMP_RIGHT:
+                    marble.direction = "right"
+                elif component.type == ComponentType.INTERCEPTOR:
                     marble.is_moving = False
+                    # Count marble by color
+                    if marble.color == "red":
+                        self.red_marbles += 1
+                    else:
+                        self.blue_marbles += 1
+                    marbles_to_remove.append(marble)
             else:
-                # Marble is out of bounds, mark for removal
+                # Marble is out of bounds, count it before removing
+                if marble.color == "red":
+                    self.red_marbles += 1
+                else:
+                    self.blue_marbles += 1
                 marbles_to_remove.append(marble)
 
-        # Remove marbles that went out of bounds
+        # Remove marbles that went out of bounds or hit the interceptor
         for marble in marbles_to_remove:
             self.components[marble.y][marble.x].is_occupied = False
             self.marbles.remove(marble)
@@ -174,6 +179,9 @@ class GameBoard:
                     components.append((x, y, self.components[y][x].type.value))
         return components
 
-    def get_score(self) -> int:
-        """Return the current game score"""
-        return self.score
+    def get_marble_counts(self) -> dict:
+        """Return the total counts of red and blue marbles"""
+        return {
+            "red": self.red_marbles,
+            "blue": self.blue_marbles
+        }

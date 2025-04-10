@@ -23,18 +23,21 @@ def print_board(board: GameBoard) -> None:
                 elif component.type == ComponentType.LAUNCHER:
                     grid[y][x] = 'L'
     
-    # Add marbles
+    # Add marbles with their colors
     for marble in board.marbles:
-        grid[marble.y][marble.x] = 'O'
+        grid[marble.y][marble.x] = 'R' if marble.color == "red" else 'B'
     
     # Print the grid
     print('-' * (board.width * 2 + 1))
     for row in grid:
         print('|' + ' '.join(row) + '|')
     print('-' * (board.width * 2 + 1))
-    print(f"Score: {board.score}")
+    
+    # Print marble counts
+    counts = board.get_marble_counts()
+    print(f"Total Red Marbles: {counts['red']}")
+    print(f"Total Blue Marbles: {counts['blue']}")
     print(f"Active Launcher: {board.active_launcher}")
-    print(f"Number of marbles: {len(board.marbles)}")
 
 def main():
     # Create a game board
@@ -43,34 +46,51 @@ def main():
     # Add some components for testing
     board.add_component(ComponentType.RAMP_LEFT, 3, 2)
     board.add_component(ComponentType.RAMP_RIGHT, 7, 2)
-    board.add_component(ComponentType.INTERCEPTOR, 5, 5)
+    board.add_component(ComponentType.INTERCEPTOR, 5, 9)  # Place interceptor at bottom middle
     
-    # Test left launcher
-    print("\nTesting left launcher:")
+    # Add launchers at the top
+    board.add_component(ComponentType.LAUNCHER, 3, 0)  # Left launcher
+    board.add_component(ComponentType.LAUNCHER, 7, 0)  # Right launcher
+    
+    # Test left launcher with red marble
+    print("\nTesting left launcher with red marble:")
     board.set_active_launcher("left")
-    board.launch_marble()
+    board.launch_marble("red")
     
     # Simulate a few steps
-    for _ in range(8):
+    for _ in range(12):  # Increased steps to allow marble to reach bottom
         print_board(board)
         board.update_marble_positions()
         time.sleep(0.5)
     
-    # Reset and test right launcher
-    print("\nTesting right launcher:")
-    board.reset()
-    board.add_component(ComponentType.RAMP_LEFT, 3, 2)
-    board.add_component(ComponentType.RAMP_RIGHT, 7, 2)
-    board.add_component(ComponentType.INTERCEPTOR, 5, 5)
+    # Wait for all marbles to settle
+    while board.marbles:
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
     
+    # Test right launcher with blue marble
+    print("\nTesting right launcher with blue marble:")
     board.set_active_launcher("right")
-    board.launch_marble()
+    board.launch_marble("blue")
     
     # Simulate a few steps
-    for _ in range(8):
+    for _ in range(12):  # Increased steps to allow marble to reach bottom
         print_board(board)
         board.update_marble_positions()
         time.sleep(0.5)
+    
+    # Wait for all marbles to settle
+    while board.marbles:
+        print_board(board)
+        board.update_marble_positions()
+        time.sleep(0.5)
+    
+    # Print final counts
+    print("\nFinal Marble Counts:")
+    counts = board.get_marble_counts()
+    print(f"Total Red Marbles: {counts['red']}")
+    print(f"Total Blue Marbles: {counts['blue']}")
 
 if __name__ == "__main__":
     main() 
