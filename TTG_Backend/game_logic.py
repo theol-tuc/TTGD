@@ -5,14 +5,18 @@ from enum import Enum
 
 class ComponentType(Enum):
     EMPTY = 0
-    MARBLE = 1
+    RED_MARBLE = 1
     RAMP_LEFT = 2  # Blue ramp directing left
     RAMP_RIGHT = 3  # Red ramp directing right
     CROSSOVER = 4  # Allows marbles to pass over each other
     INTERCEPTOR = 5  # Stops marbles
-    LAUNCHER = 6  # Drops marbles from top
+    RED_LAUNCHER = 6  # Drops marbles from top
     BIT_LEFT = 7  # Bit component 
     BIT_RIGHT = 8  # Bit component
+    RED_TRIGGER = 9
+    BLUE_TRIGGER = 10
+    BLUE_MARBLE = 11
+    BLUE_LAUNCHER = 12  # Drops blue marbles from top
 
 
 class Component:
@@ -106,7 +110,7 @@ class GameBoard:
             elif component.type == ComponentType.BIT_RIGHT:
                 direction = "left"
                 component.type = ComponentType.BIT_LEFT
-            if component.type == ComponentType.RAMP_LEFT:
+            elif component.type == ComponentType.RAMP_LEFT:
                 direction = "left"
             elif component.type == ComponentType.RAMP_RIGHT:
                 direction = "right"
@@ -114,7 +118,12 @@ class GameBoard:
                 marble.is_moving = False
                 self.score += 1
                 continue
-
+            elif component.type == ComponentType.CROSSOVER:
+                marble.is_moving = True
+                continue
+            elif component.type == ComponentType.RED_TRIGGER:
+                
+                marble.is_moving = False
             # Calculate new position based on current direction
             new_x, new_y = marble.x, marble.y
             if direction == "down":
