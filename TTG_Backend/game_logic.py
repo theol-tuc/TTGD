@@ -11,6 +11,8 @@ class ComponentType(Enum):
     CROSSOVER = 4  # Allows marbles to pass over each other
     INTERCEPTOR = 5  # Stops marbles
     LAUNCHER = 6  # Drops marbles from top
+    BIT_LEFT = 7  # Bit component 
+    BIT_RIGHT = 8  # Bit component
 
 
 class Component:
@@ -19,7 +21,6 @@ class Component:
         self.x = x
         self.y = y
         self.is_occupied = False
-
 
 class Marble:
     def __init__(self, x: int, y: int):
@@ -94,48 +95,53 @@ class GameBoard:
 
             component = self.components[marble.y][marble.x]
 
+            # Default to moving down unless ramp changes it
+            direction = "down"
+
             # Handle component interactions
+            if component.type == ComponentType.BIT_LEFT:
+                direction = "right"
+                component.type = ComponentType.BIT_RIGHT
+            elif component.type == ComponentType.BIT_RIGHT:
+                direction = "left"
+                component.type = ComponentType.BIT_LEFT
             if component.type == ComponentType.RAMP_LEFT:
-                marble.direction = "left"
+                direction = "left"
             elif component.type == ComponentType.RAMP_RIGHT:
-                marble.direction = "right"
+                direction = "right"
             elif component.type == ComponentType.INTERCEPTOR:
                 marble.is_moving = False
-                self.score += 1  # Increment score when marble is intercepted
+                self.score += 1
                 continue
             elif component.type == ComponentType.CROSSOVER:
-                # Allow marble to continue in its current direction
-                pass
+                direction = marble.direction  # keep current
 
-            # Calculate new position based on direction
+            # Calculate new position based on final direction
             new_x, new_y = marble.x, marble.y
-            if marble.direction == "down":
+            if direction == "down":
                 new_y += 1
-            elif marble.direction == "left":
+            elif direction == "left":
                 new_x -= 1
-            elif marble.direction == "right":
+            elif direction == "right":
                 new_x += 1
 
             # Check if new position is valid
-            if (0 <= new_x < self.width and
-                    0 <= new_y < self.height):
+            if 0 <= new_x < self.width and 0 <= new_y < self.height:
                 new_component = self.components[new_y][new_x]
 
-                # Check for collisions with other marbles
                 if self.check_collision(new_x, new_y):
                     marble.is_moving = False
                     continue
 
-                # Update positions if new spot is empty or a crossover
-                if (new_component.type == ComponentType.EMPTY or
-                        new_component.type == ComponentType.CROSSOVER):
+
+                if new_component.type in [ComponentType.EMPTY, ComponentType.CROSSOVER]:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
+                    marble.direction = direction  # update direction here
                     self.components[new_y][new_x].is_occupied = True
                 else:
                     marble.is_moving = False
             else:
-                # Marble is out of bounds, mark for removal
                 marbles_to_remove.append(marble)
 
         # Remove marbles that went out of bounds

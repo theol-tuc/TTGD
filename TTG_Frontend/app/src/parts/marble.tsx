@@ -5,7 +5,7 @@ export interface MarbleAction {
     nextRow: number;
     nextCol: number;
     nextDirection: Direction;
-}
+  }
 
 export const calculateNextPosition = (
   currentPosition: Position,

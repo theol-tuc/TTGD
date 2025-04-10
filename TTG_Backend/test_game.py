@@ -15,6 +15,8 @@ def test_game_mechanics():
     
     # Add some ramps
     board.add_component(ComponentType.RAMP_LEFT, 4, 3)
+    board.add_component(ComponentType.RAMP_LEFT, 3, 4)
+    board.add_component(ComponentType.RAMP_LEFT, 5, 2)
     board.add_component(ComponentType.RAMP_RIGHT, 6, 3)
     print("✓ Added left ramp (<) at (4,3)")
     print("✓ Added right ramp (>) at (6,3)")
