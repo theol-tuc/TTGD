@@ -1,8 +1,7 @@
-import React, {useState, useRef, useEffect} from "react";
-import { MarblePathGraph, Direction } from '../parts/marble_path';
-import { ItemType, ITEM_COLORS } from '../parts/constants';
-import { IMAGE_FILENAMES } from '../parts/constants';
-import './board.css';
+import React, { useEffect, useRef, useState } from "react";
+import { Direction, MarblePathGraph } from "../parts/marble_path";
+import { IMAGE_FILENAMES, ItemType } from "../parts/constants";
+import "./board.css";
 
 export type BoardCell = {
     type: ItemType;
@@ -12,9 +11,10 @@ const numRows = 17;
 const numCols = 15;
 
 const Board: React.FC = () => {
+    // Initialize the board with a function that sets up all cells.
     const [board, setBoard] = useState<BoardCell[][]>(() => {
-        const initialBoard: BoardCell[][] = Array.from({length: numRows}, () =>
-            Array.from({length: numCols}, () => ({type: ItemType.Empty}))
+        const initialBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
+            Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
         );
 
         // Set vertical borders (first and last columns)
@@ -28,15 +28,13 @@ const Board: React.FC = () => {
             initialBoard[numRows - 1][col].type = ItemType.BorderHorizontal;
         }
 
-        // Set invalid cells and diagonal borders for each row
         // Row 1 (index 0)
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || (col >= 3 && col <= 11) || col === 13) {
                 initialBoard[0][col].type = ItemType.Invalid;
-            } else if (col === 2 ) {
+            } else if (col === 2) {
                 initialBoard[0][col].type = ItemType.BorderDiagonalLeft;
-            }
-            else if (col === 12) {
+            } else if (col === 12) {
                 initialBoard[0][col].type = ItemType.BorderDiagonalRight;
             }
         }
@@ -45,36 +43,50 @@ const Board: React.FC = () => {
         for (let col = 1; col < numCols - 1; col++) {
             if (col === 1 || col === 2 || (col >= 4 && col <= 10) || col === 12 || col === 13) {
                 initialBoard[1][col].type = ItemType.Invalid;
-            } else if (col === 3 ) {
+            } else if (col === 3) {
                 initialBoard[1][col].type = ItemType.BorderDiagonalLeft;
-            }
-            else if (col === 11) {
+            } else if (col === 11) {
                 initialBoard[1][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
         // Row 3 (index 2)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 1 || col === 2 || col === 3 || (col >= 5 && col <= 9) || col === 11 || col === 12 || col === 13) {
+            if (
+                col === 1 ||
+                col === 2 ||
+                col === 3 ||
+                (col >= 5 && col <= 9) ||
+                col === 11 ||
+                col === 12 ||
+                col === 13
+            ) {
                 initialBoard[2][col].type = ItemType.Invalid;
-            } else if (col === 4 ) {
+            } else if (col === 4) {
                 initialBoard[2][col].type = ItemType.BorderDiagonalLeft;
-            }
-            else if (col === 4 || col === 10) {
+            } else if (col === 4 || col === 10) {
                 initialBoard[2][col].type = ItemType.BorderDiagonalRight;
             }
         }
 
         // Row 4 (index 3)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 1 || col === 2 || col === 3 || col === 7 || col === 12 || col === 13 || col === 11) {
+            if (
+                col === 1 ||
+                col === 2 ||
+                col === 3 ||
+                col === 7 ||
+                col === 12 ||
+                col === 13 ||
+                col === 11
+            ) {
                 initialBoard[3][col].type = ItemType.Invalid;
             }
         }
 
         // Row 5 (index 4)
         for (let col = 1; col < numCols - 1; col++) {
-            if (col === 2 || col === 1 || col === 13 || col === 12) {
+            if (col === 1 || col === 2 || col === 13 || col === 12) {
                 initialBoard[4][col].type = ItemType.Invalid;
             }
         }
@@ -108,20 +120,14 @@ const Board: React.FC = () => {
             }
         }
 
-        // Create checkerboard pattern for remaining cells
+        // Create checkerboard pattern for remaining cells.
         for (let row = 0; row < numRows; row++) {
             for (let col = 0; col < numCols; col++) {
-                // Skip if cell is already set
                 if (initialBoard[row][col].type !== ItemType.Empty) continue;
-
-                // Create checkerboard pattern
-                if ((row + col) % 2 === 0) {
-                    initialBoard[row][col].type = ItemType.Empty;
-                } else {
-                    initialBoard[row][col].type = ItemType.GraySpace;
-                }
+                initialBoard[row][col].type = (row + col) % 2 === 0 ? ItemType.Empty : ItemType.GraySpace;
             }
         }
+
         initialBoard[14][7].type = ItemType.Invalid;
         initialBoard[16][0].type = ItemType.CornerLeft;
         initialBoard[16][14].type = ItemType.CornerRight;
@@ -129,10 +135,8 @@ const Board: React.FC = () => {
         return initialBoard;
     });
 
-    // Initialize the marble path graph
+    // Marble path graph setup.
     const marblePathGraph = useRef<MarblePathGraph>(new MarblePathGraph(numRows, numCols));
-
-    // Update the graph when the board changes
     useEffect(() => {
         for (let row = 0; row < numRows; row++) {
             for (let col = 0; col < numCols; col++) {
@@ -141,51 +145,159 @@ const Board: React.FC = () => {
         }
     }, [board]);
 
-    // Function to handle marble movement
-    const moveMarble = (startRow: number, startCol: number, direction: Direction) => {
-        const nextNode = marblePathGraph.current.getNextNode(startRow, startCol, direction);
-        if (nextNode) {
-            // Handle marble movement logic here
-            console.log(`Marble moving from (${startRow},${startCol}) to (${nextNode.row},${nextNode.col})`);
+    // Helper function to deep clone the board.
+    const cloneBoard = (board: BoardCell[][]): BoardCell[][] =>
+        board.map((row) => row.map((cell) => ({ ...cell })));
+
+    // Only interactive types (for clicks) include bits and ramps.
+    const handleCellClick = (row: number, col: number) => {
+        setBoard((prevBoard) => {
+            const newBoard = cloneBoard(prevBoard);
+            const cell = newBoard[row][col];
+            switch (cell.type) {
+                case ItemType.BitLeft:
+                    cell.type = ItemType.BitRight;
+                    break;
+                case ItemType.BitRight:
+                    cell.type = ItemType.BitLeft;
+                    break;
+                case ItemType.RampLeft:
+                    cell.type = ItemType.RampRight;
+                    break;
+                case ItemType.RampRight:
+                    cell.type = ItemType.RampLeft;
+                    break;
+                default:
+                    return prevBoard;
+            }
+            return newBoard;
+        });
+    };
+
+    // List of types that should not be draggable.
+    const nonDraggableTypes = [
+        ItemType.LeverBlue,
+        ItemType.LeverRed,
+        ItemType.BorderVertical,
+        ItemType.BorderHorizontal,
+        ItemType.BorderDiagonalLeft,
+        ItemType.BorderDiagonalRight,
+        ItemType.CornerRight,
+        ItemType.CornerLeft,
+        ItemType.Empty,
+        ItemType.GraySpace,
+        ItemType.Invalid,
+    ];
+    const isDraggable = (type: ItemType): boolean => !nonDraggableTypes.includes(type);
+
+    const handleDragStart = (e: React.DragEvent, row: number, col: number) => {
+        const cell = board[row][col];
+        if (isDraggable(cell.type)) {
+            e.dataTransfer.setData("text/plain", cell.type);
+            e.dataTransfer.setData("source-row", row.toString());
+            e.dataTransfer.setData("source-col", col.toString());
+        } else {
+            e.preventDefault();
         }
     };
 
-    return(
-        <div className="board">
-            {board.map((row, rowIndex) => (
-                <div key={rowIndex} className="board-row">
-                    {row.map((cell, colIndex) => {
-                        const imagePath = IMAGE_FILENAMES[cell.type];
-                        console.log(`Cell (${rowIndex},${colIndex}) type: ${cell.type}, image path: ${imagePath}`);
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
 
-                        return (
-                            <div
-                                key={`${rowIndex}-${colIndex}`}
-                                className="board-cell"
-                                style={{
-                                    gridColumn: colIndex + 1,
-                                    gridRow: rowIndex + 1,
-                                }}
-                                title={`${cell.type} (${rowIndex},${colIndex})`}
-                            >
-                                { imagePath && (
-                                    <img
-                                        src={imagePath}
-                                        alt={cell.type}
-                                        className="cell-image"
-                                        onError={(e) => {
-                                            console.error(`Failed to load image for ${cell.type} at path: ${imagePath}`);
-                                            (e.target as HTMLImageElement).style.display = 'none';
-                                        }}
-                                    />
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            ))}
+    // When dropping on a cell in the board.
+    const handleDrop = (e: React.DragEvent, row: number, col: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const itemType = e.dataTransfer.getData("text/plain") as ItemType;
+        const sourceRow = parseInt(e.dataTransfer.getData("source-row"));
+        const sourceCol = parseInt(e.dataTransfer.getData("source-col"));
+
+        // Allow drop only if the target cell is empty and the dragged item is draggable.
+        if (board[row][col].type === ItemType.Empty && isDraggable(itemType)) {
+            setBoard((prevBoard) => {
+                const newBoard = cloneBoard(prevBoard);
+                // Clear the source cell.
+                if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
+                    newBoard[sourceRow][sourceCol].type = ItemType.Empty;
+                }
+                newBoard[row][col].type = itemType;
+                return newBoard;
+            });
+        }
+    };
+
+    // When an item is dropped on the container (outside of any specific cell),
+    // clear the source cell so that the item “disappears.”
+    const handleContainerDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const sourceRow = parseInt(e.dataTransfer.getData("source-row"));
+        const sourceCol = parseInt(e.dataTransfer.getData("source-col"));
+        if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
+            setBoard((prevBoard) => {
+                const newBoard = cloneBoard(prevBoard);
+                newBoard[sourceRow][sourceCol].type = ItemType.Empty;
+                return newBoard;
+            });
+        }
+    };
+
+    return (
+        <div
+            className="board-container"
+            onDragOver={handleDragOver}
+            onDrop={handleContainerDrop}
+        >
+            <div className="board">
+                {board.map((row, rowIndex) => (
+                    <div key={rowIndex} className="board-row">
+                        {row.map((cell, colIndex) => {
+                            const imagePath = IMAGE_FILENAMES[cell.type];
+                            const draggable = isDraggable(cell.type);
+                            // Make cell interactive if it is a bit, ramp, or draggable.
+                            const isInteractive =
+                                cell.type === ItemType.BitLeft ||
+                                cell.type === ItemType.BitRight ||
+                                cell.type === ItemType.RampLeft ||
+                                cell.type === ItemType.RampRight ||
+                                draggable;
+                            return (
+                                <div
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className="board-cell"
+                                    style={{
+                                        gridColumn: colIndex + 1,
+                                        gridRow: rowIndex + 1,
+                                        cursor: isInteractive ? "move" : "default",
+                                    }}
+                                    title={`${cell.type} (${rowIndex},${colIndex})`}
+                                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                                    onDragOver={handleDragOver}
+                                    onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
+                                    draggable={draggable}
+                                    onDragStart={(e) => handleDragStart(e, rowIndex, colIndex)}
+                                >
+                                    {imagePath && (
+                                        <img
+                                            src={imagePath}
+                                            alt={cell.type}
+                                            className="cell-image"
+                                            onError={(e) => {
+                                                console.error(`Failed to load image for ${cell.type} at path: ${imagePath}`);
+                                                (e.target as HTMLImageElement).style.display = "none";
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
         </div>
     );
-}
+};
 
 export default Board;

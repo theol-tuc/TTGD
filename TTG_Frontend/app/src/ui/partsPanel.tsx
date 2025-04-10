@@ -5,27 +5,21 @@ import { ItemType, IMAGE_FILENAMES } from '../parts/constants';
 const { Title } = Typography;
 
 const partItems = [
-    { type: ItemType.BallBlue, name: 'Blue Ball' },
-    { type: ItemType.BallRed, name: 'Red Ball' },
-    { type: ItemType.RampLeft, name: 'Ramp Left' },
-    { type: ItemType.RampRight, name: 'Ramp Right' },
-    //{ type: ItemType.Gear, name: 'Gear' },
-    //{ type: ItemType.GearBit, name: 'Gear Bit' },
-    { type: ItemType.Intercept, name: 'Interceptor' },
-    { type: ItemType.BitLeft, name: 'Bit Left' },
-    { type: ItemType.BitRight, name: 'Bit Right' },
-    //{ type: ItemType.Gearbox, name: 'Gearbox' },
+//    { type: ItemType.BallBlue, name: 'Blue Ball' },
+ //   { type: ItemType.BallRed, name: 'Red Ball' },
+    { type: ItemType.RampLeft, name: 'Ramp' },
+    { type: ItemType.BitLeft, name: 'Bit' },
     { type: ItemType.Crossover, name: 'Crossover' },
+    { type: ItemType.Intercept, name: 'Interceptor' },
 ];
 
 export const PartsPanel: React.FC = () => {
-    const handlePartClick = (type: ItemType) => {
-        console.log('Selected part:', type);
-        // Add logic to handle part selection
+    const handleDragStart = (e: React.DragEvent, type: ItemType) => {
+        e.dataTransfer.setData('text/plain', type);
     };
 
     return (
-        <Card title="Parts to use" bordered={false}>
+        <Card title="Parts" bordered={false}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <Space wrap>
                     {partItems.map((part) => (
@@ -38,18 +32,22 @@ export const PartsPanel: React.FC = () => {
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                cursor: 'pointer',
+                                cursor: 'grab',
                                 borderRadius: '6px',
-                                overflow: "hidden"}}
-                            onClick={() => handlePartClick(part.type)}>
-                            <img
-                                src={IMAGE_FILENAMES[part.type]}
+                            }}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, part.type)}
+                        >
+                            <img 
+                                src={IMAGE_FILENAMES[part.type]} 
                                 alt={part.name}
                                 style={{
-                                    width: '40px',
-                                    height: '40px',
+                                    width: '80%',
+                                    height: '60%',
                                     objectFit: 'contain',
-                                    marginBottom: '8px'}}/>
+                                    marginBottom: '5px'
+                                }}
+                            />
                             <span style={{fontSize: '11px'}}>{part.name}</span>
                         </Card.Grid>
                     ))}
