@@ -71,35 +71,35 @@ def main():
 
     # Add components for testing
     # re-entry challenge
-    board.add_component(ComponentType.RAMP_LEFT, 5, 3)
-    board.add_component(ComponentType.RAMP_LEFT, 6, 4)
-    board.add_component(ComponentType.RAMP_LEFT, 7, 5)
-    board.add_component(ComponentType.RAMP_LEFT, 8, 6)
-    board.add_component(ComponentType.RAMP_LEFT, 9, 7)
-    board.add_component(ComponentType.RAMP_LEFT, 10, 8)
-    board.add_component(ComponentType.RAMP_LEFT, 11, 9)
-    board.add_component(ComponentType.RAMP_LEFT, 12, 10)
+    #board.add_component(ComponentType.RAMP_LEFT, 5, 3)
+    #board.add_component(ComponentType.RAMP_LEFT, 6, 4)
+    #board.add_component(ComponentType.RAMP_LEFT, 7, 5)
+    #board.add_component(ComponentType.RAMP_LEFT, 8, 6)
+    #board.add_component(ComponentType.RAMP_LEFT, 9, 7)
+    #board.add_component(ComponentType.RAMP_LEFT, 10, 8)
+    #board.add_component(ComponentType.RAMP_LEFT, 11, 9)
+    #board.add_component(ComponentType.RAMP_LEFT, 12, 10)
 
 
     #gravity challenge
-    # board.add_component(ComponentType.RAMP_LEFT, 6, 3) 
-    # board.add_component(ComponentType.RAMP_RIGHT, 6, 4)
-    # board.add_component(ComponentType.RAMP_RIGHT, 5, 5)
-    # board.add_component(ComponentType.RAMP_RIGHT, 4, 6)
-    # board.add_component(ComponentType.RAMP_RIGHT, 3, 7)
-    # board.add_component(ComponentType.RAMP_RIGHT, 2, 8)
+    #board.add_component(ComponentType.RAMP_LEFT, 6, 3)
+    #board.add_component(ComponentType.RAMP_RIGHT, 6, 4)
+    #board.add_component(ComponentType.RAMP_RIGHT, 5, 5)
+    #board.add_component(ComponentType.RAMP_RIGHT, 4, 6)
+    #board.add_component(ComponentType.RAMP_RIGHT, 3, 7)
+    #board.add_component(ComponentType.RAMP_RIGHT, 2, 8)
 
     #tetrad challenge
-    # bit_L = ComponentType.BIT_LEFT
-    # bit_R = ComponentType.BIT_RIGHT
-    # board.add_component(bit_R, 6, 3)
-    # board.add_component(bit_L, 5, 4)  
-    # board.add_component(bit_R, 6, 5)
-    # board.add_component(bit_L, 5, 6)
-    # board.add_component(bit_R, 6, 7)    
-    # board.add_component(bit_L, 5, 8)
-    # board.add_component(bit_R, 6, 9)
-    # board.add_component(ComponentType.INTERCEPTOR, 5, 10)
+    bit_L = ComponentType.BIT_LEFT
+    bit_R = ComponentType.BIT_RIGHT
+    board.add_component(bit_R, 6, 3)
+    board.add_component(bit_L, 5, 4)
+    board.add_component(bit_R, 6, 5)
+    board.add_component(bit_L, 5, 6)
+    board.add_component(bit_R, 6, 7)
+    board.add_component(bit_L, 5, 8)
+    board.add_component(bit_R, 6, 9)
+    board.add_component(ComponentType.INTERCEPTOR, 5, 10)
 
     # board.add_component(ComponentType.CROSSOVER, 5, 8)  
     # board.add_component(ComponentType.BIT_LEFT, 9, 8)  
