@@ -38,23 +38,27 @@ class GameBoard:
         self.components: List[List[Component]] = [[Component(ComponentType.EMPTY, x, y)
                                                    for x in range(width)]
                                                   for y in range(height)]
-        self.launchers: List[Tuple[int, int]] = []  # Positions of launchers
+        # Initialize two launchers - left and right
+        self.left_launcher = (2, 0)  # Left launcher position
+        self.right_launcher = (8, 0)  # Right launcher position
+        self.active_launcher = None  # Will be set by trigger
         self.score = 0
 
     def reset(self) -> None:
         """Reset the game board to its initial state"""
         self.marbles.clear()
-        self.launchers.clear()
+        self.active_launcher = None
         self.score = 0
         self.components = [[Component(ComponentType.EMPTY, x, y)
                           for x in range(self.width)]
                          for y in range(self.height)]
+        # Re-add launchers after reset
+        self.add_component(ComponentType.LAUNCHER, self.left_launcher[0], self.left_launcher[1])
+        self.add_component(ComponentType.LAUNCHER, self.right_launcher[0], self.right_launcher[1])
 
     def add_component(self, type: ComponentType, x: int, y: int) -> bool:
         """Add a component to the board if the position is valid and empty"""
         if 0 <= x < self.width and 0 <= y < self.height:
-            if type == ComponentType.LAUNCHER:
-                self.launchers.append((x, y))
             self.components[y][x] = Component(type, x, y)
             return True
         return False
@@ -71,12 +75,20 @@ class GameBoard:
                 return True
         return False
 
-    def launch_marble(self, launcher_index: int) -> bool:
-        """Launch a marble from a launcher"""
-        if 0 <= launcher_index < len(self.launchers):
-            x, y = self.launchers[launcher_index]
+    def launch_marble(self) -> bool:
+        """Launch a marble from the active launcher"""
+        if self.active_launcher == "left":
+            x, y = self.left_launcher
+            return self.add_marble(x, y)
+        elif self.active_launcher == "right":
+            x, y = self.right_launcher
             return self.add_marble(x, y)
         return False
+
+    def set_active_launcher(self, launcher: str) -> None:
+        """Set which launcher is active (left or right)"""
+        if launcher in ["left", "right"]:
+            self.active_launcher = launcher
 
     def check_collision(self, x: int, y: int) -> bool:
         """Check if a position is occupied by another marble"""
@@ -96,38 +108,32 @@ class GameBoard:
             # Get current component
             component = self.components[marble.y][marble.x]
 
-            # Default to moving down unless ramp changes it
-            direction = "down"
-
             # Handle component interactions
-            if component.type == ComponentType.BIT_LEFT:
-                direction = "right"
-                component.type = ComponentType.BIT_RIGHT
-            elif component.type == ComponentType.BIT_RIGHT:
-                direction = "left"
-                component.type = ComponentType.BIT_LEFT
             if component.type == ComponentType.RAMP_LEFT:
-                direction = "left"
+                marble.direction = "left"
             elif component.type == ComponentType.RAMP_RIGHT:
-                direction = "right"
+                marble.direction = "right"
             elif component.type == ComponentType.INTERCEPTOR:
                 marble.is_moving = False
                 self.score += 1
+                # Here we'll add trigger logic later
                 continue
 
             # Calculate new position based on current direction
             new_x, new_y = marble.x, marble.y
-            if direction == "down":
+            if marble.direction == "down":
                 new_y += 1
-            elif direction == "left":
+            elif marble.direction == "left":
                 new_x -= 1
-            elif direction == "right":
+            elif marble.direction == "right":
                 new_x += 1
 
             # Check if new position is valid
-            if 0 <= new_x < self.width and 0 <= new_y < self.height:
+            if (0 <= new_x < self.width and
+                    0 <= new_y < self.height):
                 new_component = self.components[new_y][new_x]
 
+                # Check for collisions with other marbles
                 if self.check_collision(new_x, new_y):
                     marble.is_moving = False
                     continue
@@ -139,11 +145,11 @@ class GameBoard:
                         new_component.type == ComponentType.RAMP_RIGHT):
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
-                    marble.direction = direction  # update direction here
                     self.components[new_y][new_x].is_occupied = True
                 else:
                     marble.is_moving = False
             else:
+                # Marble is out of bounds, mark for removal
                 marbles_to_remove.append(marble)
 
         # Remove marbles that went out of bounds
