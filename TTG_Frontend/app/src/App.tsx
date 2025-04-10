@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import { Layout } from 'antd';
-import Board from "./board/board";
+import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
+import { ItemType } from './parts/constants';
 
 const { Header, Sider, Content } = Layout;
 
@@ -10,6 +11,7 @@ const App: React.FC = () => {
     const [zoomLevel, setZoomLevel] = useState(1);
     const [isRunning, setIsRunning] = useState(false);
     const [currentSpeed, setCurrentSpeed] = useState(1);
+    const [board, setBoard] = useState<BoardCell[][]>([]);
 
     const handleZoomIn = () => {
         setZoomLevel(prev => Math.min(prev + 0.1, 2));
@@ -37,9 +39,39 @@ const App: React.FC = () => {
         setIsRunning(true);
     };
 
+    const shouldPreserveCell = (cellType: ItemType): boolean => {
+        const preservedTypes = [
+            ItemType.BorderVertical,
+            ItemType.BorderHorizontal,
+            ItemType.BorderDiagonalLeft,
+            ItemType.BorderDiagonalRight,
+            ItemType.CornerLeft,
+            ItemType.CornerRight,
+            ItemType.Invalid,
+            ItemType.LeverBlue,
+            ItemType.LeverRed
+        ];
+        return preservedTypes.includes(cellType);
+    };
+
     const handleClearBoard = () => {
-        console.log("Clearing board - functionality to be implemented");
-        // This will be implemented when we have board state management
+        setBoard(prevBoard => {
+            const newBoard = prevBoard.map(row => 
+                row.map(cell => {
+                    // Only clear interactive parts, preserve board structure
+                    if (cell.type === ItemType.BitLeft || 
+                        cell.type === ItemType.BitRight || 
+                        cell.type === ItemType.RampLeft || 
+                        cell.type === ItemType.RampRight || 
+                        cell.type === ItemType.Crossover || 
+                        cell.type === ItemType.Intercept) {
+                        return { type: ItemType.Empty };
+                    }
+                    return { ...cell };
+                })
+            );
+            return newBoard;
+        });
     };
 
     const handleResetMarbles = () => {
@@ -107,7 +139,7 @@ const App: React.FC = () => {
                         transform: `scale(${zoomLevel})`,
                         transformOrigin: 'center'
                     }}>
-                        <Board />
+                        <Board board={board} setBoard={setBoard} />
                     </div>
                 </Content>
                 <Sider
