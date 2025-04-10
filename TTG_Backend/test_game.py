@@ -22,6 +22,22 @@ def print_board(board: GameBoard) -> None:
                     grid[y][x] = 'X'
                 elif component.type == ComponentType.LAUNCHER:
                     grid[y][x] = 'L'
+                elif component.type == ComponentType.BORDER_VERTICAL:
+                    grid[y][x] = '|'
+                elif component.type == ComponentType.BORDER_HORIZONTAL:
+                    grid[y][x] = '-'
+                elif component.type == ComponentType.BORDER_DIAGONAL_LEFT:
+                    grid[y][x] = '\\'
+                elif component.type == ComponentType.BORDER_DIAGONAL_RIGHT:
+                    grid[y][x] = '/'
+                elif component.type == ComponentType.CORNER_LEFT:
+                    grid[y][x] = '+'
+                elif component.type == ComponentType.CORNER_RIGHT:
+                    grid[y][x] = '+'
+                elif component.type == ComponentType.LEVER_BLUE:
+                    grid[y][x] = 'B'
+                elif component.type == ComponentType.LEVER_RED:
+                    grid[y][x] = 'R'
     
     # Add marbles with their colors
     for marble in board.marbles:
@@ -40,17 +56,13 @@ def print_board(board: GameBoard) -> None:
     print(f"Active Launcher: {board.active_launcher}")
 
 def main():
-    # Create a game board
-    board = GameBoard(11, 10)  # Width 11, Height 10
+    # Create a game board with correct dimensions
+    board = GameBoard(15, 17)  # Width 15, Height 17
     
     # Add some components for testing
     board.add_component(ComponentType.RAMP_LEFT, 3, 2)
-    board.add_component(ComponentType.RAMP_RIGHT, 7, 2)
-    board.add_component(ComponentType.INTERCEPTOR, 5, 9)  # Place interceptor at bottom middle
-    
-    # Add launchers at the top
-    board.add_component(ComponentType.LAUNCHER, 3, 0)  # Left launcher
-    board.add_component(ComponentType.LAUNCHER, 7, 0)  # Right launcher
+    board.add_component(ComponentType.RAMP_RIGHT, 11, 2)
+    board.add_component(ComponentType.INTERCEPTOR, 7, 14)  # Place interceptor at bottom middle
     
     # Test left launcher with red marble
     print("\nTesting left launcher with red marble:")
@@ -58,7 +70,7 @@ def main():
     board.launch_marble("red")
     
     # Simulate a few steps
-    for _ in range(12):  # Increased steps to allow marble to reach bottom
+    for _ in range(20):  # Increased steps to allow marble to reach bottom
         print_board(board)
         board.update_marble_positions()
         time.sleep(0.5)
@@ -75,7 +87,7 @@ def main():
     board.launch_marble("blue")
     
     # Simulate a few steps
-    for _ in range(12):  # Increased steps to allow marble to reach bottom
+    for _ in range(20):  # Increased steps to allow marble to reach bottom
         print_board(board)
         board.update_marble_positions()
         time.sleep(0.5)

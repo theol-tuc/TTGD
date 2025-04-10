@@ -16,26 +16,30 @@ export enum ItemType {
     BorderHorizontal = "border_horizontal",
     BorderDiagonalLeft = "border_diagonal_left",
     BorderDiagonalRight = "border_diagonal_right",
+    CornerRight = "corner_right",
+    CornerLeft = "corner_left",
 }
 
 export const IMAGE_FILENAMES: Record<ItemType, string> = {
     [ItemType.Empty]: '/images/PartLocation-t.png',
     [ItemType.RampRight]: '/images/Ramp-t.png',
     [ItemType.RampLeft]: '/images/Ramp-t.png',
-    [ItemType.BitRight]: '/images/Ramp-t.png',
-    [ItemType.BitLeft]: '/images/Ramp-t.png',
+    [ItemType.BitRight]: '/images/Bit-t.png',
+    [ItemType.BitLeft]: '/images/Bit-t.png',
     [ItemType.Crossover]: '/images/Crossover-t.png',
     [ItemType.Intercept]: '/images/Interceptor-t.png',
-    [ItemType.GraySpace]: '',
+    [ItemType.GraySpace]:'/images/GraySpace.png',
     [ItemType.Invalid]: '',
     [ItemType.BallBlue]: '/images/Ball-m.png',
     [ItemType.BallRed]: '/images/Ball-m.png',
-    [ItemType.LeverBlue]: '/images/Turnstile-t.png',
-    [ItemType.LeverRed]: '/images/Turnstile-t.png',
+    [ItemType.LeverBlue]: '/images/bluelever.png',
+    [ItemType.LeverRed]: '/images/redlever.png',
     [ItemType.BorderVertical]: '/images/Side-t.png',
     [ItemType.BorderHorizontal]: '/images/Side-horizontal-t.png',
     [ItemType.BorderDiagonalLeft]: '/images/Slope-t.png',
     [ItemType.BorderDiagonalRight]: '/images/Slope-t.png',
+    [ItemType.CornerLeft]: '/images/corner.png',
+    [ItemType.CornerRight]: '/images/corner_right.png'
 };
 
 export const ITEM_COLORS: Record<ItemType, string> = {
@@ -55,5 +59,7 @@ export const ITEM_COLORS: Record<ItemType, string> = {
     [ItemType.BorderVertical]: '#946635',
     [ItemType.BorderHorizontal]: '#49331b',
     [ItemType.BorderDiagonalLeft]: '#88694a',
-    [ItemType.BorderDiagonalRight]: '#88694a'
+    [ItemType.BorderDiagonalRight]: '#88694a',
+    [ItemType.CornerRight]: '#946635',
+    [ItemType.CornerLeft]: '#946635',
 };
