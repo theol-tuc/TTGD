@@ -31,6 +31,7 @@ class Component:
         self.y = y
         self.is_occupied = False
 
+
 class Marble:
     def __init__(self, color: str, x: int, y: int, direction: str):
         self.color = color
@@ -53,10 +54,10 @@ class GameBoard:
 
     def initialize_board(self) -> None:
         """Initialize the board with empty components"""
-        self.components = [[Component(ComponentType.EMPTY, x, y) 
-                          for x in range(self.width)] 
-                          for y in range(self.height)]
-        
+        self.components = [[Component(ComponentType.EMPTY, x, y)
+                            for x in range(self.width)]
+                           for y in range(self.height)]
+
         # Set up borders and invalid spaces
         self.setup_board_structure()
 
@@ -75,16 +76,16 @@ class GameBoard:
         self.setup_diamond_pattern()
 
         # Add levers at the bottom
-        self.components[self.height - 3][6].type = ComponentType.LEVER_BLUE
-        self.components[self.height - 3][8].type = ComponentType.LEVER_RED
+        self.components[self.height - 3][6].type = ComponentType.LEVER_BLUE  # Left lever for blue marbles
+        self.components[self.height - 3][8].type = ComponentType.LEVER_RED  # Right lever for red marbles
 
         # Add corners
         self.components[self.height - 1][0].type = ComponentType.CORNER_LEFT
         self.components[self.height - 1][self.width - 1].type = ComponentType.CORNER_RIGHT
 
         # Add launchers at the top
-        self.components[0][3].type = ComponentType.LAUNCHER  # Left launcher
-        self.components[0][11].type = ComponentType.LAUNCHER  # Right launcher
+        self.components[0][3].type = ComponentType.LAUNCHER  # Left launcher for blue marbles
+        self.components[0][11].type = ComponentType.LAUNCHER  # Right launcher for red marbles
 
     def setup_diamond_pattern(self) -> None:
         """Set up the diamond pattern of invalid spaces"""
@@ -139,12 +140,16 @@ class GameBoard:
         """Launch a marble from the active launcher"""
         if self.active_launcher == "left":
             x = 3  # Left launcher position
-            direction = "left"
-        else:
-            x = 11  # Right launcher position
+            # Left side always uses blue marbles
             direction = "right"
+            color = "blue"
+        elif self.active_launcher == "right":
+            x = 11  # Right launcher position
+            # Right side always uses red marbles
+            direction = "left"
+            color = "red"
         y = 0  # Top row
-        
+
         # Check if position is valid
         if 0 <= x < self.width and 0 <= y < self.height:
             if not self.check_collision(x, y):
@@ -154,28 +159,11 @@ class GameBoard:
     def check_collision(self, x: int, y: int) -> bool:
         """Check if a position is occupied"""
         return self.components[y][x].is_occupied
-    
-    def set_bit_type(component: Component) -> None:
-        """
-        Set the correct bit type based on the current component type.
-        Flips BIT_LEFT to BIT_RIGHT and BIT_RIGHT to BIT_LEFT.
-        Updates the component type and returns the new direction for the marble.
-        """
-        if component.type == ComponentType.BIT_LEFT:
-            print(f"Flipping BIT_LEFT at ({component.x}, {component.y}) to BIT_RIGHT")
-            component.type = ComponentType.BIT_RIGHT
-            return "right"
-        elif component.type == ComponentType.BIT_RIGHT:
-            print(f"Flipping BIT_RIGHT at ({component.x}, {component.y}) to BIT_LEFT")
-            component.type = ComponentType.BIT_LEFT
-            return "left"
-        return None  # If no change is made, return None
-
 
     def update_marble_positions(self) -> None:
         """Update all marble positions based on components and physics"""
         marbles_to_remove = []
-        
+
         for marble in self.marbles:
             if not marble.is_moving:
                 continue
@@ -184,8 +172,10 @@ class GameBoard:
             new_x, new_y = marble.x, marble.y
             if marble.direction == "left":
                 new_x -= 1
+                new_y += 1
             elif marble.direction == "right":
                 new_x += 1
+                new_y += 1
 
             # Check if new position is valid
             if (0 <= new_x < self.width and
@@ -212,10 +202,10 @@ class GameBoard:
                     marble.direction = "right"
                 elif component.type == ComponentType.BIT_LEFT:
                     marble.direction = "right"
-                    self.set_bit_type(component)
+                    component.type = ComponentType.BIT_RIGHT
                 elif component.type == ComponentType.BIT_RIGHT:
                     marble.direction = "left"
-                    self.set_bit_type(component)
+                    component.type = ComponentType.BIT_LEFT
                 elif component.type == ComponentType.CROSSOVER:
                     if marble.direction == "left":
                         marble.direction = "left"
