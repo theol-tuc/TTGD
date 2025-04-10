@@ -20,7 +20,9 @@ def print_board(board: GameBoard) -> None:
                     grid[y][x] = '+'
                 elif component.type == ComponentType.INTERCEPTOR:
                     grid[y][x] = 'X'
-                elif component.type == ComponentType.LAUNCHER:
+                elif component.type == ComponentType.RED_LAUNCHER:
+                    grid[y][x] = 'R'
+                elif component.type == ComponentType.BLUE_LAUNCHER:
                     grid[y][x] = 'L'
     
     # Add marbles
