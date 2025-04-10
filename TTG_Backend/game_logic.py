@@ -33,11 +33,11 @@ class Component:
 
 
 class Marble:
-    def __init__(self, color: str, x: int, y: int):
+    def __init__(self, color: str, x: int, y: int, direction: str):
         self.color = color
         self.x = x
         self.y = y
-        self.direction = "down"
+        self.direction = direction
         self.is_moving = True
 
 
@@ -141,38 +141,24 @@ class GameBoard:
         if self.active_launcher == "left":
             x = 3  # Left launcher position
             # Left side always uses blue marbles
+            direction = "right"
             color = "blue"
-        else:
+        elif self.active_launcher == "right":
             x = 11  # Right launcher position
             # Right side always uses red marbles
+            direction = "left"
             color = "red"
         y = 0  # Top row
 
         # Check if position is valid
         if 0 <= x < self.width and 0 <= y < self.height:
             if not self.check_collision(x, y):
-                self.marbles.append(Marble(color, x, y))
+                self.marbles.append(Marble(color, x, y, direction))
                 self.components[y][x].is_occupied = True
 
     def check_collision(self, x: int, y: int) -> bool:
         """Check if a position is occupied"""
         return self.components[y][x].is_occupied
-
-    def set_bit_type(component: Component) -> None:
-        """
-        Set the correct bit type based on the current component type.
-        Flips BIT_LEFT to BIT_RIGHT and BIT_RIGHT to BIT_LEFT.
-        Updates the component type and returns the new direction for the marble.
-        """
-        if component.type == ComponentType.BIT_LEFT:
-            print(f"Flipping BIT_LEFT at ({component.x}, {component.y}) to BIT_RIGHT")
-            component.type = ComponentType.BIT_RIGHT
-            return "right"
-        elif component.type == ComponentType.BIT_RIGHT:
-            print(f"Flipping BIT_RIGHT at ({component.x}, {component.y}) to BIT_LEFT")
-            component.type = ComponentType.BIT_LEFT
-            return "left"
-        return None  # If no change is made, return None
 
     def update_marble_positions(self) -> None:
         """Update all marble positions based on components and physics"""
@@ -184,22 +170,12 @@ class GameBoard:
 
             # Calculate new position based on current direction
             new_x, new_y = marble.x, marble.y
-            if marble.direction == "down":
-                new_y += 1
-            elif marble.direction == "left":
+            if marble.direction == "left":
                 new_x -= 1
-                # After moving left, check if we should go down
-                if 0 <= new_x < self.width and 0 <= new_y < self.height:
-                    next_component = self.components[new_y][new_x]
-                    if next_component.type not in [ComponentType.RAMP_LEFT, ComponentType.RAMP_RIGHT]:
-                        marble.direction = "down"
+                new_y += 1
             elif marble.direction == "right":
                 new_x += 1
-                # After moving right, check if we should go down
-                if 0 <= new_x < self.width and 0 <= new_y < self.height:
-                    next_component = self.components[new_y][new_x]
-                    if next_component.type not in [ComponentType.RAMP_LEFT, ComponentType.RAMP_RIGHT]:
-                        marble.direction = "down"
+                new_y += 1
 
             # Check if new position is valid
             if (0 <= new_x < self.width and
@@ -231,12 +207,10 @@ class GameBoard:
                     marble.direction = "left"
                     component.type = ComponentType.BIT_LEFT
                 elif component.type == ComponentType.CROSSOVER:
-                    if marble.direction == "down":
+                    if marble.direction == "left":
                         marble.direction = "left"
-                    elif marble.direction == "left":
-                        marble.direction = "down"
                     elif marble.direction == "right":
-                        marble.direction = "down"
+                        marble.direction = "right"
                 elif component.type == ComponentType.LEVER_BLUE:
                     self.set_active_launcher("left")
                     self.launch_marble("blue")
