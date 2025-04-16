@@ -139,10 +139,10 @@ class GameBoard:
         """Launch a marble from the active launcher"""
         if self.active_launcher == "left":
             x = 3  # Left launcher position
-            direction = "left"
+            direction = "right"
         else:
             x = 11  # Right launcher position
-            direction = "right"
+            direction = "left"
         y = 0  # Top row
         
         # Check if position is valid
@@ -155,7 +155,7 @@ class GameBoard:
         """Check if a position is occupied"""
         return self.components[y][x].is_occupied
     
-    def set_bit_type(component: Component) -> None:
+    def set_bit_type(self, component: Component) -> None:
         """
         Set the correct bit type based on the current component type.
         Flips BIT_LEFT to BIT_RIGHT and BIT_RIGHT to BIT_LEFT.
@@ -171,7 +171,6 @@ class GameBoard:
             return "left"
         return None  # If no change is made, return None
 
-
     def update_marble_positions(self) -> None:
         """Update all marble positions based on components and physics"""
         marbles_to_remove = []
@@ -180,12 +179,18 @@ class GameBoard:
             if not marble.is_moving:
                 continue
 
-            # Calculate new position based on current direction
+            # Calculate new position based on current direction and gravity
             new_x, new_y = marble.x, marble.y
-            if marble.direction == "left":
-                new_x -= 1
-            elif marble.direction == "right":
-                new_x += 1
+            
+            # Apply gravity (move down if possible)
+            if new_y + 1 < self.height and not self.check_collision(new_x, new_y + 1):
+                new_y += 1
+            else:
+                # If can't move down, try moving horizontally based on direction
+                if marble.direction == "left":
+                    new_x -= 1
+                elif marble.direction == "right":
+                    new_x += 1
 
             # Check if new position is valid
             if (0 <= new_x < self.width and
@@ -207,9 +212,23 @@ class GameBoard:
 
                 # Handle component interactions
                 if component.type == ComponentType.RAMP_LEFT:
-                    marble.direction = "left"
+                    # Check if there's space to move down-left
+                    if (marble.y + 1 < self.height and 
+                        marble.x - 1 >= 0 and 
+                        not self.check_collision(marble.x - 1, marble.y + 1)):
+                        marble.direction = "left"
+                        marble.y += 1
+                        marble.x -= 1
+                        self.components[marble.y][marble.x].is_occupied = True
                 elif component.type == ComponentType.RAMP_RIGHT:
-                    marble.direction = "right"
+                    # Check if there's space to move down-right
+                    if (marble.y + 1 < self.height and 
+                        marble.x + 1 < self.width and 
+                        not self.check_collision(marble.x + 1, marble.y + 1)):
+                        marble.direction = "right"
+                        marble.y += 1
+                        marble.x += 1
+                        self.components[marble.y][marble.x].is_occupied = True
                 elif component.type == ComponentType.BIT_LEFT:
                     marble.direction = "right"
                     self.set_bit_type(component)
@@ -217,10 +236,11 @@ class GameBoard:
                     marble.direction = "left"
                     self.set_bit_type(component)
                 elif component.type == ComponentType.CROSSOVER:
-                    if marble.direction == "left":
-                        marble.direction = "left"
-                    elif marble.direction == "right":
-                        marble.direction = "right"
+                    # Check if there's space to move down
+                    if (marble.y + 1 < self.height and 
+                        not self.check_collision(marble.x, marble.y + 1)):
+                        marble.y += 1
+                        self.components[marble.y][marble.x].is_occupied = True
                 elif component.type == ComponentType.LEVER_BLUE:
                     self.set_active_launcher("left")
                     self.launch_marble("blue")

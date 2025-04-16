@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
-from typing import List, Dict, Optional, ForwardRef
+from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
 
 app = FastAPI()
@@ -30,12 +30,15 @@ class MarbleRequest(BaseModel):
     x: Optional[int] = None
     y: Optional[int] = None
 
-class BoardState(BaseModel):
-    #maybe remove this line later:
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+class LauncherRequest(BaseModel):
+    launcher: str
 
-    components: List[List[Dict[str, any]]]
-    marbles: List[Dict[str, any]]
+class BoardState(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    components: List[List[Dict[str, Any]]]
+    marbles: List[Dict[str, Any]]
     red_marbles: int
     blue_marbles: int
     active_launcher: str
@@ -91,7 +94,7 @@ async def add_marble(marble: MarbleRequest):
     if marble.x is not None and marble.y is not None:
         # Add marble at specific position
         if not board.check_collision(marble.x, marble.y):
-            board.marbles.append(Marble(marble.color, marble.x, marble.y))
+            board.marbles.append(Marble(marble.color, marble.x, marble.y, "right"))  # Default direction
             board.components[marble.y][marble.x].is_occupied = True
             return {"message": "Marble added successfully"}
         else:
@@ -102,12 +105,12 @@ async def add_marble(marble: MarbleRequest):
         return {"message": "Marble launched successfully"}
 
 @app.post("/launcher")
-async def set_launcher(launcher: str):
+async def set_launcher(launcher_request: LauncherRequest):
     """Set the active launcher"""
-    if launcher not in ["left", "right"]:
+    if launcher_request.launcher not in ["left", "right"]:
         raise HTTPException(status_code=400, detail="Invalid launcher type")
-    board.set_active_launcher(launcher)
-    return {"message": f"Launcher set to {launcher}"}
+    board.set_active_launcher(launcher_request.launcher)
+    return {"message": f"Launcher set to {launcher_request.launcher}"}
 
 @app.post("/update")
 async def update_board():
@@ -125,6 +128,3 @@ async def reset_board():
 async def get_counts():
     """Get marble counts"""
     return board.get_marble_counts()
-
-#maybe remove this line later:
-BoardState.model_rebuild(GameBoard=GameBoard)

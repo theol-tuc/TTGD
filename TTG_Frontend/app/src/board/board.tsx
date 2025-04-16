@@ -22,7 +22,7 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
     const [backendState, setBackendState] = useState<BoardState | null>(null);
     const marblePathGraph = useRef<MarblePathGraph>(new MarblePathGraph(numRows, numCols));
-    const updateInterval = useRef<NodeJS.Timeout>();
+    const updateInterval = useRef<NodeJS.Timeout | null>(null);
 
     // Initialize the board and sync with backend
     useEffect(() => {

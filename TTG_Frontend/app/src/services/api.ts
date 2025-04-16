@@ -30,7 +30,7 @@ export const launchMarble = async (color: string) => {
 };
 
 export const setLauncher = async (launcher: string) => {
-    await axios.post(`${API_BASE_URL}/launcher`, launcher);
+    await axios.post(`${API_BASE_URL}/launcher`, { launcher });
 };
 
 export const updateBoard = async () => {

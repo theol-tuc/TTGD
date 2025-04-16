@@ -80,25 +80,41 @@ const App: React.FC = () => {
     };
 
     const handleTriggerLeft = async () => {
-        await setLauncher("left");
-        await launchMarble("blue");
-        const state = await getBoardState();
-        setMarbleCounts({
-            red: state.red_marbles,
-            blue: state.blue_marbles
-        });
-        setActiveLauncher('left');
+        try {
+            console.log('Setting launcher to left...');
+            await setLauncher("left");
+            console.log('Launcher set, launching blue marble...');
+            await launchMarble("blue");
+            console.log('Marble launched, getting board state...');
+            const state = await getBoardState();
+            console.log('Board state updated:', state);
+            setMarbleCounts({
+                red: state.red_marbles,
+                blue: state.blue_marbles
+            });
+            setActiveLauncher('left');
+        } catch (error) {
+            console.error('Error in handleTriggerLeft:', error);
+        }
     };
 
     const handleTriggerRight = async () => {
-        await setLauncher("right");
-        await launchMarble("red");
-        const state = await getBoardState();
-        setMarbleCounts({
-            red: state.red_marbles,
-            blue: state.blue_marbles
-        });
-        setActiveLauncher('right');
+        try {
+            console.log('Setting launcher to right...');
+            await setLauncher("right");
+            console.log('Launcher set, launching red marble...');
+            await launchMarble("red");
+            console.log('Marble launched, getting board state...');
+            const state = await getBoardState();
+            console.log('Board state updated:', state);
+            setMarbleCounts({
+                red: state.red_marbles,
+                blue: state.blue_marbles
+            });
+            setActiveLauncher('right');
+        } catch (error) {
+            console.error('Error in handleTriggerRight:', error);
+        }
     };
 
     // Update marble counts periodically when running
