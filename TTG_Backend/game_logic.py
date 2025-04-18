@@ -135,16 +135,16 @@ class GameBoard:
         # Row 5 (index 4)
         for x in range(1, self.width):
             if x in [1,2,12,13]:
-                self.components[3][x].type = ComponentType.INVALID
-            elif x % 2 == 0:
-                self.components[3][x].type = ComponentType.GRAY_SPACE
+                self.components[4][x].type = ComponentType.INVALID
+            elif x % 2 == 1:
+                self.components[4][x].type = ComponentType.GRAY_SPACE
             else:
-                self.components[3][x].type = ComponentType.EMPTY
+                self.components[4][x].type = ComponentType.EMPTY
 
 
 
         # Middle rows
-        for y in range(4, 13):
+        for y in range(5, 13):
             for x in range(2,14):
                 if (x + y) % 2 == 1:
                     self.components[y][x].type = ComponentType.GRAY_SPACE
