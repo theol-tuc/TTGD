@@ -183,6 +183,7 @@ class GameBoard:
             if not self.check_collision(x, y):
                 self.marbles.append(Marble(color, x, y, direction))
                 self.components[y][x].is_occupied = True
+                print(f"Launched marble at ({x}, {y}) with direction {direction}")
 
     def check_collision(self, x: int, y: int) -> bool:
         """Check if a position is occupied"""
@@ -195,11 +196,9 @@ class GameBoard:
         Updates the component type and returns the new direction for the marble.
         """
         if component.type == ComponentType.BIT_LEFT:
-            print(f"Flipping BIT_LEFT at ({component.x}, {component.y}) to BIT_RIGHT")
             component.type = ComponentType.BIT_RIGHT
             return "right"
         elif component.type == ComponentType.BIT_RIGHT:
-            print(f"Flipping BIT_RIGHT at ({component.x}, {component.y}) to BIT_LEFT")
             component.type = ComponentType.BIT_LEFT
             return "left"
         return None  # If no change is made, return None
@@ -212,95 +211,143 @@ class GameBoard:
             if not marble.is_moving:
                 continue
 
-            # Calculate new position based on current direction and gravity
-            new_x, new_y = marble.x, marble.y
+            print(f"Marble at ({marble.x}, {marble.y}) is moving {marble.direction}")
             
-            # Apply gravity (move down if possible)
-            if new_y + 1 < self.height and not self.check_collision(new_x, new_y + 1):
-                new_y += 1
-            else:
-                # If can't move down, try moving horizontally based on direction
-                if marble.direction == "left":
-                    new_x -= 1
-                elif marble.direction == "right":
-                    new_x += 1
-
-            # Check if new position is valid
-            if (0 <= new_x < self.width and
-                    0 <= new_y < self.height):
-                new_component = self.components[new_y][new_x]
-
-                # Check for collisions with other marbles
-                if self.check_collision(new_x, new_y):
-                    marble.is_moving = False
-                    continue
-
-                # Update position and handle component interactions
-                self.components[marble.y][marble.x].is_occupied = False
-                marble.x, marble.y = new_x, new_y
-                self.components[new_y][new_x].is_occupied = True
-
-                # Get current component after movement
-                component = self.components[marble.y][marble.x]
-
-                # Handle component interactions
-                if component.type == ComponentType.RAMP_LEFT:
-                    # Check if there's space to move down-left
-                    if (marble.y + 1 < self.height and 
-                        marble.x - 1 >= 0 and 
-                        not self.check_collision(marble.x - 1, marble.y + 1)):
-                        marble.direction = "left"
-                        marble.y += 1
-                        marble.x -= 1
-                        self.components[marble.y][marble.x].is_occupied = True
-                elif component.type == ComponentType.RAMP_RIGHT:
-                    # Check if there's space to move down-right
-                    if (marble.y + 1 < self.height and 
-                        marble.x + 1 < self.width and 
-                        not self.check_collision(marble.x + 1, marble.y + 1)):
-                        marble.direction = "right"
-                        marble.y += 1
-                        marble.x += 1
-                        self.components[marble.y][marble.x].is_occupied = True
-                elif component.type == ComponentType.BIT_LEFT:
-                    marble.direction = "right"
-                    self.set_bit_type(component)
-                elif component.type == ComponentType.BIT_RIGHT:
+            current_component = self.components[marble.y][marble.x]
+            
+            if current_component.type == ComponentType.RAMP_LEFT:
+                if (marble.y + 1 < self.height and 
+                    marble.x - 1 >= 0 and 
+                    not self.check_collision(marble.x - 1, marble.y + 1)):
                     marble.direction = "left"
-                    self.set_bit_type(component)
-                elif component.type == ComponentType.CROSSOVER:
-                    # Check if there's space to move down
-                    if (marble.y + 1 < self.height and 
-                        not self.check_collision(marble.x, marble.y + 1)):
-                        marble.y += 1
-                        self.components[marble.y][marble.x].is_occupied = True
-                elif component.type == ComponentType.LEVER_BLUE:
-                    self.set_active_launcher("left")
-                    self.launch_marble("blue")
+                    self.components[marble.y][marble.x].is_occupied = False
+                    marble.y += 1
+                    marble.x -= 1
+                    self.components[marble.y][marble.x].is_occupied = True
+            elif current_component.type == ComponentType.RAMP_RIGHT:
+                if (marble.y + 1 < self.height and 
+                    marble.x + 1 < self.width and 
+                    not self.check_collision(marble.x + 1, marble.y + 1)):
+                    marble.direction = "right"
+                    self.components[marble.y][marble.x].is_occupied = False
+                    marble.y += 1
+                    marble.x += 1
+                    self.components[marble.y][marble.x].is_occupied = True
+            elif current_component.type == ComponentType.BIT_LEFT:
+                marble.direction = "right"
+                self.set_bit_type(current_component)
+                new_x, new_y = marble.x, marble.y
+                if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
+                    new_x += 1
+                elif (new_y + 1 < self.height and new_x + 1 < self.width and 
+                      not self.check_collision(new_x + 1, new_y + 1)):
+                    new_x += 1
+                    new_y += 1
+                else:
                     marble.is_moving = False
-                    self.active_launcher = None
-                elif component.type == ComponentType.LEVER_RED:
-                    self.set_active_launcher("right")
-                    self.launch_marble("red")
+                
+                if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
+                    self.components[marble.y][marble.x].is_occupied = False
+                    marble.x, marble.y = new_x, new_y
+                    self.components[new_y][new_x].is_occupied = True
+            elif current_component.type == ComponentType.BIT_RIGHT:
+                marble.direction = "left"
+                self.set_bit_type(current_component)
+                new_x, new_y = marble.x, marble.y
+                if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
+                    new_x -= 1
+                elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
+                      not self.check_collision(new_x - 1, new_y + 1)):
+                    new_x -= 1
+                    new_y += 1
+                else:
                     marble.is_moving = False
-                    self.active_launcher = None
-                elif component.type == ComponentType.INTERCEPTOR:
-                    marble.is_moving = False
-                    # Count marble by color
-                    if marble.color == "red":
-                        self.red_marbles += 1
+                
+                if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
+                    self.components[marble.y][marble.x].is_occupied = False
+                    marble.x, marble.y = new_x, new_y
+                    self.components[new_y][new_x].is_occupied = True
+            elif current_component.type == ComponentType.CROSSOVER:
+                new_x, new_y = marble.x, marble.y
+                if marble.direction == "left":
+                    if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
+                        new_x -= 1
+                    elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
+                          not self.check_collision(new_x - 1, new_y + 1)):
+                        new_x -= 1
+                        new_y += 1
                     else:
-                        self.blue_marbles += 1
-                    marbles_to_remove.append(marble)
-            else:
-                # Marble is out of bounds, count it before removing
+                        marble.is_moving = False
+                else:
+                    if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
+                        new_x += 1
+                    elif (new_y + 1 < self.height and new_x + 1 < self.width and 
+                          not self.check_collision(new_x + 1, new_y + 1)):
+                        new_x += 1
+                        new_y += 1
+                    else:
+                        marble.is_moving = False
+                
+                if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
+                    self.components[marble.y][marble.x].is_occupied = False
+                    marble.x, marble.y = new_x, new_y
+                    self.components[new_y][new_x].is_occupied = True
+            elif current_component.type == ComponentType.LEVER_BLUE:
+                self.set_active_launcher("left")
+                self.launch_marble("blue")
+                marble.is_moving = False
+                marbles_to_remove.append(marble)
+            elif current_component.type == ComponentType.LEVER_RED:
+                self.set_active_launcher("right")
+                self.launch_marble("red")
+                marble.is_moving = False
+                marbles_to_remove.append(marble)
+            elif current_component.type == ComponentType.INTERCEPTOR:
+                marble.is_moving = False
                 if marble.color == "red":
                     self.red_marbles += 1
                 else:
                     self.blue_marbles += 1
                 marbles_to_remove.append(marble)
+            elif current_component.type in [
+                ComponentType.BORDER_VERTICAL,
+                ComponentType.BORDER_HORIZONTAL,
+                ComponentType.BORDER_DIAGONAL_LEFT,
+                ComponentType.BORDER_DIAGONAL_RIGHT,
+                ComponentType.CORNER_LEFT,
+                ComponentType.CORNER_RIGHT
+            ]:
+                marble.is_moving = False
+            else:
+                new_x, new_y = marble.x, marble.y
+                
+                if new_y + 1 < self.height and not self.check_collision(new_x, new_y + 1):
+                    new_y += 1
+                else:
+                    if marble.direction == "left":
+                        if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
+                            new_x -= 1
+                        elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
+                              not self.check_collision(new_x - 1, new_y + 1)):
+                            new_x -= 1
+                            new_y += 1
+                        else:
+                            marble.is_moving = False
+                    elif marble.direction == "right":
+                        if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
+                            new_x += 1
+                        elif (new_y + 1 < self.height and new_x + 1 < self.width and 
+                              not self.check_collision(new_x + 1, new_y + 1)):
+                            new_x += 1
+                            new_y += 1
+                        else:
+                            marble.is_moving = False
+                
+                if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
+                    self.components[marble.y][marble.x].is_occupied = False
+                    marble.x, marble.y = new_x, new_y
+                    self.components[new_y][new_x].is_occupied = True
 
-        # Remove marbles that went out of bounds or hit the interceptor
         for marble in marbles_to_remove:
             self.components[marble.y][marble.x].is_occupied = False
             self.marbles.remove(marble)
