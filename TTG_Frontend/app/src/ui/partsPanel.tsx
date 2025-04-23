@@ -11,6 +11,8 @@ const partItems = [
     { type: ItemType.RampLeft, name: 'Ramp' },
     { type: ItemType.BitLeft, name: 'Bit' },
     { type: ItemType.Crossover, name: 'Crossover' },
+    { type: ItemType.GearBitLeft, name: 'Gear Bit' },
+    { type: ItemType.Gear, name: 'Gear' },
     { type: ItemType.Intercept, name: 'Interceptor' },
 ];
 
@@ -43,8 +45,8 @@ export const PartsPanel: React.FC = () => {
                                 src={IMAGE_FILENAMES[part.type]} 
                                 alt={part.name}
                                 style={{
-                                    width: '80%',
-                                    height: '60%',
+                                    width: '100%',
+                                    height: '150%',
                                     objectFit: 'contain',
                                     marginBottom: '5px'
                                 }}

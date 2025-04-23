@@ -79,3 +79,7 @@
 .board-cell.interactive{
     cursor:pointer;
 }
+
+.board-cell[title*="gear "] .cell-image {
+    transform: scale(1.5) rotate(10deg);
+}

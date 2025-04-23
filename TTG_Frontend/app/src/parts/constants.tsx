@@ -18,6 +18,9 @@ export enum ItemType {
     BorderDiagonalRight = "border_diagonal_right",
     CornerRight = "corner_right",
     CornerLeft = "corner_left",
+    Gear = "gear",
+    GearBitRight = "gear_bit_right",
+    GearBitLeft = "gear_bit_left",
 }
 
 export const IMAGE_FILENAMES: Record<ItemType, string> = {
@@ -39,7 +42,10 @@ export const IMAGE_FILENAMES: Record<ItemType, string> = {
     [ItemType.BorderDiagonalLeft]: '/images/Slope-t.png',
     [ItemType.BorderDiagonalRight]: '/images/Slope-t.png',
     [ItemType.CornerLeft]: '/images/corner.png',
-    [ItemType.CornerRight]: '/images/corner_right.png'
+    [ItemType.CornerRight]: '/images/corner_right.png',
+    [ItemType.Gear]: '/images/Gear-t.png',
+    [ItemType.GearBitRight]: '/images/Gearbit-t.png',
+    [ItemType.GearBitLeft]: '/images/Gearbit-t.png',
 };
 
 export const ITEM_COLORS: Record<ItemType, string> = {
@@ -62,4 +68,8 @@ export const ITEM_COLORS: Record<ItemType, string> = {
     [ItemType.BorderDiagonalRight]: '#88694a',
     [ItemType.CornerRight]: '#946635',
     [ItemType.CornerLeft]: '#946635',
+    [ItemType.Gear]: '#a9ff18',
+    [ItemType.GearBitLeft]: '#006fff',
+    [ItemType.GearBitRight]: '#006fff',
 };
+

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ItemType, IMAGE_FILENAMES } from "../parts/constants";
-import { Direction, MarblePathGraph } from "../parts/marble_path";
 import "./board.css";
 import {getBoardState, addComponent, launchMarble, setLauncher, updateBoard, BoardState} from "../services/api";
 
@@ -21,7 +20,6 @@ interface BoardProps {
 
 const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
     const [backendState, setBackendState] = useState<BoardState | null>(null);
-    const marblePathGraph = useRef<MarblePathGraph>(new MarblePathGraph(numRows, numCols));
     const updateInterval = useRef<NodeJS.Timeout | null>(null);
 
     // Initialize the board and sync with backend
@@ -61,16 +59,6 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         };
     }, [isRunning, currentSpeed]);
 
-    // Update the marble path graph when board changes
-    useEffect(() => {
-        if (board && board.length > 0) {
-            for (let row = 0; row < numRows; row++) {
-                for (let col = 0; col < numCols; col++) {
-                    marblePathGraph.current.updateNode(row, col, board[row][col].type);
-                }
-            }
-        }
-    }, [board]);
 
     const updateFrontendBoard = (state: BoardState) => {
         const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
@@ -114,6 +102,9 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             case 'lever_red': return ItemType.LeverRed;
             case 'invalid': return ItemType.Invalid;
             case 'gray_space': return ItemType.GraySpace;
+            case 'gear': return ItemType.Gear;
+            case 'gear_bit_left': return ItemType.GearBitLeft;
+            case 'gear_bit_right': return ItemType.GearBitRight;
             default: return ItemType.Empty;
         }
     };
@@ -127,6 +118,9 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             case ItemType.BitRight: backendType = 'bit_right'; break;
             case ItemType.Crossover: backendType = 'crossover'; break;
             case ItemType.Intercept: backendType = 'interceptor'; break;
+            case ItemType.GearBitLeft: backendType = 'gear_bit_left'; break;
+            case ItemType.GearBitRight: backendType = 'gear_bit_right'; break;
+            case ItemType.Gear: backendType = 'gear'; break;
             default: return;
         }
 
@@ -159,6 +153,14 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
                 case ItemType.RampRight:
                     cell.type = ItemType.RampLeft;
                     handleAddComponent(ItemType.RampLeft, col, row);
+                    break;
+                case ItemType.GearBitLeft:
+                    cell.type = ItemType.GearBitRight;
+                    handleAddComponent(ItemType.GearBitRight, col, row);
+                    break;
+                case ItemType.GearBitRight:
+                    cell.type = ItemType.GearBitLeft;
+                    handleAddComponent(ItemType.GearBitLeft, col, row);
                     break;
                 default:
                     return prevBoard;
