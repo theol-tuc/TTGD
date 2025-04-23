@@ -4,7 +4,8 @@ import { ItemType } from './constants';
 // Define the possible directions a marble can move (only downward due to gravity)
 export enum Direction {
     DownLeft = 'down_left',
-    DownRight = 'down_right'
+    DownRight = 'down_right',
+    Down = 'down'
 }
 
 // Define a node in our graph
@@ -45,17 +46,22 @@ export class MarblePathGraph {
             }
         }
 
-        // Connect nodes based on the diamond pattern (only downward connections)
+        // Connect nodes based on possible marble movements (only downward)
         for (let row = 0; row < this.numRows - 1; row++) {
             for (let col = 0; col < this.numCols; col++) {
                 const node = graph[row][col];
 
-                // Only connect to nodes below
+                // Connect to node below (default gravity)
+                if (row < this.numRows - 1) {
+                    node.connections.set(Direction.Down, graph[row + 1][col]);
+                }
+
+                // Connect to diagonal nodes (for ramps)
                 if (col > 0) {
-                    node.connections.set(Direction.DownLeft, graph[row + 1][col - 1]);
+                    node.connections.set(Direction.DownLeft, graph[row][col - 1]);
                 }
                 if (col < this.numCols - 1) {
-                    node.connections.set(Direction.DownRight, graph[row + 1][col + 1]);
+                    node.connections.set(Direction.DownRight, graph[row][col + 1]);
                 }
             }
         }
@@ -85,75 +91,121 @@ export class MarblePathGraph {
     }
 
     // Get the next node a marble should move to based on its current position and direction
-    public getNextNode(row: number, col: number, direction: Direction): GraphNode | null {
-        if (row >= 0 && row < this.numRows && col >= 0 && col < this.numCols) {
-            const node = this.nodes[row][col];
-
-            // Handle different part types
-            switch (node.type) {
-                case ItemType.RampRight:
-                    // RampRight always sends marble down-right
-                    return node.connections.get(Direction.DownRight) || null;
-
-                case ItemType.RampLeft:
-                    // RampLeft always sends marble down-left
-                    return node.connections.get(Direction.DownLeft) || null;
-
-                case ItemType.BitRight:
-                    // BitRight sends marble down-right if set to 1, down-left if set to 0
-                    return this.getBitState(row, col) 
-                        ? node.connections.get(Direction.DownRight) || null
-                        : node.connections.get(Direction.DownLeft) || null;
-
-                case ItemType.BitLeft:
-                    // BitLeft sends marble down-left if set to 1, down-right if set to 0
-                    return this.getBitState(row, col)
-                        ? node.connections.get(Direction.DownLeft) || null
-                        : node.connections.get(Direction.DownRight) || null;
-
-                case ItemType.Crossover:
-                    // Crossover preserves the incoming direction
-                    return node.connections.get(direction) || null;
-
-                case ItemType.Intercept:
-                    // Intercept stops the marble
-                    return null;
-
-                case ItemType.GraySpace:
-                case ItemType.Empty:
-                    // Empty spaces and gray spaces stop the marble
-                    return null;
-
-                case ItemType.Invalid:
-                    // Invalid spaces stop the marble
-                    return null;
-
-                default:
-                    return null;
-            }
+    public getNextNode(row: number, col: number, direction: Direction): {
+        node: GraphNode | null,
+        newDirection: Direction
+    } {
+        if (row < 0 || row >= this.numRows || col < 0 || col >= this.numCols) {
+            return {node: null, newDirection: direction};
         }
-        return null;
+
+        const node = this.nodes[row][col];
+
+        // Handle different component types
+        switch (node.type) {
+            case ItemType.RampLeft:
+                // RampLeft changes direction to left and moves down-left
+                return {
+                    node: this.nodes[row + 1]?.[col - 1] || null,
+                    newDirection: Direction.DownLeft
+                };
+
+            case ItemType.RampRight:
+                // RampRight changes direction to right and moves down-right
+                return {
+                    node: this.nodes[row + 1]?.[col + 1] || null,
+                    newDirection: Direction.DownRight
+                };
+
+            case ItemType.BitLeft:
+                // BitLeft flips direction (handled by backend)
+                // Just pass through to next node in current direction
+                return {
+                    node: direction === Direction.DownLeft
+                        ? this.nodes[row + 1]?.[col - 1] || null
+                        : this.nodes[row + 1]?.[col + 1] || null,
+                    newDirection: direction
+                };
+
+            case ItemType.BitRight:
+                // BitRight flips direction (handled by backend)
+                // Just pass through to next node in current direction
+                return {
+                    node: direction === Direction.DownLeft
+                        ? this.nodes[row + 1]?.[col - 1] || null
+                        : this.nodes[row + 1]?.[col + 1] || null,
+                    newDirection: direction
+                };
+
+            case ItemType.Crossover:
+                // Crossover preserves direction
+                return {
+                    node: direction === Direction.DownLeft
+                        ? this.nodes[row + 1]?.[col - 1] || null
+                        : this.nodes[row + 1]?.[col + 1] || null,
+                    newDirection: direction
+                };
+
+            case ItemType.Intercept:
+                // Interceptor stops the marble
+                return {node: null, newDirection: direction};
+
+            case ItemType.LeverBlue:
+            case ItemType.LeverRed:
+                // Levers trigger actions but don't affect marble path directly
+                return {node: null, newDirection: direction};
+
+            case ItemType.Invalid:
+            case ItemType.BorderVertical:
+            case ItemType.BorderHorizontal:
+                // Invalid spaces and borders stop the marble
+                return {node: null, newDirection: direction};
+
+            default:
+                // For empty spaces and gray spaces, continue in current direction
+                if (direction === Direction.DownLeft) {
+                    return {
+                        node: this.nodes[row + 1]?.[col - 1] || null,
+                        newDirection: direction
+                    };
+                } else if (direction === Direction.DownRight) {
+                    return {
+                        node: this.nodes[row + 1]?.[col + 1] || null,
+                        newDirection: direction
+                    };
+                } else {
+                    // Default downward movement
+                    return {
+                        node: this.nodes[row + 1]?.[col] || null,
+                        newDirection: Direction.Down
+                    };
+                }
+        }
     }
-
-    // Get all possible paths from a starting position, taking into account the node type
+    // Get all possible paths from a starting position (for visualization)
     public getPossiblePaths(startRow: number, startCol: number): Direction[] {
-        if (startRow >= 0 && startRow < this.numRows && startCol >= 0 && startCol < this.numCols) {
-            const node = this.nodes[startRow][startCol];
-            
-            switch (node.type) {
-                case ItemType.RampRight:
-                    return [Direction.DownRight];
-                case ItemType.RampLeft:
-                    return [Direction.DownLeft];
-                case ItemType.BitRight:
-                case ItemType.BitLeft:
-                    return [Direction.DownLeft, Direction.DownRight];
-                case ItemType.Crossover:
-                    return Array.from(node.connections.keys());
-                default:
-                    return [];
-            }
+        if (startRow < 0 || startRow >= this.numRows || startCol < 0 || startCol >= this.numCols) {
+            return [];
         }
-        return [];
+        const node = this.nodes[startRow][startCol];
+        const possibleDirections: Direction[] = [];
+
+        // Check all possible directions based on component type
+        switch (node.type) {
+            case ItemType.RampLeft:
+                possibleDirections.push(Direction.DownLeft);
+                break;
+            case ItemType.RampRight:
+                possibleDirections.push(Direction.DownRight);
+                break;
+            case ItemType.BitLeft:
+            case ItemType.BitRight:
+            case ItemType.Crossover:
+                possibleDirections.push(Direction.DownLeft, Direction.DownRight);
+                break;
+            default:
+                possibleDirections.push(Direction.Down);
+        }
+        return possibleDirections;
     }
 }
