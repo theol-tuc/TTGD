@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ItemType, IMAGE_FILENAMES } from "../parts/constants";
+import React, {useEffect, useRef, useState} from "react";
+import {IMAGE_FILENAMES, ItemType} from "../parts/constants";
 import "./board.css";
-import {getBoardState, addComponent, launchMarble, setLauncher, updateBoard, BoardState} from "../services/api";
+import {addComponent, BoardState, getBoardState, updateBoard} from "../services/api";
 
 export type BoardCell = {
     type: ItemType;
@@ -17,6 +17,22 @@ interface BoardProps {
     isRunning: boolean;
     currentSpeed: number;
 }
+
+
+const canPlaceComponent = (item: ItemType, target: ItemType) => {
+    const isGear = [
+        ItemType.Gear,
+    ].includes(item);
+
+    if (isGear) {
+        // only on gray‐spaces
+        return target === ItemType.GraySpace;
+    } else {
+        // everything else still goes on empty cells
+        return target === ItemType.Empty;
+    }
+};
+
 
 const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
     const [backendState, setBackendState] = useState<BoardState | null>(null);
@@ -208,13 +224,16 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         const sourceRow = parseInt(e.dataTransfer.getData("source-row"));
         const sourceCol = parseInt(e.dataTransfer.getData("source-col"));
 
-        if (board[row][col].type === ItemType.Empty && isDraggable(itemType)) {
+        const targetType = board[row][col].type;
+        if (isDraggable(itemType) && canPlaceComponent(itemType, targetType)) {
             await handleAddComponent(itemType, col, row);
 
             if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
                 setBoard(prevBoard => {
                     const newBoard = cloneBoard(prevBoard);
-                    newBoard[sourceRow][sourceCol].type = ItemType.Empty;
+                    if (itemType == ItemType.Gear)
+                        newBoard[sourceRow][sourceCol].type = ItemType.GraySpace;
+                    else newBoard[sourceRow][sourceCol].type = ItemType.Empty;
                     return newBoard;
                 });
             }
@@ -229,6 +248,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
             setBoard((prevBoard) => {
                 const newBoard = cloneBoard(prevBoard);
+
                 newBoard[sourceRow][sourceCol].type = ItemType.Empty;
                 return newBoard;
             });
