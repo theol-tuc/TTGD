@@ -15,8 +15,8 @@
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    /* position: relative;
-    z-index: 1; */
+    position: relative;
+    z-index: 1;
 }
 
 .board-row {
@@ -30,13 +30,22 @@
     justify-content: center;
     position: relative;
     aspect-ratio: 1;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .cell-image {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    position: relative;
+    z-index: 1;
+}
+
+/* Add styles for marbles to appear on top of components */
+.board-cell[title*="ball"] .cell-image {
+    position: relative;
+    z-index: 2;
+    transform: scale(1.2);
 }
 
 .board-cell[title*="ramp_right"] .cell-image {
@@ -69,4 +78,8 @@
 
 .board-cell.interactive{
     cursor:pointer;
+}
+
+.board-cell[title*="gear "] .cell-image {
+    transform: scale(1.5) rotate(10deg);
 }
