@@ -337,51 +337,10 @@ class GameBoard:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
                     self.components[new_y][new_x].is_occupied = True
-            elif current_component.type == ComponentType.GEAR:
-                # Flip all connected gears
-                self.flip_gears(marble.x, marble.y)
-                
-                # Calculate new position based on current direction
-                new_x, new_y = marble.x, marble.y
-                if marble.direction == "left":
-                    if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
-                        new_x -= 1
-                    elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
-                          not self.check_collision(new_x - 1, new_y + 1)):
-                        new_x -= 1
-                        new_y += 1
-                    else:
-                        marble.is_moving = False
-                elif marble.direction == "right":
-                    if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
-                        new_x += 1
-                    elif (new_y + 1 < self.height and new_x + 1 < self.width and 
-                          not self.check_collision(new_x + 1, new_y + 1)):
-                        new_x += 1
-                        new_y += 1
-                    else:
-                        marble.is_moving = False
-                elif marble.direction == "up":
-                    if new_y - 1 >= 0 and not self.check_collision(new_x, new_y - 1):
-                        new_y -= 1
-                    else:
-                        marble.is_moving = False
-                elif marble.direction == "down":
-                    if new_y + 1 < self.height and not self.check_collision(new_x, new_y + 1):
-                        new_y += 1
-                    else:
-                        marble.is_moving = False
-                
-                if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
-                    self.components[marble.y][marble.x].is_occupied = False
-                    marble.x, marble.y = new_x, new_y
-                    self.components[new_y][new_x].is_occupied = True
             elif current_component.type == ComponentType.GEAR_BIT_LEFT:
                 # Flip all connected gears and change direction
                 self.flip_gears(marble.x, marble.y)
                 marble.direction = "right"
-                
-                # Calculate new position based on new direction
                 new_x, new_y = marble.x, marble.y
                 if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
                     new_x += 1
@@ -401,7 +360,6 @@ class GameBoard:
                 self.flip_gears(marble.x, marble.y)
                 marble.direction = "left"
                 
-                # Calculate new position based on new direction
                 new_x, new_y = marble.x, marble.y
                 if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
                     new_x -= 1
