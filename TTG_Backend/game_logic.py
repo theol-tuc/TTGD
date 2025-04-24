@@ -85,7 +85,11 @@ class GameBoard:
 
         # Add levers at the bottom
         self.components[14][6].type = ComponentType.LEVER_BLUE
+        self.components[14][5].type = ComponentType.LEVER_BLUE
+        self.components[14][3].type = ComponentType.LEVER_BLUE
         self.components[14][8].type = ComponentType.LEVER_RED
+        self.components[14][9].type = ComponentType.LEVER_RED
+        self.components[14][11].type = ComponentType.LEVER_RED
 
         # Add corners
         self.components[16][0].type = ComponentType.CORNER_LEFT
@@ -166,6 +170,13 @@ class GameBoard:
             for x in range(1, self.width - 1):
                 if (x <= 6) or (x >= 8):
                     self.components[y][x].type = ComponentType.INVALID
+        
+        self.components[14][6].type = ComponentType.LEVER_BLUE
+        self.components[14][5].type = ComponentType.LEVER_BLUE
+        self.components[14][3].type = ComponentType.LEVER_BLUE
+        self.components[14][8].type = ComponentType.LEVER_RED
+        self.components[14][9].type = ComponentType.LEVER_RED
+        self.components[14][11].type = ComponentType.LEVER_RED
 
     def add_component(self, type: ComponentType, x: int, y: int) -> None:
         """Add a component to the board"""
