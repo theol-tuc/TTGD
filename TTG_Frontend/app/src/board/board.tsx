@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Direction, MarblePathGraph } from "../parts/marble_path";
-import { IMAGE_FILENAMES, ItemType } from "../parts/constants";
+import React, {useEffect, useRef, useState} from "react";
+import {IMAGE_FILENAMES, ItemType} from "../parts/constants";
 import "./board.css";
+import {addComponent, BoardState, getBoardState, updateBoard} from "../services/api";
 
 export type BoardCell = {
     type: ItemType;
+    isOccupied?: boolean;
 };
 
 const numRows = 17;
@@ -13,152 +14,141 @@ const numCols = 15;
 interface BoardProps {
     board: BoardCell[][];
     setBoard: React.Dispatch<React.SetStateAction<BoardCell[][]>>;
+    isRunning: boolean;
+    currentSpeed: number;
 }
 
-const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
-    // Initialize the board with a function that sets up all cells.
+
+const canPlaceComponent = (item: ItemType, target: ItemType) => {
+    const isGear = [
+        ItemType.Gear,
+    ].includes(item);
+
+    if (isGear) {
+        // only on gray‐spaces
+        return target === ItemType.GraySpace;
+    } else {
+        // everything else still goes on empty cells
+        return target === ItemType.Empty;
+    }
+};
+
+
+const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
+    const [backendState, setBackendState] = useState<BoardState | null>(null);
+    const updateInterval = useRef<NodeJS.Timeout | null>(null);
+
+    // Initialize the board and sync with backend
     useEffect(() => {
-        if (!board || board.length === 0) {
-            const initialBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
-                Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
-            );
+        const initializeBoard = async () => {
+            const state = await getBoardState();
+            setBackendState(state);
+            updateFrontendBoard(state);
+        };
 
-            // Set vertical borders (first and last columns)
-            for (let row = 0; row < numRows; row++) {
-                initialBoard[row][0].type = ItemType.BorderVertical;
-                initialBoard[row][numCols - 1].type = ItemType.BorderVertical;
+        initializeBoard();
+
+        return () => {
+            if (updateInterval.current) {
+                clearInterval(updateInterval.current);
             }
+        };
+    }, []);
 
-            // Set horizontal border (last row)
-            for (let col = 0; col < numCols; col++) {
-                initialBoard[numRows - 1][col].type = ItemType.BorderHorizontal;
-            }
-
-            // Row 1 (index 0)
-            for (let col = 1; col < numCols - 1; col++) {
-                if (col === 1 || (col >= 3 && col <= 11) || col === 13) {
-                    initialBoard[0][col].type = ItemType.Invalid;
-                } else if (col === 2) {
-                    initialBoard[0][col].type = ItemType.BorderDiagonalLeft;
-                } else if (col === 12) {
-                    initialBoard[0][col].type = ItemType.BorderDiagonalRight;
-                }
-            }
-
-            // Row 2 (index 1)
-            for (let col = 1; col < numCols - 1; col++) {
-                if (col === 1 || col === 2 || (col >= 4 && col <= 10) || col === 12 || col === 13) {
-                    initialBoard[1][col].type = ItemType.Invalid;
-                } else if (col === 3) {
-                    initialBoard[1][col].type = ItemType.BorderDiagonalLeft;
-                } else if (col === 11) {
-                    initialBoard[1][col].type = ItemType.BorderDiagonalRight;
-                }
-            }
-
-            // Row 3 (index 2)
-            for (let col = 1; col < numCols - 1; col++) {
-                if (
-                    col === 1 ||
-                    col === 2 ||
-                    col === 3 ||
-                    (col >= 5 && col <= 9) ||
-                    col === 11 ||
-                    col === 12 ||
-                    col === 13
-                ) {
-                    initialBoard[2][col].type = ItemType.Invalid;
-                } else if (col === 4) {
-                    initialBoard[2][col].type = ItemType.BorderDiagonalLeft;
-                } else if (col === 4 || col === 10) {
-                    initialBoard[2][col].type = ItemType.BorderDiagonalRight;
-                }
-            }
-
-            // Row 4 (index 3)
-            for (let col = 1; col < numCols - 1; col++) {
-                if (
-                    col === 1 ||
-                    col === 2 ||
-                    col === 3 ||
-                    col === 7 ||
-                    col === 12 ||
-                    col === 13 ||
-                    col === 11
-                ) {
-                    initialBoard[3][col].type = ItemType.Invalid;
-                }
-            }
-
-            // Row 5 (index 4)
-            for (let col = 1; col < numCols - 1; col++) {
-                if (col === 1 || col === 2 || col === 13 || col === 12) {
-                    initialBoard[4][col].type = ItemType.Invalid;
-                }
-            }
-
-            // Rows 6-13 (indices 5-12)
-            for (let row = 5; row <= 12; row++) {
-                initialBoard[row][1].type = ItemType.Invalid;
-                initialBoard[row][13].type = ItemType.Invalid;
-            }
-
-            // Row 14 (index 13)
-            for (let col = 1; col < numCols - 1; col++) {
-                if ((col >= 1 && col <= 6) || (col >= 8 && col <= 13)) {
-                    initialBoard[13][col].type = ItemType.Invalid;
-                }
-            }
-
-            // Row 15 (index 14)
-            for (let col = 1; col < numCols - 1; col++) {
-                if ((col >= 1 && col <= 5) || (col >= 9 && col <= 13)) {
-                    initialBoard[14][col].type = ItemType.Invalid;
-                }
-            }
-            initialBoard[14][6].type = ItemType.LeverBlue;
-            initialBoard[14][8].type = ItemType.LeverRed;
-
-            // Row 16 (index 15)
-            for (let col = 1; col < numCols - 1; col++) {
-                if (col >= 1 && col <= 13) {
-                    initialBoard[15][col].type = ItemType.Invalid;
-                }
-            }
-
-            // Create checkerboard pattern for remaining cells.
-            for (let row = 0; row < numRows; row++) {
-                for (let col = 0; col < numCols; col++) {
-                    if (initialBoard[row][col].type !== ItemType.Empty) continue;
-                    initialBoard[row][col].type = (row + col) % 2 === 0 ? ItemType.Empty : ItemType.GraySpace;
-                }
-            }
-
-            initialBoard[14][7].type = ItemType.Invalid;
-            initialBoard[16][0].type = ItemType.CornerLeft;
-            initialBoard[16][14].type = ItemType.CornerRight;
-
-            setBoard(initialBoard);
-        }
-    }, [board, setBoard]);
-
-    // Marble path graph setup.
-    const marblePathGraph = useRef<MarblePathGraph>(new MarblePathGraph(numRows, numCols));
+    // Handle simulation running state
     useEffect(() => {
-        if (board && board.length > 0) {
-            for (let row = 0; row < numRows; row++) {
-                for (let col = 0; col < numCols; col++) {
-                    marblePathGraph.current.updateNode(row, col, board[row][col].type);
-                }
-            }
+        if (isRunning) {
+            updateInterval.current = setInterval(async () => {
+                await updateBoard();
+                const state = await getBoardState();
+                setBackendState(state);
+                updateFrontendBoard(state);
+            }, 1000 / currentSpeed);
+        } else if (updateInterval.current) {
+            clearInterval(updateInterval.current);
         }
-    }, [board]);
 
-    // Helper function to deep clone the board.
+        return () => {
+            if (updateInterval.current) {
+                clearInterval(updateInterval.current);
+            }
+        };
+    }, [isRunning, currentSpeed]);
+
+
+    const updateFrontendBoard = (state: BoardState) => {
+        const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
+            Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
+        );
+
+        // Map backend components to frontend
+        state.components.forEach((row, y) => {
+            row.forEach((component, x) => {
+                newBoard[y][x] = {
+                    type: mapComponentType(component.type),
+                    isOccupied: component.is_occupied
+                };
+            });
+        });
+
+        // Add marbles
+        state.marbles.forEach(marble => {
+            newBoard[marble.y][marble.x].type = marble.color === 'red' ? ItemType.BallRed : ItemType.BallBlue;
+            newBoard[marble.y][marble.x].isOccupied = true;
+        });
+
+        setBoard(newBoard);
+    };
+
+    const mapComponentType = (type: string): ItemType => {
+        switch (type) {
+            case 'ramp_left': return ItemType.RampLeft;
+            case 'ramp_right': return ItemType.RampRight;
+            case 'crossover': return ItemType.Crossover;
+            case 'interceptor': return ItemType.Intercept;
+            case 'bit_left': return ItemType.BitLeft;
+            case 'bit_right': return ItemType.BitRight;
+            case 'border_vertical': return ItemType.BorderVertical;
+            case 'border_horizontal': return ItemType.BorderHorizontal;
+            case 'border_diagonal_left': return ItemType.BorderDiagonalLeft;
+            case 'border_diagonal_right': return ItemType.BorderDiagonalRight;
+            case 'corner_left': return ItemType.CornerLeft;
+            case 'corner_right': return ItemType.CornerRight;
+            case 'lever_blue': return ItemType.LeverBlue;
+            case 'lever_red': return ItemType.LeverRed;
+            case 'invalid': return ItemType.Invalid;
+            case 'gray_space': return ItemType.GraySpace;
+            case 'gear': return ItemType.Gear;
+            case 'gear_bit_left': return ItemType.GearBitLeft;
+            case 'gear_bit_right': return ItemType.GearBitRight;
+            default: return ItemType.Empty;
+        }
+    };
+
+    const handleAddComponent = async (type: ItemType, x: number, y: number) => {
+        let backendType = '';
+        switch(type) {
+            case ItemType.RampLeft: backendType = 'ramp_left'; break;
+            case ItemType.RampRight: backendType = 'ramp_right'; break;
+            case ItemType.BitLeft: backendType = 'bit_left'; break;
+            case ItemType.BitRight: backendType = 'bit_right'; break;
+            case ItemType.Crossover: backendType = 'crossover'; break;
+            case ItemType.Intercept: backendType = 'interceptor'; break;
+            case ItemType.GearBitLeft: backendType = 'gear_bit_left'; break;
+            case ItemType.GearBitRight: backendType = 'gear_bit_right'; break;
+            case ItemType.Gear: backendType = 'gear'; break;
+            default: return;
+        }
+
+        await addComponent(backendType, x, y);
+        const state = await getBoardState();
+        setBackendState(state);
+        updateFrontendBoard(state);
+    };
+
     const cloneBoard = (board: BoardCell[][]): BoardCell[][] =>
         board.map((row) => row.map((cell) => ({ ...cell })));
 
-    // Only interactive types (for clicks) include bits and ramps.
     const handleCellClick = (row: number, col: number) => {
         setBoard((prevBoard) => {
             const newBoard = cloneBoard(prevBoard);
@@ -166,15 +156,27 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
             switch (cell.type) {
                 case ItemType.BitLeft:
                     cell.type = ItemType.BitRight;
+                    handleAddComponent(ItemType.BitRight, col, row);
                     break;
                 case ItemType.BitRight:
                     cell.type = ItemType.BitLeft;
+                    handleAddComponent(ItemType.BitLeft, col, row);
                     break;
                 case ItemType.RampLeft:
                     cell.type = ItemType.RampRight;
+                    handleAddComponent(ItemType.RampRight, col, row);
                     break;
                 case ItemType.RampRight:
                     cell.type = ItemType.RampLeft;
+                    handleAddComponent(ItemType.RampLeft, col, row);
+                    break;
+                case ItemType.GearBitLeft:
+                    cell.type = ItemType.GearBitRight;
+                    handleAddComponent(ItemType.GearBitRight, col, row);
+                    break;
+                case ItemType.GearBitRight:
+                    cell.type = ItemType.GearBitLeft;
+                    handleAddComponent(ItemType.GearBitLeft, col, row);
                     break;
                 default:
                     return prevBoard;
@@ -183,7 +185,6 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
         });
     };
 
-    // List of types that should not be draggable.
     const nonDraggableTypes = [
         ItemType.LeverBlue,
         ItemType.LeverRed,
@@ -197,6 +198,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
         ItemType.GraySpace,
         ItemType.Invalid,
     ];
+
     const isDraggable = (type: ItemType): boolean => !nonDraggableTypes.includes(type);
 
     const handleDragStart = (e: React.DragEvent, row: number, col: number) => {
@@ -215,30 +217,29 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
         e.stopPropagation();
     };
 
-    // When dropping on a cell in the board.
-    const handleDrop = (e: React.DragEvent, row: number, col: number) => {
+    const handleDrop = async (e: React.DragEvent, row: number, col: number) => {
         e.preventDefault();
         e.stopPropagation();
         const itemType = e.dataTransfer.getData("text/plain") as ItemType;
         const sourceRow = parseInt(e.dataTransfer.getData("source-row"));
         const sourceCol = parseInt(e.dataTransfer.getData("source-col"));
 
-        // Allow drop only if the target cell is empty and the dragged item is draggable.
-        if (board[row][col].type === ItemType.Empty && isDraggable(itemType)) {
-            setBoard((prevBoard) => {
-                const newBoard = cloneBoard(prevBoard);
-                // Clear the source cell.
-                if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
-                    newBoard[sourceRow][sourceCol].type = ItemType.Empty;
-                }
-                newBoard[row][col].type = itemType;
-                return newBoard;
-            });
+        const targetType = board[row][col].type;
+        if (isDraggable(itemType) && canPlaceComponent(itemType, targetType)) {
+            await handleAddComponent(itemType, col, row);
+
+            if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
+                setBoard(prevBoard => {
+                    const newBoard = cloneBoard(prevBoard);
+                    if (itemType == ItemType.Gear)
+                        newBoard[sourceRow][sourceCol].type = ItemType.GraySpace;
+                    else newBoard[sourceRow][sourceCol].type = ItemType.Empty;
+                    return newBoard;
+                });
+            }
         }
     };
 
-    // When an item is dropped on the container (outside of any specific cell),
-    // clear the source cell so that the item "disappears."
     const handleContainerDrop = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -247,6 +248,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
         if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
             setBoard((prevBoard) => {
                 const newBoard = cloneBoard(prevBoard);
+
                 newBoard[sourceRow][sourceCol].type = ItemType.Empty;
                 return newBoard;
             });
@@ -254,7 +256,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
     };
 
     if (!board || board.length === 0) {
-        return null; // Don't render anything until the board is initialized
+        return null;
     }
 
     return (
@@ -269,13 +271,13 @@ const Board: React.FC<BoardProps> = ({ board, setBoard }) => {
                         {row.map((cell, colIndex) => {
                             const imagePath = IMAGE_FILENAMES[cell.type];
                             const draggable = isDraggable(cell.type);
-                            // Make cell interactive if it is a bit, ramp, or draggable.
                             const isInteractive =
                                 cell.type === ItemType.BitLeft ||
                                 cell.type === ItemType.BitRight ||
                                 cell.type === ItemType.RampLeft ||
                                 cell.type === ItemType.RampRight ||
                                 draggable;
+
                             return (
                                 <div
                                     key={`${rowIndex}-${colIndex}`}

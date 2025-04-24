@@ -1,9 +1,16 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
+import {
+    getBoardState,
+    setLauncher,
+    launchMarble,
+    resetBoard,
+    updateBoard
+} from "./services/api";
 
 const { Header, Sider, Content } = Layout;
 
@@ -12,6 +19,21 @@ const App: React.FC = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [currentSpeed, setCurrentSpeed] = useState(1);
     const [board, setBoard] = useState<BoardCell[][]>([]);
+    const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
+    const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
+
+    // Initialize board from backend
+    useEffect(() => {
+        const initializeBoard = async () => {
+            const state = await getBoardState();
+            setActiveLauncher(state.active_launcher as 'left' | 'right');
+            setMarbleCounts({
+                red: state.red_marbles,
+                blue: state.blue_marbles
+            });
+        };
+        initializeBoard();
+    }, []);
 
     const handleZoomIn = () => {
         setZoomLevel(prev => Math.min(prev + 0.1, 2));
@@ -39,55 +61,76 @@ const App: React.FC = () => {
         setIsRunning(true);
     };
 
-    const shouldPreserveCell = (cellType: ItemType): boolean => {
-        const preservedTypes = [
-            ItemType.BorderVertical,
-            ItemType.BorderHorizontal,
-            ItemType.BorderDiagonalLeft,
-            ItemType.BorderDiagonalRight,
-            ItemType.CornerLeft,
-            ItemType.CornerRight,
-            ItemType.Invalid,
-            ItemType.LeverBlue,
-            ItemType.LeverRed
-        ];
-        return preservedTypes.includes(cellType);
-    };
-
-    const handleClearBoard = () => {
-        setBoard(prevBoard => {
-            const newBoard = prevBoard.map(row => 
-                row.map(cell => {
-                    // Only clear interactive parts, preserve board structure
-                    if (cell.type === ItemType.BitLeft || 
-                        cell.type === ItemType.BitRight || 
-                        cell.type === ItemType.RampLeft || 
-                        cell.type === ItemType.RampRight || 
-                        cell.type === ItemType.Crossover || 
-                        cell.type === ItemType.Intercept) {
-                        return { type: ItemType.Empty };
-                    }
-                    return { ...cell };
-                })
-            );
-            return newBoard;
+    const handleClearBoard = async () => {
+        await resetBoard();
+        const state = await getBoardState();
+        setMarbleCounts({
+            red: state.red_marbles,
+            blue: state.blue_marbles
         });
     };
 
-    const handleResetMarbles = () => {
-        console.log("Resetting marbles - functionality to be implemented");
-        // This will be implemented when we have marble state management
+    const handleResetMarbles = async () => {
+        await resetBoard();
+        const state = await getBoardState();
+        setMarbleCounts({
+            red: state.red_marbles,
+            blue: state.blue_marbles
+        });
     };
 
-    const handleTriggerLeft = () => {
-        console.log("Triggering left lever - functionality to be implemented");
-        // This will be implemented when we have lever functionality
+    const handleTriggerLeft = async () => {
+        try {
+            console.log('Setting launcher to left...');
+            await setLauncher("left");
+            console.log('Launcher set, launching blue marble...');
+            await launchMarble("blue");
+            console.log('Marble launched, getting board state...');
+            const state = await getBoardState();
+            console.log('Board state updated:', state);
+            setMarbleCounts({
+                red: state.red_marbles,
+                blue: state.blue_marbles
+            });
+            setActiveLauncher('left');
+        } catch (error) {
+            console.error('Error in handleTriggerLeft:', error);
+        }
     };
 
-    const handleTriggerRight = () => {
-        console.log("Triggering right lever - functionality to be implemented");
-        // This will be implemented when we have lever functionality
+    const handleTriggerRight = async () => {
+        try {
+            console.log('Setting launcher to right...');
+            await setLauncher("right");
+            console.log('Launcher set, launching red marble...');
+            await launchMarble("red");
+            console.log('Marble launched, getting board state...');
+            const state = await getBoardState();
+            console.log('Board state updated:', state);
+            setMarbleCounts({
+                red: state.red_marbles,
+                blue: state.blue_marbles
+            });
+            setActiveLauncher('right');
+        } catch (error) {
+            console.error('Error in handleTriggerRight:', error);
+        }
     };
+
+    // Update marble counts periodically when running
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isRunning) {
+            interval = setInterval(async () => {
+                const state = await getBoardState();
+                setMarbleCounts({
+                    red: state.red_marbles,
+                    blue: state.blue_marbles
+                });
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [isRunning]);
 
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
@@ -99,8 +142,17 @@ const App: React.FC = () => {
                 lineHeight: '64px',
                 backgroundColor: '#4096ff',
                 fontSize: '1.2rem',
-                fontWeight: 'bold'}}>
-                Welcome to Turing Tumble
+                fontWeight: 'bold'
+            }}>
+                Turing Tumble Simulator
+                <span style={{
+                    float: 'right',
+                    fontSize: '0.9rem',
+                    fontWeight: 'normal'
+                }}>
+                    Red: {marbleCounts.red} | Blue: {marbleCounts.blue} |
+                    Launcher: {activeLauncher === 'left' ? 'Blue (Left)' : 'Red (Right)'}
+                </span>
             </Header>
             <Layout style={{ overflow: 'hidden' }}>
                 <Sider
@@ -113,17 +165,20 @@ const App: React.FC = () => {
                         left: 0,
                         top: 64,
                         overflowY: 'auto',
-                        padding: '16px'}}>
-                    <Toolbar onZoomIn={handleZoomIn}
-                             onZoomOut={handleZoomOut}
-                             onSlowDown={handleSlowDown}
-                             onSpeedUp={handleSpeedUp}
-                             onClearBoard={handleClearBoard}
-                             onResetMarbles={handleResetMarbles}
-                             onTriggerLeft={handleTriggerLeft}
-                             onTriggerRight={handleTriggerRight}
-                             isRunning={isRunning}
-                             currentSpeed={currentSpeed}/>
+                        padding: '16px'
+                    }}>
+                    <Toolbar
+                        onZoomIn={handleZoomIn}
+                        onZoomOut={handleZoomOut}
+                        onSlowDown={handleSlowDown}
+                        onSpeedUp={handleSpeedUp}
+                        onClearBoard={handleClearBoard}
+                        onResetMarbles={handleResetMarbles}
+                        onTriggerLeft={handleTriggerLeft}
+                        onTriggerRight={handleTriggerRight}
+                        isRunning={isRunning}
+                        currentSpeed={currentSpeed}
+                    />
                 </Sider>
                 <Content style={{
                     marginLeft: '200px',
@@ -134,12 +189,18 @@ const App: React.FC = () => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    overflow: 'hidden'}}>
+                    overflow: 'hidden'
+                }}>
                     <div style={{
                         transform: `scale(${zoomLevel})`,
                         transformOrigin: 'center'
                     }}>
-                        <Board board={board} setBoard={setBoard} />
+                        <Board
+                            board={board}
+                            setBoard={setBoard}
+                            isRunning={isRunning}
+                            currentSpeed={currentSpeed}
+                        />
                     </div>
                 </Content>
                 <Sider
@@ -152,7 +213,8 @@ const App: React.FC = () => {
                         right: 0,
                         top: 64,
                         overflowY: 'auto',
-                        padding: '10px'}}>
+                        padding: '10px'
+                    }}>
                     <PartsPanel />
                 </Sider>
             </Layout>
