@@ -125,6 +125,70 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         }
     };
 
+    const handleAddGearOrGearBit = async (type: ItemType, x: number, y: number) => {
+        const neighbors = [
+            board[y-1]?.[x], 
+            board[y+1]?.[x], 
+            board[y]?.[x-1], 
+            board[y]?.[x+1], 
+        ].filter(Boolean);
+    
+        const connectedGearBits = neighbors.filter(cell =>
+            cell.type === ItemType.GearBitLeft || cell.type === ItemType.GearBitRight
+        );
+    
+        let adjustedType = type;
+    
+        if (connectedGearBits.length > 0) {
+            const neighbor = connectedGearBits[0];
+            const neighborState = (neighbor.type === ItemType.GearBitLeft) ? 'left' : 'right';
+    
+            if (type === ItemType.GearBitLeft && neighborState === 'right') {
+                adjustedType = ItemType.GearBitRight;
+            } else if (type === ItemType.GearBitRight && neighborState === 'left') {
+                adjustedType = ItemType.GearBitLeft;
+            }
+        }
+    
+        let backendType = '';
+        switch (adjustedType) {
+            case ItemType.GearBitLeft: backendType = 'gear_bit_left'; break;
+            case ItemType.GearBitRight: backendType = 'gear_bit_right'; break;
+            case ItemType.Gear: backendType = 'gear'; break;
+        }
+    
+        await addComponent(backendType, x, y);
+        const state = await getBoardState();
+        setBackendState(state);
+        updateFrontendBoard(state);
+    };
+
+    const findConnectedGearGroup = (row: number, col: number, board: BoardCell[][]): [number, number][] => {
+        const visited = new Set<string>();
+        const queue: [number, number][] = [[row, col]];
+        const group: [number, number][] = [];
+    
+        while (queue.length > 0) {
+            const [r, c] = queue.pop()!;
+            const key = `${r},${c}`;
+            if (visited.has(key)) continue;
+            visited.add(key);
+    
+            const cell = board[r]?.[c];
+            if (!cell) continue;
+    
+            if (cell.type === ItemType.GearBitLeft || cell.type === ItemType.GearBitRight || cell.type === ItemType.Gear) {
+                group.push([r, c]);
+    
+                queue.push([r-1, c]); 
+                queue.push([r+1, c]); 
+                queue.push([r, c-1]); 
+                queue.push([r, c+1]); 
+            }
+        }
+        return group;
+    };    
+
     const handleAddComponent = async (type: ItemType, x: number, y: number) => {
         let backendType = '';
         switch(type) {
@@ -134,10 +198,13 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             case ItemType.BitRight: backendType = 'bit_right'; break;
             case ItemType.Crossover: backendType = 'crossover'; break;
             case ItemType.Intercept: backendType = 'interceptor'; break;
-            case ItemType.GearBitLeft: backendType = 'gear_bit_left'; break;
-            case ItemType.GearBitRight: backendType = 'gear_bit_right'; break;
-            case ItemType.Gear: backendType = 'gear'; break;
-            default: return;
+            case ItemType.GearBitLeft:
+            case ItemType.GearBitRight:
+            case ItemType.Gear:
+                await handleAddGearOrGearBit(type, x, y);
+                return;
+            default:
+                return;
         }
 
         await addComponent(backendType, x, y);
@@ -171,12 +238,22 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
                     handleAddComponent(ItemType.RampLeft, col, row);
                     break;
                 case ItemType.GearBitLeft:
-                    cell.type = ItemType.GearBitRight;
-                    handleAddComponent(ItemType.GearBitRight, col, row);
-                    break;
                 case ItemType.GearBitRight:
-                    cell.type = ItemType.GearBitLeft;
-                    handleAddComponent(ItemType.GearBitLeft, col, row);
+                case ItemType.Gear:
+                    {
+                    const group = findConnectedGearGroup(row, col, newBoard);
+                    group.forEach(([r, c]) => {
+                        const gearCell = newBoard[r][c];
+                        if (gearCell.type === ItemType.GearBitLeft) {
+                            gearCell.type = ItemType.GearBitRight;
+                            handleAddComponent(ItemType.GearBitRight, c, r);
+                        } else if (gearCell.type === ItemType.GearBitRight) {
+                            gearCell.type = ItemType.GearBitLeft;
+                            handleAddComponent(ItemType.GearBitLeft, c, r);
+                        }
+                    });
+                    
+                    }
                     break;
                 default:
                     return prevBoard;
