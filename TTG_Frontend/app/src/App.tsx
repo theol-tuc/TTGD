@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from 'antd';
+import {Dropdown, Layout, Menu, Space} from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
@@ -9,7 +9,8 @@ import {
     setLauncher,
     launchMarble,
     resetBoard,
-    updateBoard
+    updateBoard,
+    addComponent
 } from "./services/api";
 
 const { Header, Sider, Content } = Layout;
@@ -79,11 +80,10 @@ const App: React.FC = () => {
         return newBoard;
     };
 
-    // Refresh board, counts, and launcher
+
     const refreshBoard = async () => {
         const state = await getBoardState();
         setBoard(buildBoard(state));
-        setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
         setActiveLauncher(state.active_launcher as 'left' | 'right');
     };
 
