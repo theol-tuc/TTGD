@@ -9,10 +9,40 @@ import {
     setLauncher,
     launchMarble,
     resetBoard,
-    updateBoard
+    updateBoard,
+    addComponent
 } from "./services/api";
 
 const { Header, Sider, Content } = Layout;
+
+const numRows = 17;
+const numCols = 15;
+
+const mapComponentType = (type: string): ItemType => {
+    switch (type) {
+        case 'ramp_left': return ItemType.RampLeft;
+        case 'ramp_right': return ItemType.RampRight;
+        case 'crossover': return ItemType.Crossover;
+        case 'interceptor': return ItemType.Intercept;
+        case 'bit_left': return ItemType.BitLeft;
+        case 'bit_right': return ItemType.BitRight;
+        case 'border_vertical': return ItemType.BorderVertical;
+        case 'border_horizontal': return ItemType.BorderHorizontal;
+        case 'border_diagonal_left': return ItemType.BorderDiagonalLeft;
+        case 'border_diagonal_right': return ItemType.BorderDiagonalRight;
+        case 'corner_left': return ItemType.CornerLeft;
+        case 'corner_right': return ItemType.CornerRight;
+        case 'lever_blue': return ItemType.LeverBlue;
+        case 'lever_red': return ItemType.LeverRed;
+        case 'invalid': return ItemType.Invalid;
+        case 'gray_space': return ItemType.GraySpace;
+        case 'gear': return ItemType.Gear;
+        case 'gear_bit_left': return ItemType.GearBitLeft;
+        case 'gear_bit_right': return ItemType.GearBitRight;
+        default: return ItemType.Empty;
+    }
+};
+
 
 const App: React.FC = () => {
     const [zoomLevel, setZoomLevel] = useState(1);
@@ -21,16 +51,49 @@ const App: React.FC = () => {
     const [board, setBoard] = useState<BoardCell[][]>([]);
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
     const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
+    const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
+
+    const buildBoard = (state: any): BoardCell[][] => {
+        const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
+            Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
+        );
+
+        // components
+        state.components.forEach((row: any[], y: number) => {
+            row.forEach((c, x) => {
+                newBoard[y][x] = {
+                    type: mapComponentType(c.type),
+                    isOccupied: c.is_occupied
+                };
+            });
+        });
+
+        // marbles
+        state.marbles.forEach((m: any) => {
+            newBoard[m.y][m.x].type =
+                m.color === 'red' ? ItemType.BallRed : ItemType.BallBlue;
+            newBoard[m.y][m.x].isOccupied = true;
+        });
+
+        return newBoard;
+    };
+
+    // Refresh board, counts, and launcher
+    const refreshBoard = async () => {
+        const state = await getBoardState();
+        setBoard(buildBoard(state));
+        setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
+        setActiveLauncher(state.active_launcher as 'left' | 'right');
+    };
 
     // Initialize board from backend
     useEffect(() => {
         const initializeBoard = async () => {
             const state = await getBoardState();
+            setInitialComponents(state.components);
+            setBoard(buildBoard(state));
+            setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
             setActiveLauncher(state.active_launcher as 'left' | 'right');
-            setMarbleCounts({
-                red: state.red_marbles,
-                blue: state.blue_marbles
-            });
         };
         initializeBoard();
     }, []);
@@ -63,6 +126,7 @@ const App: React.FC = () => {
 
     const handleClearBoard = async () => {
         await resetBoard();
+        await refreshBoard();
         const state = await getBoardState();
         setMarbleCounts({
             red: state.red_marbles,
@@ -71,12 +135,27 @@ const App: React.FC = () => {
     };
 
     const handleResetMarbles = async () => {
+        const before = await getBoardState();
+        const compTypes = before.components.map(row => row.map(c => c.type));
+        const countsBefore = { red: before.red_marbles, blue: before.blue_marbles };
+        const launcherBefore = before.active_launcher as 'left' | 'right';
+
+        // reset backend (clears both components & marbles)
         await resetBoard();
-        const state = await getBoardState();
-        setMarbleCounts({
-            red: state.red_marbles,
-            blue: state.blue_marbles
-        });
+
+        // re-add every component cell
+        for (let y = 0; y < compTypes.length; y++) {
+            for (let x = 0; x < compTypes[y].length; x++) {
+                const type = compTypes[y][x];
+                if (type && type !== 'empty') {
+                    await addComponent(type, x, y);
+                }
+            }
+        }
+        // restore launcher and counts
+        await refreshBoard();
+        setMarbleCounts(countsBefore);
+        setActiveLauncher(launcherBefore);
     };
 
     const handleTriggerLeft = async () => {
@@ -122,6 +201,8 @@ const App: React.FC = () => {
         let interval: NodeJS.Timeout;
         if (isRunning) {
             interval = setInterval(async () => {
+                await updateBoard();
+                await refreshBoard();
                 const state = await getBoardState();
                 setMarbleCounts({
                     red: state.red_marbles,

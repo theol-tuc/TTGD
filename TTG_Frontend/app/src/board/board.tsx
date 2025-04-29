@@ -348,21 +348,23 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         const itemType = e.dataTransfer.getData("text/plain") as ItemType;
         const sourceRow = parseInt(e.dataTransfer.getData("source-row"));
         const sourceCol = parseInt(e.dataTransfer.getData("source-col"));
-
         const targetType = board[row][col].type;
+
+        const isMove = !isNaN(sourceRow) && !isNaN(sourceCol) && (row !== sourceRow || col !== sourceCol);
+
         if (isDraggable(itemType) && canPlaceComponent(itemType, targetType)) {
             await handleAddComponent(itemType, col, row);
 
-            if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
-                setBoard(prevBoard => {
-                    const newBoard = cloneBoard(prevBoard);
-                    if (itemType == ItemType.Gear)
-                        newBoard[sourceRow][sourceCol].type = ItemType.GraySpace;
-                    else newBoard[sourceRow][sourceCol].type = ItemType.Empty;
-                    return newBoard;
-                });
+            if (isMove) {
+                if (itemType === ItemType.Gear) {
+                    await addComponent('gray_space', sourceCol, sourceRow);
+                } else {
+                    await addComponent('empty', sourceCol, sourceRow);
+                }
             }
         }
+        const state = await getBoardState();
+        updateFrontendBoard(state);
     };
 
     const handleContainerDrop = (e: React.DragEvent) => {
