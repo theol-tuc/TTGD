@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout } from 'antd';
+import { Layout, Dropdown, Menu, Space } from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
@@ -21,6 +21,8 @@ const App: React.FC = () => {
     const [board, setBoard] = useState<BoardCell[][]>([]);
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
     const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
+    const [challenges, setChallenges] = useState<Array<{id: string, name: string}>>([]);
+    const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
 
     // Initialize board from backend
     useEffect(() => {
@@ -31,9 +33,39 @@ const App: React.FC = () => {
                 red: state.red_marbles,
                 blue: state.blue_marbles
             });
+            // TODO: Replace this with actual API call to fetch challenges
+            const mockChallenges = [
+                { id: '1', name: 'Challenge 1: Basic Ramp' },
+                { id: '2', name: 'Challenge 2: Bit Manipulation' },
+                { id: '3', name: 'Challenge 3: Crossover' },
+            ];
+            setChallenges(mockChallenges);
         };
         initializeBoard();
     }, []);
+
+    const handleChallengeSelect = (challengeId: string) => {
+        setSelectedChallenge(challengeId);
+        // TODO: Add logic to load the selected challenge from backend
+        console.log('Selected challenge:', challengeId);
+    };
+
+    const challengesMenu = (
+        <Menu>
+            {challenges.length > 0 ? (
+                challenges.map(challenge => (
+                    <Menu.Item
+                        key={challenge.id}
+                        onClick={() => handleChallengeSelect(challenge.id)}
+                    >
+                        {challenge.name}
+                    </Menu.Item>
+                ))
+            ) : (
+                <Menu.Item disabled>Challenge 1: Basic Ramp</Menu.Item>
+            )}
+        </Menu>
+    );
 
     const handleZoomIn = () => {
         setZoomLevel(prev => Math.min(prev + 0.1, 2));
@@ -142,11 +174,21 @@ const App: React.FC = () => {
                 lineHeight: '64px',
                 backgroundColor: '#4096ff',
                 fontSize: '1.2rem',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
             }}>
-                Turing Tumble Simulator
+                <Space>
+                    <span>Turing Tumble Simulator</span>
+                    <Dropdown overlay={challengesMenu} placement="bottomLeft">
+                        <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
+                            Challenges ▼
+                        </a>
+                    </Dropdown>
+                </Space>
+
                 <span style={{
-                    float: 'right',
                     fontSize: '0.9rem',
                     fontWeight: 'normal'
                 }}>
