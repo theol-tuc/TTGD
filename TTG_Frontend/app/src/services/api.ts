@@ -45,3 +45,9 @@ export const getMarbleCounts = async () => {
     const response = await axios.get(`${API_BASE_URL}/counts`);
     return response.data;
 };
+
+export const getMarbleOutput = async (): Promise<string[]> => {
+    const response = await axios.get(`${API_BASE_URL}/output`);
+    console.log("Fetched Marbles:", response.data.output);
+    return response.data.output || [];
+}

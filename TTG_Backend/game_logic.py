@@ -57,6 +57,7 @@ class GameBoard:
         self.active_launcher = "left"
         self.red_marbles = 0
         self.blue_marbles = 0
+        self.marble_output: List[str] = [] 
         self.initialize_board()
 
     def initialize_board(self) -> None:
@@ -389,11 +390,13 @@ class GameBoard:
                 self.set_active_launcher("left")
                 self.launch_marble("blue")
                 marble.is_moving = False
+                self.marble_output.append(marble.color)
                 marbles_to_remove.append(marble)
             elif current_component.type == ComponentType.LEVER_RED:
                 self.set_active_launcher("right")
                 self.launch_marble("red")
                 marble.is_moving = False
+                self.marble_output.append(marble.color)
                 marbles_to_remove.append(marble)
             elif current_component.type == ComponentType.INTERCEPTOR:
                 marble.is_moving = False
@@ -477,10 +480,15 @@ class GameBoard:
             "red": self.red_marbles,
             "blue": self.blue_marbles
         }
+    
+    def get_marble_output(self) -> List[str]:
+        """Get the marble output sequence"""
+        return {"output": self.marble_output}
 
     def reset(self) -> None:
         """Reset the game board"""
         self.marbles = []
         self.red_marbles = 0
         self.blue_marbles = 0
+        self.marble_output = []
         self.initialize_board()

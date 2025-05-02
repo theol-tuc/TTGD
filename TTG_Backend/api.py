@@ -104,6 +104,11 @@ async def add_marble(marble: MarbleRequest):
         board.launch_marble(marble.color)
         return {"message": "Marble launched successfully"}
 
+@app.get("/output")
+async def get_outputs():
+    """Get the marble outputs"""
+    return board.get_marble_output()
+
 @app.post("/launcher")
 async def set_launcher(launcher_request: LauncherRequest):
     """Set the active launcher"""

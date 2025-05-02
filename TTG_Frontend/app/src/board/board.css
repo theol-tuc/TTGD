@@ -83,3 +83,14 @@
 .board-cell[title*="gear "] .cell-image {
     transform: scale(1.5) rotate(10deg);
 }
+
+/* /* Container for marble outputs */
+.marble-outputs {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 5px;
+    z-index: 10;
+}

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {IMAGE_FILENAMES, ItemType} from "../parts/constants";
 import "./board.css";
-import {addComponent, BoardState, getBoardState, updateBoard} from "../services/api";
+import {addComponent, BoardState, getBoardState, updateBoard, getMarbleOutput} from "../services/api";
 
 export type BoardCell = {
     type: ItemType;
@@ -36,6 +36,7 @@ const canPlaceComponent = (item: ItemType, target: ItemType) => {
 
 const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
     const [backendState, setBackendState] = useState<BoardState | null>(null);
+    const [marbleOutput, setMarbleOutput] = useState<string[]>([]);
     const updateInterval = useRef<NodeJS.Timeout | null>(null);
 
     // Initialize the board and sync with backend
@@ -124,6 +125,24 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             default: return ItemType.Empty;
         }
     };
+    
+    const handleMarbleOutput = async () => {
+        try {
+            const output = await getMarbleOutput();
+            console.log("Fetched Marble Outputs:", output); // Debugging
+            setMarbleOutput(output || []); // Ensure it sets an array
+        } catch (error) {
+            console.error("Error fetching marble outputs:", error);
+            setMarbleOutput([]); // Fallback to an empty array on error
+        }
+    };
+
+    useEffect(() => {
+        if (isRunning) {
+            const interval = setInterval(handleMarbleOutput, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [isRunning]);
 
     const handleAddGearBit = async (type: ItemType, x: number, y: number) => {
         const neighbors = [
@@ -132,7 +151,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             board[y]?.[x-1], 
             board[y]?.[x+1]
         ].filter(Boolean);
-    
+        console.log("Neighbors: ", neighbors[0].type, neighbors[1].type, neighbors[2].type, neighbors[3].type);
         const connectedGearBits = neighbors.filter(cell =>
             cell.type === ItemType.GearBitLeft || cell.type === ItemType.GearBitRight
         );
@@ -382,6 +401,37 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         }
     };
 
+    const renderMarbleOutputs = () => {
+        console.log("Rendering Marble Outputs:", marbleOutput); // Debugging
+        if (!Array.isArray(marbleOutput)) {
+            console.error("marbleOutput is not an array:", marbleOutput);
+            return null;
+        }
+
+        return (
+            <div className="marble-outputs">
+                {marbleOutput.map((color, index) => (
+                    <div
+                        key={index}
+                        className="board-cell"
+                        title={`ball_${color}`} 
+                        style={{
+                            height: `40px`, 
+                            width: `40px`, 
+                            marginLeft: `1px`, 
+                        }}
+                    >
+                        <img
+                            src={`/images/${color}Ball.png`} 
+                            alt={`${color} ball`}
+                            className="cell-image"
+                        />
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     if (!board || board.length === 0) {
         return null;
     }
@@ -438,6 +488,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
                     </div>
                 ))}
             </div>
+            {renderMarbleOutputs()}
         </div>
     );
 };
