@@ -181,6 +181,72 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         updateFrontendBoard(state);
     };
 
+    const handleMoveGearBit = async (type: ItemType, x: number, y: number) => {
+        // Find connected gear groups for each neighbor
+        const gearGroups = [
+            findConnectedGearGroup(y - 1, x, board),
+            findConnectedGearGroup(y + 1, x, board),
+            findConnectedGearGroup(y, x - 1, board),
+            findConnectedGearGroup(y, x + 1, board),
+        ];
+
+        // Eliminate duplicates by converting to a Set
+        const uniqueGearGroups: [number, number][][] = [];
+        const seen = new Set<string>();
+
+        for (const group of gearGroups) {
+            const serializedGroup = group.map(([row, col]) => `${row},${col}`).sort().join('|');
+            if (!seen.has(serializedGroup)) {
+                seen.add(serializedGroup);
+                uniqueGearGroups.push(group);
+            }
+        }
+
+        // Determine the largest gear group
+        let largestGroup: [number, number][] = [];
+        uniqueGearGroups.forEach((group) => {
+            if (group.length > largestGroup.length) {
+                largestGroup = group;
+            }
+        });
+
+        // Count the directions in the largest group
+        let leftCount = 0;
+        let rightCount = 0;
+        largestGroup.forEach(([row, col]) => {
+            const cell = board[row][col];
+            if (cell.type === ItemType.GearBitLeft) {
+                leftCount++;
+            } else if (cell.type === ItemType.GearBitRight) {
+                rightCount++;
+            }
+        });
+
+        // Choose the majority direction
+        const majorityDirection =
+            leftCount > rightCount
+                ? ItemType.GearBitLeft
+                : rightCount > leftCount
+                ? ItemType.GearBitRight
+                : type; // Default to the current type if equal
+
+        // Place the gear bit with the chosen direction
+        let backendType = '';
+        switch (majorityDirection) {
+            case ItemType.GearBitLeft:
+                backendType = 'gear_bit_left';
+                break;
+            case ItemType.GearBitRight:
+                backendType = 'gear_bit_right';
+                break;
+        }
+
+        await addComponent(backendType, x, y);
+        const state = await getBoardState();
+        setBackendState(state);
+        updateFrontendBoard(state);
+    };
+
     const handleAddGear = async (type: ItemType, x: number, y: number) => {
         const updatedBoard = [...board];
         updatedBoard[y][x].type = ItemType.Gear;
@@ -213,14 +279,6 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         console.log("Majority Direction: ", majorityDirection);
         console.log("Left Count: ", leftCount);
         console.log("Right Count: ", rightCount);
-    
-        gearGroup.forEach(([row, col]) => {
-            const cell = updatedBoard[row][col];
-            if (cell.type === ItemType.GearBitLeft || cell.type === ItemType.GearBitRight) {
-                cell.type = majorityDirection;
-                addComponent(majorityDirection, col, row); 
-            }
-        });
     
         const finalState = await getBoardState();
         setBackendState(finalState);
@@ -265,7 +323,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             case ItemType.Intercept: backendType = 'interceptor'; break;
             case ItemType.GearBitLeft:
             case ItemType.GearBitRight:
-                await handleAddGearBit(type, x, y);
+                await handleMoveGearBit(type, x, y);
                 return;
             case ItemType.Gear:
                 await handleAddGear(type, x, y);
@@ -313,10 +371,10 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
                         const gearCell = newBoard[r][c];
                         if (gearCell.type === ItemType.GearBitLeft) {
                             gearCell.type = ItemType.GearBitRight;
-                            handleAddComponent(ItemType.GearBitRight, c, r);
+                            handleAddGearBit(ItemType.GearBitRight, c, r);
                         } else if (gearCell.type === ItemType.GearBitRight) {
                             gearCell.type = ItemType.GearBitLeft;
-                            handleAddComponent(ItemType.GearBitLeft, c, r);
+                            handleAddGearBit(ItemType.GearBitLeft, c, r);
                         }
                     });
                     
