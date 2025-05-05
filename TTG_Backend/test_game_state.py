@@ -1,7 +1,7 @@
 from game_state import GameStateSerializer
 from game_logic import GameBoard, ComponentType
 
-def test_serialization():
+def test_serialization_and_deserialization():
     # Create a test board
     board = GameBoard()
     
@@ -10,41 +10,43 @@ def test_serialization():
     board.add_component(ComponentType.BIT_LEFT, 6, 6)  # Add a bit
     board.add_component(ComponentType.RAMP_LEFT, 8, 8)  # Add a ramp
     
+    # Set some board properties
+    board.active_launcher = "right"
+    board.red_marbles = 3
+    board.blue_marbles = 2
+    
     # Serialize the board
     json_state = GameStateSerializer.to_json(board)
     
-    # Print the serialized state
-    print("Serialized Game State:")
-    print(json_state)
+    # Deserialize back to a new board
+    reconstructed_board = GameStateSerializer.from_json_to_board(json_state)
     
-    # Deserialize back to dictionary
-    state_dict = GameStateSerializer.from_json(json_state)
-    
-    # Verify the deserialized state
-    assert state_dict["width"] == 15
-    assert state_dict["height"] == 17
-    assert len(state_dict["components"]) == 17  # height
-    assert len(state_dict["components"][0]) == 15  # width
+    # Verify the reconstructed board
+    assert reconstructed_board.width == 15
+    assert reconstructed_board.height == 17
+    assert reconstructed_board.active_launcher == "right"
+    assert reconstructed_board.red_marbles == 3
+    assert reconstructed_board.blue_marbles == 2
     
     # Check specific component positions
     gear_found = False
     bit_found = False
     ramp_found = False
     
-    for y, row in enumerate(state_dict["components"]):
+    for y, row in enumerate(reconstructed_board.components):
         for x, component in enumerate(row):
-            if component["type"] == ComponentType.GEAR.value and x == 7 and y == 7:
+            if component.type == ComponentType.GEAR and x == 7 and y == 7:
                 gear_found = True
-            elif component["type"] == ComponentType.BIT_LEFT.value and x == 6 and y == 6:
+            elif component.type == ComponentType.BIT_LEFT and x == 6 and y == 6:
                 bit_found = True
-            elif component["type"] == ComponentType.RAMP_LEFT.value and x == 8 and y == 8:
+            elif component.type == ComponentType.RAMP_LEFT and x == 8 and y == 8:
                 ramp_found = True
     
-    assert gear_found, "Gear not found in serialized state"
-    assert bit_found, "Bit not found in serialized state"
-    assert ramp_found, "Ramp not found in serialized state"
+    assert gear_found, "Gear not found in reconstructed board"
+    assert bit_found, "Bit not found in reconstructed board"
+    assert ramp_found, "Ramp not found in reconstructed board"
     
-    print("\nAll tests passed!")
+    print("\nAll serialization and deserialization tests passed!")
 
 if __name__ == "__main__":
-    test_serialization() 
+    test_serialization_and_deserialization() 
