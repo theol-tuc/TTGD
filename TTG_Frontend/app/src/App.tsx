@@ -10,7 +10,8 @@ import {
     launchMarble,
     resetBoard,
     updateBoard,
-    addComponent
+    addComponent,
+    getMarbleOutput
 } from "./services/api";
 
 const { Header, Sider, Content } = Layout;
@@ -51,6 +52,7 @@ const App: React.FC = () => {
     const [board, setBoard] = useState<BoardCell[][]>([]);
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
     const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
+    const [marbleOutput, setMarbleOutput] = useState<string[]>([]);
     const [challenges, setChallenges] = useState<Array<{id: string, name: string}>>([]);
     const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
     const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
@@ -167,9 +169,11 @@ const App: React.FC = () => {
             red: state.red_marbles,
             blue: state.blue_marbles
         });
+        setMarbleOutput([]);
     };
 
     const handleResetMarbles = async () => {
+        setMarbleOutput([]);
         const before = await getBoardState();
         const compTypes = before.components.map(row => row.map(c => c.type));
         const countsBefore = { red: before.red_marbles, blue: before.blue_marbles };
@@ -191,6 +195,55 @@ const App: React.FC = () => {
         await refreshBoard();
         setMarbleCounts(countsBefore);
         setActiveLauncher(launcherBefore);
+    };
+
+    const handleMarbleOutput = async () => {
+            try {
+                const output = await getMarbleOutput();
+                console.log("Fetched Marble Outputs:", output); // Debugging
+                setMarbleOutput(output || []); // Ensure it sets an array
+            } catch (error) {
+                console.error("Error fetching marble outputs:", error);
+                setMarbleOutput([]); // Fallback to an empty array on error
+            }
+        };
+    
+    useEffect(() => {
+        if (isRunning) {
+            const interval = setInterval(handleMarbleOutput, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [isRunning]);
+
+    const renderMarbleOutputs = () => {
+        console.log("Rendering Marble Outputs:", marbleOutput); // Debugging
+        if (!Array.isArray(marbleOutput)) {
+            console.error("marbleOutput is not an array:", marbleOutput);
+            return null;
+        }
+
+        return (
+            <div className="marble-outputs">
+                {marbleOutput.map((color, index) => (
+                    <div
+                        key={index}
+                        className="board-cell"
+                        title={`ball_${color}`} 
+                        style={{
+                            height: `40px`, 
+                            width: `40px`, 
+                            marginLeft: `1px`, 
+                        }}
+                    >
+                        <img
+                            src={`/images/${color}Ball.png`} 
+                            alt={`${color} ball`}
+                            className="cell-image"
+                        />
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     const handleTriggerLeft = async () => {
@@ -326,6 +379,7 @@ const App: React.FC = () => {
                             isRunning={isRunning}
                             currentSpeed={currentSpeed}
                         />
+                        {renderMarbleOutputs()}
                     </div>
                 </Content>
                 <Sider
