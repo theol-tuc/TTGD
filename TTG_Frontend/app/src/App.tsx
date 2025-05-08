@@ -111,9 +111,8 @@ const App: React.FC = () => {
                 });
 
                 // Initialize frontend board
-                const initialBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
-                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty })))
-                //setBoard(initialBoard);
+                const initialBoard = buildBoard(state);
+                setBoard(initialBoard);
             } catch (error) {
                 console.error('Initialization error:', error);
                 api.error({
@@ -399,18 +398,7 @@ const App: React.FC = () => {
                         {infoPanelVisible ? 'Hide Info' : 'Show Info'}
                     </Button>
                     <Dropdown
-                        overlay={
-                            <Menu>
-                                {CHALLENGES.map(challenge => (
-                                    <Menu.Item
-                                        key={challenge.id}
-                                        onClick={() => handleChallengeSelect(challenge.id)}
-                                    >
-                                        {challenge.name}
-                                    </Menu.Item>
-                                ))}
-                            </Menu>
-                        }
+                        overlay={challengesMenu}
                         placement="bottomRight"
                     >
                         <Button type="text" style={{ color: '#fff' }}>
@@ -425,15 +413,6 @@ const App: React.FC = () => {
                         Reset
                     </Button>
                 </Space>
-
-                <span style={{
-                    float: 'right',
-                    fontSize: '0.9rem',
-                    fontWeight: 'normal'
-                }}>
-                    Red: {marbleCounts.red} | Blue: {marbleCounts.blue} |
-                    Launcher: {activeLauncher === 'left' ? 'Blue (Left)' : 'Red (Right)'}
-                </span>
             </Header>
             <Drawer
                 title={getCurrentChallenge()?.name || 'Challenge Info'}

@@ -26,6 +26,8 @@ export const PartsPanel: React.FC = () => {
             { type: ItemType.BitLeft, name: 'Bit' },
             { type: ItemType.Crossover, name: 'Crossover' },
             { type: ItemType.Intercept, name: 'Interceptor' },
+            { type: ItemType.Gear, name: 'Gear' },
+            { type: ItemType.GearBitLeft, name: 'Gear Bit' },
         ];
         if (!currentChallenge?.availableParts) {
             return partItems;
