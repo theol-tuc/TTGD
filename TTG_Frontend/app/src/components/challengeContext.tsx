@@ -8,13 +8,19 @@ interface ChallengeContextType {
     resetToDefault: () => void;
 }
 
+interface ChallengeContextType {
+    currentChallenge: Challenge;
+    setCurrentChallenge: (challenge: Challenge) => void;
+    resetToDefault: () => void;
+}
+
 export const ChallengeContext = createContext<ChallengeContextType>({
     currentChallenge: DEFAULT_CHALLENGE,
     setCurrentChallenge: () => {},
     resetToDefault: () => {}
 });
 
-export const ChallengeProvider: React.FC = ({ children }) => {
+export const ChallengeProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     const [currentChallenge, setCurrentChallenge] = useState<Challenge>(DEFAULT_CHALLENGE);
 
     const resetToDefault = () => {

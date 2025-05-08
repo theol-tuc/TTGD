@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {Layout, Dropdown, Menu, Space, Button, Drawer, Typography } from 'antd';
+import {Layout, Dropdown, Menu, Space, Button, Drawer, Typography, notification } from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
-import { CHALLENGES, getChallengeById, Challenge } from './components/challenges';
+import { CHALLENGES, getChallengeById, Challenge, DEFAULT_CHALLENGE } from './components/challenges';
 import {
     getBoardState,
     setLauncher,
@@ -14,6 +14,7 @@ import {
     addComponent,
     getMarbleOutput
 } from "./services/api";
+import {useChallenge} from "./components/challengeContext";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -54,88 +55,113 @@ const App: React.FC = () => {
     const [board, setBoard] = useState<BoardCell[][]>([]);
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
     const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
-    const [marbleOutput, setMarbleOutput] = useState<string[]>([]);
-    const [challenges, setChallenges] = useState<Challenge[]>(CHALLENGES);
-    const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
+    const { currentChallenge, setCurrentChallenge, resetToDefault } = useChallenge();
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
-    const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
+    const [api, contextHolder] = notification.useNotification();
 
-    const buildBoard = (state: any): BoardCell[][] => {
-        const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
-            Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
-        );
-
-        // components
-        state.components.forEach((row: any[], y: number) => {
-            row.forEach((c, x) => {
-                newBoard[y][x] = {
-                    type: mapComponentType(c.type),
-                    isOccupied: c.is_occupied
-                };
-            });
-        });
-
-        // marbles
-        state.marbles.forEach((m: any) => {
-            newBoard[m.y][m.x].type =
-                m.color === 'red' ? ItemType.BallRed : ItemType.BallBlue;
-            newBoard[m.y][m.x].isOccupied = true;
-        });
-
-        return newBoard;
-    };
-
-
-    const refreshBoard = async () => {
-        const state = await getBoardState();
-        setBoard(buildBoard(state));
-        setActiveLauncher(state.active_launcher as 'left' | 'right');
-    };
-
-    // Initialize board from backend
+    // Initialize board and challenge from backend
     useEffect(() => {
-        const initializeBoard = async () => {
-            const state = await getBoardState();
-            setInitialComponents(state.components);
-            setBoard(buildBoard(state));
-            setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
-            setActiveLauncher(state.active_launcher as 'left' | 'right');
-            setMarbleCounts({
-                red: state.red_marbles,
-                blue: state.blue_marbles
-            });
+        const initializeApp = async () => {
+            try {
+                // Initialize with default challenge
+                setCurrentChallenge(DEFAULT_CHALLENGE);
+
+                // Get initial board state
+                const state = await getBoardState();
+                setActiveLauncher(state.active_launcher as 'left' | 'right');
+                setMarbleCounts({
+                    red: state.red_marbles,
+                    blue: state.blue_marbles
+                });
+
+                // Initialize frontend board
+                const initialBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
+                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty })))
+                //setBoard(initialBoard);
+            } catch (error) {
+                console.error('Initialization error:', error);
+                api.error({
+                    message: 'Initialization Error',
+                    description: 'Failed to initialize the application. Please try again.',
+                });
+            }
         };
-        initializeBoard();
+
+        initializeApp();
     }, []);
 
-    const handleChallengeSelect = (challengeId: string) => {
-        const challenge = challenges.find(c => c.id === challengeId);
-        if (challenge) {
-            setSelectedChallenge(challengeId);
+    const handleChallengeSelect = async (challengeId: string) => {
+        try {
+            const challenge = getChallengeById(challengeId);
+            if (!challenge) return;
+
+            setCurrentChallenge(challenge);
             setInfoPanelVisible(true);
-            // TODO: Add logic to load the selected challenge from backend
-            console.log('Selected challenge:', challengeId);
+            await resetBoard();
+
+            // Load initial board if defined
+            if (challenge.initialBoard) {
+                setBoard(challenge.initialBoard);
+            } else {
+                const state = await getBoardState();
+                // Convert backend state to frontend board format
+                const newBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
+                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty }))
+                );
+                setBoard(newBoard);
+            }
+
+            api.success({
+                message: 'Challenge Loaded',
+                description: `${challenge.name} has been selected.`,
+            });
+        } catch (error) {
+            console.error('Challenge selection error:', error);
+            api.error({
+                message: 'Error Loading Challenge',
+                description: 'Failed to load the selected challenge. Please try again.',
+            });
         }
     };
 
     const getCurrentChallenge = () => {
-        return challenges.find(c => c.id === selectedChallenge);
+        return currentChallenge;
+    };
+
+    const handleResetChallenge = async () => {
+        try {
+            resetToDefault();
+            await resetBoard();
+            const state = await getBoardState();
+            setMarbleCounts({
+                red: state.red_marbles,
+                blue: state.blue_marbles
+            });
+            setActiveLauncher(state.active_launcher as 'left' | 'right');
+
+            api.info({
+                message: 'Reset Complete',
+                description: 'Reset to default Free Play mode.',
+            });
+        } catch (error) {
+            console.error('Reset error:', error);
+            api.error({
+                message: 'Reset Error',
+                description: 'Failed to reset the board. Please try again.',
+            });
+        }
     };
 
     const challengesMenu = (
         <Menu>
-            {challenges.length > 0 ? (
-                challenges.map(challenge => (
-                    <Menu.Item
-                        key={challenge.id}
-                        onClick={() => handleChallengeSelect(challenge.id)}
-                    >
-                        {challenge.name}
-                    </Menu.Item>
-                ))
-            ) : (
-                <Menu.Item disabled>No challenges available</Menu.Item>
-            )}
+            {CHALLENGES.map(challenge => (
+                <Menu.Item
+                    key={challenge.id}
+                    onClick={() => handleChallengeSelect(challenge.id)}
+                >
+                    {challenge.name}
+                </Menu.Item>
+            ))}
         </Menu>
     );
 
@@ -305,6 +331,7 @@ const App: React.FC = () => {
 
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
+            {contextHolder}
             <Header style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -328,20 +355,39 @@ const App: React.FC = () => {
                 </Space>
 
                 <Space>
-                    {selectedChallenge && (
-                        <Button
-                            type="text"
-                            style={{ color: '#fff' }}
-                            onClick={() => setInfoPanelVisible(!infoPanelVisible)}
-                        >
-                            {infoPanelVisible ? 'Hide Info' : 'Show Info'}
-                        </Button>
-                    )}
-                    <Dropdown overlay={challengesMenu} placement="bottomRight">
+                    <Button
+                        type="text"
+                        style={{ color: '#fff' }}
+                        onClick={() => setInfoPanelVisible(!infoPanelVisible)}
+                    >
+                        {infoPanelVisible ? 'Hide Info' : 'Show Info'}
+                    </Button>
+                    <Dropdown
+                        overlay={
+                            <Menu>
+                                {CHALLENGES.map(challenge => (
+                                    <Menu.Item
+                                        key={challenge.id}
+                                        onClick={() => handleChallengeSelect(challenge.id)}
+                                    >
+                                        {challenge.name}
+                                    </Menu.Item>
+                                ))}
+                            </Menu>
+                        }
+                        placement="bottomRight"
+                    >
                         <Button type="text" style={{ color: '#fff' }}>
                             ▼ Challenges
                         </Button>
                     </Dropdown>
+                    <Button
+                        type="text"
+                        style={{ color: '#fff' }}
+                        onClick={handleResetChallenge}
+                    >
+                        Reset
+                    </Button>
                 </Space>
 
                 <span style={{
@@ -362,7 +408,7 @@ const App: React.FC = () => {
                 width={400}
                 bodyStyle={{ padding: 20 }}
             >
-                {selectedChallenge ? (
+                {currentChallenge ? (
                     <>
                         <Title level={4}>Description</Title>
                         <Paragraph>{getCurrentChallenge()?.description}</Paragraph>
