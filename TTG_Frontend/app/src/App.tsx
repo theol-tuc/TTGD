@@ -46,7 +46,7 @@ const App: React.FC = () => {
                 // Initialize frontend board
                 const initialBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
                     Array.from({ length: 15 }, () => ({ type: ItemType.Empty })))
-                //setBoard(initialBoard);
+                setBoard(initialBoard);
             } catch (error) {
                 console.error('Initialization error:', error);
                 api.error({
