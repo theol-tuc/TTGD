@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {Dropdown, Layout, Menu, Space} from 'antd';
+import {Layout, Dropdown, Menu, Space, Button, Drawer, Typography } from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
+import { CHALLENGES, getChallengeById, Challenge } from './components/challenges';
 import {
     getBoardState,
     setLauncher,
@@ -15,6 +16,7 @@ import {
 } from "./services/api";
 
 const { Header, Sider, Content } = Layout;
+const { Title, Paragraph, Text } = Typography;
 
 const numRows = 17;
 const numCols = 15;
@@ -53,8 +55,9 @@ const App: React.FC = () => {
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
     const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
     const [marbleOutput, setMarbleOutput] = useState<string[]>([]);
-    const [challenges, setChallenges] = useState<Array<{id: string, name: string}>>([]);
+    const [challenges, setChallenges] = useState<Challenge[]>(CHALLENGES);
     const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
+    const [infoPanelVisible, setInfoPanelVisible] = useState(false);
     const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
 
     const buildBoard = (state: any): BoardCell[][] => {
@@ -101,21 +104,22 @@ const App: React.FC = () => {
                 red: state.red_marbles,
                 blue: state.blue_marbles
             });
-            // TODO: Replace this with actual API call to fetch challenges
-            const mockChallenges = [
-                { id: '1', name: 'Challenge 1: Basic Ramp' },
-                { id: '2', name: 'Challenge 2: Bit Manipulation' },
-                { id: '3', name: 'Challenge 3: Crossover' },
-            ];
-            setChallenges(mockChallenges);
         };
         initializeBoard();
     }, []);
 
     const handleChallengeSelect = (challengeId: string) => {
-        setSelectedChallenge(challengeId);
-        // TODO: Add logic to load the selected challenge from backend
-        console.log('Selected challenge:', challengeId);
+        const challenge = challenges.find(c => c.id === challengeId);
+        if (challenge) {
+            setSelectedChallenge(challengeId);
+            setInfoPanelVisible(true);
+            // TODO: Add logic to load the selected challenge from backend
+            console.log('Selected challenge:', challengeId);
+        }
+    };
+
+    const getCurrentChallenge = () => {
+        return challenges.find(c => c.id === selectedChallenge);
     };
 
     const challengesMenu = (
@@ -130,7 +134,7 @@ const App: React.FC = () => {
                     </Menu.Item>
                 ))
             ) : (
-                <Menu.Item disabled>Challenge 1: Basic Ramp</Menu.Item>
+                <Menu.Item disabled>No challenges available</Menu.Item>
             )}
         </Menu>
     );
@@ -302,24 +306,41 @@ const App: React.FC = () => {
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
             <Header style={{
-                textAlign: 'left',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 color: '#fff',
                 height: '64px',
                 padding: '0 24px',
-                lineHeight: '64px',
                 backgroundColor: '#4096ff',
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
             }}>
                 <Space>
-                    <span>Turing Tumble Simulator</span>
-                    <Dropdown overlay={challengesMenu} placement="bottomLeft">
-                        <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-                            Challenges ▼
-                        </a>
+                    <Text strong style={{ color: '#fff', fontSize: '1.2rem' }}>
+                        Turing Tumble Simulator
+                    </Text>
+                </Space>
+
+                <Space>
+                    <Text style={{ color: '#fff' }}>
+                        Red: {marbleCounts.red} | Blue: {marbleCounts.blue} |
+                        Launcher: {activeLauncher === 'left' ? 'Blue (Left)' : 'Red (Right)'}
+                    </Text>
+                </Space>
+
+                <Space>
+                    {selectedChallenge && (
+                        <Button
+                            type="text"
+                            style={{ color: '#fff' }}
+                            onClick={() => setInfoPanelVisible(!infoPanelVisible)}
+                        >
+                            {infoPanelVisible ? 'Hide Info' : 'Show Info'}
+                        </Button>
+                    )}
+                    <Dropdown overlay={challengesMenu} placement="bottomRight">
+                        <Button type="text" style={{ color: '#fff' }}>
+                            ▼ Challenges
+                        </Button>
                     </Dropdown>
                 </Space>
 
@@ -332,6 +353,32 @@ const App: React.FC = () => {
                     Launcher: {activeLauncher === 'left' ? 'Blue (Left)' : 'Red (Right)'}
                 </span>
             </Header>
+            <Drawer
+                title={getCurrentChallenge()?.name || 'Challenge Info'}
+                placement="right"
+                closable={true}
+                onClose={() => setInfoPanelVisible(false)}
+                visible={infoPanelVisible}
+                width={400}
+                bodyStyle={{ padding: 20 }}
+            >
+                {selectedChallenge ? (
+                    <>
+                        <Title level={4}>Description</Title>
+                        <Paragraph>{getCurrentChallenge()?.description}</Paragraph>
+                        <Title level={4}>Objectives</Title>
+                        <Paragraph>
+                            <ul>
+                                {getCurrentChallenge()?.objectives?.map((obj, i) => (
+                                    <li key={i}>{obj}</li>
+                                ))}
+                            </ul>
+                        </Paragraph>
+                    </>
+                ) : (
+                    <Paragraph>No challenge selected</Paragraph>
+                )}
+            </Drawer>
             <Layout style={{ overflow: 'hidden' }}>
                 <Sider
                     width={200}
