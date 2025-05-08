@@ -55,8 +55,44 @@ const App: React.FC = () => {
     const [board, setBoard] = useState<BoardCell[][]>([]);
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
     const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
-    const { currentChallenge, setCurrentChallenge, resetToDefault } = useChallenge();
+    const [marbleOutput, setMarbleOutput] = useState<string[]>([]);
+    const [challenges, setChallenges] = useState<Challenge[]>(CHALLENGES);
+    const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
+    const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
+
+    const buildBoard = (state: any): BoardCell[][] => {
+        const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
+            Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
+        );
+
+        // components
+        state.components.forEach((row: any[], y: number) => {
+            row.forEach((c, x) => {
+                newBoard[y][x] = {
+                    type: mapComponentType(c.type),
+                    isOccupied: c.is_occupied
+                };
+            });
+        });
+
+        // marbles
+        state.marbles.forEach((m: any) => {
+            newBoard[m.y][m.x].type =
+                m.color === 'red' ? ItemType.BallRed : ItemType.BallBlue;
+            newBoard[m.y][m.x].isOccupied = true;
+        });
+
+        return newBoard;
+    };
+
+
+    const refreshBoard = async () => {
+        const state = await getBoardState();
+        setBoard(buildBoard(state));
+        setActiveLauncher(state.active_launcher as 'left' | 'right');
+    };
+    const { currentChallenge, setCurrentChallenge, resetToDefault } = useChallenge();
     const [api, contextHolder] = notification.useNotification();
 
     // Initialize board and challenge from backend
