@@ -111,7 +111,12 @@ const App: React.FC = () => {
                 });
 
                 // Initialize frontend board
+<<<<<<< HEAD
                 const initialBoard = buildBoard(state);
+=======
+                const initialBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
+                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty })))
+>>>>>>> 8335ed4e02e05383469bc3326ccd13c7f131b4d7
                 setBoard(initialBoard);
             } catch (error) {
                 console.error('Initialization error:', error);
