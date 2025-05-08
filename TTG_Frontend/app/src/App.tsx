@@ -4,7 +4,7 @@ import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
-import { CHALLENGES, getChallengeById, Challenge, DEFAULT_CHALLENGE } from './components/challenges';
+import { CHALLENGES, updateChallengeInitialBoard, Challenge, DEFAULT_CHALLENGE } from './components/challenges';
 import {
     getBoardState,
     setLauncher,
@@ -12,7 +12,8 @@ import {
     resetBoard,
     updateBoard,
     addComponent,
-    getMarbleOutput
+    getMarbleOutput,
+    fetchChallengeById
 } from "./services/api";
 import {useChallenge} from "./components/challengeContext";
 
@@ -99,9 +100,17 @@ const App: React.FC = () => {
     useEffect(() => {
         const initializeApp = async () => {
             try {
-                // Initialize with default challenge
+                // Fetch the default challenge from the backend
+                const backendChallenge = await fetchChallengeById('default');
+                console.log("Backend Challenge:", backendChallenge); // Debugging
+                if (!backendChallenge) {
+                    throw new Error('Failed to fetch default challenge');
+                }
+        
+                // Set the default challenge and board
                 setCurrentChallenge(DEFAULT_CHALLENGE);
-
+                setBoard(backendChallenge.initialBoard);
+        
                 // Get initial board state
                 const state = await getBoardState();
                 setActiveLauncher(state.active_launcher as 'left' | 'right');
@@ -109,15 +118,6 @@ const App: React.FC = () => {
                     red: state.red_marbles,
                     blue: state.blue_marbles
                 });
-
-                // Initialize frontend board
-<<<<<<< HEAD
-                const initialBoard = buildBoard(state);
-=======
-                const initialBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
-                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty })))
->>>>>>> 8335ed4e02e05383469bc3326ccd13c7f131b4d7
-                setBoard(initialBoard);
             } catch (error) {
                 console.error('Initialization error:', error);
                 api.error({
@@ -132,31 +132,29 @@ const App: React.FC = () => {
 
     const handleChallengeSelect = async (challengeId: string) => {
         try {
-            const challenge = getChallengeById(challengeId);
-            if (!challenge) return;
-
-            setCurrentChallenge(challenge);
-            setInfoPanelVisible(true);
-            await resetBoard();
-
-            // Load initial board if defined
-            if (challenge.initialBoard) {
-                setBoard(challenge.initialBoard);
-            } else {
-                const state = await getBoardState();
-                // Convert backend state to frontend board format
-                const newBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
-                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty }))
-                );
-                setBoard(newBoard);
-            }
-
+            // Fetch the backend challenge data
+            const backendChallenge = await fetchChallengeById(challengeId);
+            if (!backendChallenge) return;
+    
+            // Find the frontend metadata for the challenge
+            const frontendChallenge = CHALLENGES.find(challenge => challenge.id === challengeId);
+            if (!frontendChallenge) return;
+    
+            // Merge the backend data with the frontend metadata
+            const mergedChallenge = {
+                ...frontendChallenge,
+                initialBoard: backendChallenge.initialBoard
+            };
+    
+            setCurrentChallenge(mergedChallenge);
+            setBoard(mergedChallenge.initialBoard);
+    
             api.success({
                 message: 'Challenge Loaded',
-                description: `${challenge.name} has been selected.`,
+                description: `${mergedChallenge.name} has been selected.`,
             });
         } catch (error) {
-            console.error('Challenge selection error:', error);
+            console.error('Error loading challenge:', error);
             api.error({
                 message: 'Error Loading Challenge',
                 description: 'Failed to load the selected challenge. Please try again.',

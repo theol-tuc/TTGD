@@ -1,5 +1,6 @@
 import {BoardCell} from "../board/board";
 import { ItemType } from '../parts/constants';
+import { fetchChallengeById } from "../services/api";
 
 export interface Challenge {
     id: string;
@@ -28,21 +29,17 @@ export const CHALLENGES: Challenge[] = [
     DEFAULT_CHALLENGE,
     {
         id: '1',
-        name: 'Challenge 1: Basic Ramp',
-        description: 'Build a simple ramp that guides the marble from the launcher to the target. Learn how basic components interact with marbles.',
+        name: 'Challenge 1: Gravity',
+        description: 'Make all of the blue marbles (and only the blue marbles) reach the end.',
         objectives: [
             'Complete the circuit as described',
             'Test with multiple marbles',
             'Ensure the solution is reliable'
         ],
         availableParts: {
-            [ItemType.RampLeft]: 4,
-            [ItemType.BallBlue]: 1,
-            [ItemType.BallRed]: 1
+            [ItemType.RampLeft]: 4
         },
-        initialBoard: [
-            // Your board setup here
-        ]
+        initialBoard: []
     },
     {
         id: '2',
@@ -62,13 +59,17 @@ export const CHALLENGES: Challenge[] = [
             [ItemType.BallBlue]: 1,
             [ItemType.Intercept]: 3
         },
-        initialBoard: [
-            // Your board setup here
-        ]
+        initialBoard: []
     },
     // ... other challenges
 ];
 
-export const getChallengeById = (id: string): Challenge | undefined => {
-    return CHALLENGES.find(challenge => challenge.id === id);
+export const updateChallengeInitialBoard = async (challengeId: string) => {
+    const challenge = CHALLENGES.find(ch => ch.id === challengeId);
+    if (!challenge) return;
+
+    const backendChallenge = await fetchChallengeById(challengeId);
+    if (backendChallenge && backendChallenge.initialBoard) {
+        challenge.initialBoard = backendChallenge.initialBoard;
+    }
 };

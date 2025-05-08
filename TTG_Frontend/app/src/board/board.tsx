@@ -314,6 +314,13 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         }
 
         await addComponent(backendType, x, y);
+
+        setBoard(prevBoard => {
+            const newBoard = cloneBoard(prevBoard);
+            newBoard[y][x] = { type, isOccupied: true };
+            return newBoard;
+        });
+        
         const state = await getBoardState();
         setBackendState(state);
         updateFrontendBoard(state);

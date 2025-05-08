@@ -60,6 +60,11 @@ class GameBoard:
         self.marble_output: List[str] = [] 
         self.initialize_board()
 
+    def set_number_of_marbles(self, red: int, blue: int) -> None:
+        """Set the number of marbles for each color"""
+        self.red_marbles = red
+        self.blue_marbles = blue
+
     def initialize_board(self) -> None:
         """Initialize the board with empty components"""
         self.components = [[Component(ComponentType.EMPTY, x, y)
