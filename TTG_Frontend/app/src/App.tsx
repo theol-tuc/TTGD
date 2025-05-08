@@ -106,11 +106,11 @@ const App: React.FC = () => {
                 if (!backendChallenge) {
                     throw new Error('Failed to fetch default challenge');
                 }
-        
+
                 // Set the default challenge and board
                 setCurrentChallenge(DEFAULT_CHALLENGE);
                 setBoard(backendChallenge.initialBoard);
-        
+
                 // Get initial board state
                 const state = await getBoardState();
                 setActiveLauncher(state.active_launcher as 'left' | 'right');
@@ -145,9 +145,24 @@ const App: React.FC = () => {
                 ...frontendChallenge,
                 initialBoard: backendChallenge.initialBoard
             };
-    
+
+            // Update backend with new board
+            await resetBoard(); // clear old board
+
+            // Add components one-by-one to backend
+            for (let y = 0; y < mergedChallenge.initialBoard.length; y++) {
+                for (let x = 0; x < mergedChallenge.initialBoard[y].length; x++) {
+                    const cell = mergedChallenge.initialBoard[y][x];
+                    if (cell.type && cell.type !== ItemType.Empty) {
+                        await addComponent(cell.type, x, y);
+                    }
+                }
+            }
+
             setCurrentChallenge(mergedChallenge);
             setBoard(mergedChallenge.initialBoard);
+
+
     
             api.success({
                 message: 'Challenge Loaded',
