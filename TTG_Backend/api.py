@@ -19,7 +19,7 @@ app.add_middleware(
 GameBoardRef = Optional['GameBoard']
 
 # Initialize game board
-board = GameBoard()
+board = GameBoard(8, 8)
 
 class ComponentRequest(BaseModel):
     type: str
@@ -138,14 +138,17 @@ async def get_counts():
 @app.get("/challenge_id")
 async def get_challenge(challenge_id: str):
     """Get a specific challenge"""
+    global board
     if not challenge_id:
         raise HTTPException(status_code=422, detail="Missing challenge_id parameter")
     
     challenge = CHALLENGES.get(challenge_id)
     if not challenge:
         raise HTTPException(status_code=404, detail="Challenge not found")
-    
+    board = challenge["board"]
     return {
         "id": challenge["id"],
-        "initialBoard": serialize_challenge(challenge["board"])
+        "initialBoard": serialize_challenge(challenge["board"]),
+        "red_marbles": challenge["board"].red_marbles,
+        "blue_marbles": challenge["board"].blue_marbles,
     }
