@@ -45,3 +45,21 @@ export const getMarbleCounts = async () => {
     const response = await axios.get(`${API_BASE_URL}/counts`);
     return response.data;
 };
+
+export const getMarbleOutput = async (): Promise<string[]> => {
+    const response = await axios.get(`${API_BASE_URL}/output`);
+    console.log("Fetched Marbles:", response.data.output);
+    return response.data.output || [];
+}
+
+export const fetchChallengeById = async (challengeId: string) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/challenge_id`, {
+            params: { challenge_id: challengeId }
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching challenge ${challengeId}:`, error);
+        return null;
+    }
+};

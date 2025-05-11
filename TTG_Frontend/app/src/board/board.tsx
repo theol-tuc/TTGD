@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from "react";
 import {IMAGE_FILENAMES, ItemType} from "../parts/constants";
 import "./board.css";
-import {addComponent, BoardState, getBoardState, updateBoard} from "../services/api";
+import {addComponent, BoardState, getBoardState, updateBoard, getMarbleOutput} from "../services/api";
+import { useChallenge } from "../components/challengeContext";
 
 export type BoardCell = {
     type: ItemType;
@@ -18,6 +19,15 @@ interface BoardProps {
     currentSpeed: number;
 }
 
+
+const unlimitedParts = {
+    ramp: Infinity,
+    bit: Infinity,
+    crossover: Infinity,
+    interceptor: Infinity,
+    gear: Infinity,
+    gearBit: Infinity,
+};
 
 const canPlaceComponent = (item: ItemType, target: ItemType) => {
     const isGear = [
@@ -37,6 +47,10 @@ const canPlaceComponent = (item: ItemType, target: ItemType) => {
 const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
     const [backendState, setBackendState] = useState<BoardState | null>(null);
     const updateInterval = useRef<NodeJS.Timeout | null>(null);
+    const [mode, setMode] = useState("freeplay"); // "freeplay" or "challenge"
+    const [selectedChallenge, setSelectedChallenge] = useState(null);
+    const [availableParts, setAvailableParts] = useState(unlimitedParts);
+    const { decrementPartCount } = useChallenge();
 
     // Initialize the board and sync with backend
     useEffect(() => {
@@ -132,7 +146,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             board[y]?.[x-1], 
             board[y]?.[x+1]
         ].filter(Boolean);
-    
+        console.log("Neighbors: ", neighbors[0].type, neighbors[1].type, neighbors[2].type, neighbors[3].type);
         const connectedGearBits = neighbors.filter(cell =>
             cell.type === ItemType.GearBitLeft || cell.type === ItemType.GearBitRight
         );
@@ -156,6 +170,72 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             case ItemType.GearBitRight: backendType = 'gear_bit_right'; break;
         }
     
+        await addComponent(backendType, x, y);
+        const state = await getBoardState();
+        setBackendState(state);
+        updateFrontendBoard(state);
+    };
+
+    const handleMoveGearBit = async (type: ItemType, x: number, y: number) => {
+        // Find connected gear groups for each neighbor
+        const gearGroups = [
+            findConnectedGearGroup(y - 1, x, board),
+            findConnectedGearGroup(y + 1, x, board),
+            findConnectedGearGroup(y, x - 1, board),
+            findConnectedGearGroup(y, x + 1, board),
+        ];
+
+        // Eliminate duplicates by converting to a Set
+        const uniqueGearGroups: [number, number][][] = [];
+        const seen = new Set<string>();
+
+        for (const group of gearGroups) {
+            const serializedGroup = group.map(([row, col]) => `${row},${col}`).sort().join('|');
+            if (!seen.has(serializedGroup)) {
+                seen.add(serializedGroup);
+                uniqueGearGroups.push(group);
+            }
+        }
+
+        // Determine the largest gear group
+        let largestGroup: [number, number][] = [];
+        uniqueGearGroups.forEach((group) => {
+            if (group.length > largestGroup.length) {
+                largestGroup = group;
+            }
+        });
+
+        // Count the directions in the largest group
+        let leftCount = 0;
+        let rightCount = 0;
+        largestGroup.forEach(([row, col]) => {
+            const cell = board[row][col];
+            if (cell.type === ItemType.GearBitLeft) {
+                leftCount++;
+            } else if (cell.type === ItemType.GearBitRight) {
+                rightCount++;
+            }
+        });
+
+        // Choose the majority direction
+        const majorityDirection =
+            leftCount > rightCount
+                ? ItemType.GearBitLeft
+                : rightCount > leftCount
+                ? ItemType.GearBitRight
+                : type; // Default to the current type if equal
+
+        // Place the gear bit with the chosen direction
+        let backendType = '';
+        switch (majorityDirection) {
+            case ItemType.GearBitLeft:
+                backendType = 'gear_bit_left';
+                break;
+            case ItemType.GearBitRight:
+                backendType = 'gear_bit_right';
+                break;
+        }
+
         await addComponent(backendType, x, y);
         const state = await getBoardState();
         setBackendState(state);
@@ -194,14 +274,6 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         console.log("Majority Direction: ", majorityDirection);
         console.log("Left Count: ", leftCount);
         console.log("Right Count: ", rightCount);
-    
-        gearGroup.forEach(([row, col]) => {
-            const cell = updatedBoard[row][col];
-            if (cell.type === ItemType.GearBitLeft || cell.type === ItemType.GearBitRight) {
-                cell.type = majorityDirection;
-                addComponent(majorityDirection, col, row); 
-            }
-        });
     
         const finalState = await getBoardState();
         setBackendState(finalState);
@@ -246,7 +318,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             case ItemType.Intercept: backendType = 'interceptor'; break;
             case ItemType.GearBitLeft:
             case ItemType.GearBitRight:
-                await handleAddGearBit(type, x, y);
+                await handleMoveGearBit(type, x, y);
                 return;
             case ItemType.Gear:
                 await handleAddGear(type, x, y);
@@ -256,6 +328,13 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         }
 
         await addComponent(backendType, x, y);
+
+        setBoard(prevBoard => {
+            const newBoard = cloneBoard(prevBoard);
+            newBoard[y][x] = { type, isOccupied: true };
+            return newBoard;
+        });
+        
         const state = await getBoardState();
         setBackendState(state);
         updateFrontendBoard(state);
@@ -294,10 +373,10 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
                         const gearCell = newBoard[r][c];
                         if (gearCell.type === ItemType.GearBitLeft) {
                             gearCell.type = ItemType.GearBitRight;
-                            handleAddComponent(ItemType.GearBitRight, c, r);
+                            handleAddGearBit(ItemType.GearBitRight, c, r);
                         } else if (gearCell.type === ItemType.GearBitRight) {
                             gearCell.type = ItemType.GearBitLeft;
-                            handleAddComponent(ItemType.GearBitLeft, c, r);
+                            handleAddGearBit(ItemType.GearBitLeft, c, r);
                         }
                     });
                     
@@ -348,21 +427,24 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
         const itemType = e.dataTransfer.getData("text/plain") as ItemType;
         const sourceRow = parseInt(e.dataTransfer.getData("source-row"));
         const sourceCol = parseInt(e.dataTransfer.getData("source-col"));
-
         const targetType = board[row][col].type;
+
+        const isMove = !isNaN(sourceRow) && !isNaN(sourceCol) && (row !== sourceRow || col !== sourceCol);
+
         if (isDraggable(itemType) && canPlaceComponent(itemType, targetType)) {
             await handleAddComponent(itemType, col, row);
+            decrementPartCount(itemType);
 
-            if (!isNaN(sourceRow) && !isNaN(sourceCol)) {
-                setBoard(prevBoard => {
-                    const newBoard = cloneBoard(prevBoard);
-                    if (itemType == ItemType.Gear)
-                        newBoard[sourceRow][sourceCol].type = ItemType.GraySpace;
-                    else newBoard[sourceRow][sourceCol].type = ItemType.Empty;
-                    return newBoard;
-                });
+            if (isMove) {
+                if (itemType === ItemType.Gear) {
+                    await addComponent('gray_space', sourceCol, sourceRow);
+                } else {
+                    await addComponent('empty', sourceCol, sourceRow);
+                }
             }
         }
+        const state = await getBoardState();
+        updateFrontendBoard(state);
     };
 
     const handleContainerDrop = (e: React.DragEvent) => {
@@ -379,6 +461,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
             });
         }
     };
+
 
     if (!board || board.length === 0) {
         return null;

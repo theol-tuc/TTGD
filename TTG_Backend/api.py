@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
+from challenges import CHALLENGES, serialize_challenge
 
 app = FastAPI()
 
@@ -104,6 +105,11 @@ async def add_marble(marble: MarbleRequest):
         board.launch_marble(marble.color)
         return {"message": "Marble launched successfully"}
 
+@app.get("/output")
+async def get_outputs():
+    """Get the marble outputs"""
+    return board.get_marble_output()
+
 @app.post("/launcher")
 async def set_launcher(launcher_request: LauncherRequest):
     """Set the active launcher"""
@@ -128,3 +134,18 @@ async def reset_board():
 async def get_counts():
     """Get marble counts"""
     return board.get_marble_counts()
+
+@app.get("/challenge_id")
+async def get_challenge(challenge_id: str):
+    """Get a specific challenge"""
+    if not challenge_id:
+        raise HTTPException(status_code=422, detail="Missing challenge_id parameter")
+    
+    challenge = CHALLENGES.get(challenge_id)
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    return {
+        "id": challenge["id"],
+        "initialBoard": serialize_challenge(challenge["board"])
+    }
