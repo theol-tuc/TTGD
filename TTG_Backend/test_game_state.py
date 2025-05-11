@@ -18,8 +18,22 @@ def test_serialization_and_deserialization():
     # Serialize the board
     json_state = GameStateSerializer.to_json(board)
     
+    # Print the serialized state for inspection
+    print("\nSerialized Game State:")
+    print("=" * 50)
+    print(json_state)
+    print("=" * 50)
+    
     # Deserialize back to a new board
     reconstructed_board = GameStateSerializer.from_json_to_board(json_state)
+    
+    # Print the reconstructed board properties
+    print("\nReconstructed Board Properties:")
+    print("=" * 50)
+    print(f"Dimensions: {reconstructed_board.width}x{reconstructed_board.height}")
+    print(f"Active Launcher: {reconstructed_board.active_launcher}")
+    print(f"Marble Counts - Red: {reconstructed_board.red_marbles}, Blue: {reconstructed_board.blue_marbles}")
+    print("=" * 50)
     
     # Verify the reconstructed board
     assert reconstructed_board.width == 15
