@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {IMAGE_FILENAMES, ItemType} from "../parts/constants";
 import "./board.css";
 import {addComponent, BoardState, getBoardState, updateBoard, getMarbleOutput} from "../services/api";
+import { useChallenge } from "../components/challengeContext";
 
 export type BoardCell = {
     type: ItemType;
@@ -18,6 +19,15 @@ interface BoardProps {
     currentSpeed: number;
 }
 
+
+const unlimitedParts = {
+    ramp: Infinity,
+    bit: Infinity,
+    crossover: Infinity,
+    interceptor: Infinity,
+    gear: Infinity,
+    gearBit: Infinity,
+};
 
 const canPlaceComponent = (item: ItemType, target: ItemType) => {
     const isGear = [
@@ -37,6 +47,10 @@ const canPlaceComponent = (item: ItemType, target: ItemType) => {
 const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed }) => {
     const [backendState, setBackendState] = useState<BoardState | null>(null);
     const updateInterval = useRef<NodeJS.Timeout | null>(null);
+    const [mode, setMode] = useState("freeplay"); // "freeplay" or "challenge"
+    const [selectedChallenge, setSelectedChallenge] = useState(null);
+    const [availableParts, setAvailableParts] = useState(unlimitedParts);
+    const { decrementPartCount } = useChallenge();
 
     // Initialize the board and sync with backend
     useEffect(() => {
@@ -419,6 +433,7 @@ const Board: React.FC<BoardProps> = ({ board, setBoard, isRunning, currentSpeed 
 
         if (isDraggable(itemType) && canPlaceComponent(itemType, targetType)) {
             await handleAddComponent(itemType, col, row);
+            decrementPartCount(itemType);
 
             if (isMove) {
                 if (itemType === ItemType.Gear) {
