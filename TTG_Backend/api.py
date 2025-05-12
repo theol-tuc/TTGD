@@ -1,3 +1,4 @@
+import HEAD
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
@@ -157,7 +158,9 @@ async def get_challenge(challenge_id: str):
     
     return {
         "id": challenge["id"],
-        "initialBoard": serialize_challenge(challenge["board"])
+        "initialBoard": serialize_challenge(challenge["board"]),
+        "red_marbles": challenge["board"].red_marbles,
+        "blue_marbles": challenge["board"].blue_marbles
     }
 
 @app.post("/ai/move")

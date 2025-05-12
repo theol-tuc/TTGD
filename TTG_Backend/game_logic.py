@@ -49,14 +49,16 @@ class Marble:
 
 
 class GameBoard:
-    def __init__(self, width: int = 15, height: int = 17):
+    def __init__(self, red: int, blue: int, width: int = 15, height: int = 17):
         self.width = width
         self.height = height
         self.components: List[List[Component]] = []
         self.marbles: List[Marble] = []
         self.active_launcher = "left"
-        self.red_marbles = 0
-        self.blue_marbles = 0
+        self.red_marbles = red
+        self.blue_marbles = blue
+        self.initial_red = red
+        self.initial_blue = blue
         self.marble_output: List[str] = [] 
         self.initialize_board()
 
@@ -64,6 +66,7 @@ class GameBoard:
         """Set the number of marbles for each color"""
         self.red_marbles = red
         self.blue_marbles = blue
+        print(f"Red marbles: {self.red_marbles}, Blue marbles: {self.blue_marbles}")
 
     def initialize_board(self) -> None:
         """Initialize the board with empty components"""
@@ -195,20 +198,23 @@ class GameBoard:
 
     def launch_marble(self, color: str) -> None:
         """Launch a marble from the active launcher"""
-        if self.active_launcher == "left":
-            x = 5  # Left launcher position
-            direction = "right"
+        if (color == 'red' and self.red_marbles > 0) or (color == 'blue' and self.blue_marbles > 0):
+            if self.active_launcher == "left":
+                x = 5  # Left launcher position
+                direction = "right"
+            else:
+                x = 9  # Right launcher position
+                direction = "left"
+            y = 0
+            
+            # Check if position is valid
+            if 0 <= x < self.width and 0 <= y < self.height:
+                if not self.check_collision(x, y):
+                    self.marbles.append(Marble(color, x, y, direction))
+                    self.components[y][x].is_occupied = True
+                    print(f"Launched marble at ({x}, {y}) with direction {direction}")
         else:
-            x = 9  # Right launcher position
-            direction = "left"
-        y = 0
-        
-        # Check if position is valid
-        if 0 <= x < self.width and 0 <= y < self.height:
-            if not self.check_collision(x, y):
-                self.marbles.append(Marble(color, x, y, direction))
-                self.components[y][x].is_occupied = True
-                print(f"Launched marble at ({x}, {y}) with direction {direction}")
+            print(f"Cannot launch marble: {color} marbles are not available")
 
     def check_collision(self, x: int, y: int) -> bool:
         """Check if a position is occupied"""
@@ -392,12 +398,20 @@ class GameBoard:
                     marble.x, marble.y = new_x, new_y
                     self.components[new_y][new_x].is_occupied = True
             elif current_component.type == ComponentType.LEVER_BLUE:
+                if marble.color == "red":
+                    self.red_marbles -= 1
+                else:
+                    self.blue_marbles -= 1
                 self.set_active_launcher("left")
                 self.launch_marble("blue")
                 marble.is_moving = False
                 self.marble_output.append(marble.color)
                 marbles_to_remove.append(marble)
             elif current_component.type == ComponentType.LEVER_RED:
+                if marble.color == "red":
+                    self.red_marbles -= 1
+                else:
+                    self.blue_marbles -= 1
                 self.set_active_launcher("right")
                 self.launch_marble("red")
                 marble.is_moving = False
@@ -406,9 +420,9 @@ class GameBoard:
             elif current_component.type == ComponentType.INTERCEPTOR:
                 marble.is_moving = False
                 if marble.color == "red":
-                    self.red_marbles += 1
+                    self.red_marbles -= 1
                 else:
-                    self.blue_marbles += 1
+                    self.blue_marbles -= 1
                 marbles_to_remove.append(marble)
             elif current_component.type in [
                 ComponentType.BORDER_VERTICAL,
@@ -493,7 +507,7 @@ class GameBoard:
     def reset(self) -> None:
         """Reset the game board"""
         self.marbles = []
-        self.red_marbles = 0
-        self.blue_marbles = 0
+        self.red_marbles = self.initial_red
+        self.blue_marbles = self.initial_blue
         self.marble_output = []
         self.initialize_board()

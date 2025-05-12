@@ -43,6 +43,7 @@ export const resetBoard = async () => {
 
 export const getMarbleCounts = async () => {
     const response = await axios.get(`${API_BASE_URL}/counts`);
+    console.log("Fetched Marble Counts:", response.data);
     return response.data;
 };
 

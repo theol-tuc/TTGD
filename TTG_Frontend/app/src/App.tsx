@@ -14,7 +14,8 @@ import {
     updateBoard,
     addComponent,
     getMarbleOutput,
-    fetchChallengeById
+    fetchChallengeById,
+    getMarbleCounts
 } from "./services/api";
 import {useChallenge} from "./components/challengeContext";
 
@@ -56,7 +57,8 @@ const App: React.FC = () => {
     const [currentSpeed, setCurrentSpeed] = useState(1);
     const [board, setBoard] = useState<BoardCell[][]>([]);
     const [activeLauncher, setActiveLauncher] = useState<'left' | 'right'>('left');
-    const [marbleCounts, setMarbleCounts] = useState({ red: 0, blue: 0 });
+    const [marbleCounts, setMarbleCounts] = useState({ red: 8, blue: 8 });
+    const [marbleCountsAux, setMarbleCountsAux] = useState({ red: 0, blue: 0 });
     const [marbleOutput, setMarbleOutput] = useState<string[]>([]);
     const [challenges, setChallenges] = useState<Challenge[]>(CHALLENGES);
     const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
@@ -116,8 +118,12 @@ const App: React.FC = () => {
                 const state = await getBoardState();
                 setActiveLauncher(state.active_launcher as 'left' | 'right');
                 setMarbleCounts({
-                    red: state.red_marbles,
-                    blue: state.blue_marbles
+                    red: backendChallenge.red_marbles,
+                    blue: backendChallenge.blue_marbles
+                });
+                setMarbleCountsAux({
+                    red: backendChallenge.red_marbles,
+                    blue: backendChallenge.blue_marbles
                 });
             } catch (error) {
                 console.error('Initialization error:', error);
@@ -161,7 +167,11 @@ const App: React.FC = () => {
             }
 
             setCurrentChallenge(mergedChallenge);
-            setBoard(mergedChallenge.initialBoard);
+            setBoard(mergedChallenge.initialBoard); 
+            setMarbleCounts({
+                red: backendChallenge.red_marbles,
+                blue: backendChallenge.blue_marbles
+            });
 
 
     
@@ -277,7 +287,7 @@ const App: React.FC = () => {
         }
         // restore launcher and counts
         await refreshBoard();
-        setMarbleCounts(countsBefore);
+        setMarbleCounts(marbleCountsAux);
         setActiveLauncher(launcherBefore);
     };
 
