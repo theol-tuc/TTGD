@@ -1,4 +1,3 @@
-import HEAD
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
@@ -21,7 +20,7 @@ app.add_middleware(
 GameBoardRef = Optional['GameBoard']
 
 # Initialize game board and AI manager
-board = GameBoard()
+board = GameBoard(red=3, blue=3)  # Initialize with 3 red and 3 blue marbles
 ai_manager = AIManager()
 
 class ComponentRequest(BaseModel):
