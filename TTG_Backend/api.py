@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
 from challenges import CHALLENGES, serialize_challenge
+from ai_manager import AIManager
 
 app = FastAPI()
 
@@ -18,8 +19,9 @@ app.add_middleware(
 
 GameBoardRef = Optional['GameBoard']
 
-# Initialize game board
+# Initialize game board and AI manager
 board = GameBoard()
+ai_manager = AIManager()
 
 class ComponentRequest(BaseModel):
     type: str
@@ -46,6 +48,14 @@ class BoardState(BaseModel):
 
 @app.get("/")
 async def root():
+    # Initialize marbles
+    board.set_number_of_marbles(red=3, blue=3)
+    
+    # Add some basic components
+    board.add_component(ComponentType.RAMP_RIGHT, 4, 4)
+    board.add_component(ComponentType.GEAR, 6, 4)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 4)
+    
     return {"message": "Welcome to Turing Tumble API"}
 
 @app.get("/board")
@@ -149,3 +159,106 @@ async def get_challenge(challenge_id: str):
         "id": challenge["id"],
         "initialBoard": serialize_challenge(challenge["board"])
     }
+
+@app.post("/ai/move")
+async def get_ai_move():
+    """Get AI's next move based on current game state"""
+    try:
+        # Get current board state
+        components = []
+        for row in board.components:
+            component_row = []
+            for component in row:
+                component_row.append({
+                    "type": component.type.value,
+                    "is_occupied": component.is_occupied
+                })
+            components.append(component_row)
+        
+        marbles = []
+        for marble in board.marbles:
+            marbles.append({
+                "color": marble.color,
+                "x": marble.x,
+                "y": marble.y,
+                "direction": marble.direction,
+                "is_moving": marble.is_moving
+            })
+        
+        game_state = {
+            "components": components,
+            "marbles": marbles,
+            "red_marbles": board.red_marbles,
+            "blue_marbles": board.blue_marbles,
+            "active_launcher": board.active_launcher
+        }
+        
+        # Get AI move
+        ai_move = ai_manager.get_ai_move(game_state)
+        if not ai_move:
+            raise HTTPException(status_code=500, detail="Failed to get AI move")
+        
+        # Get AI explanation
+        explanation = ai_manager.get_ai_explanation(game_state, ai_move)
+        
+        return {
+            "move": ai_move,
+            "explanation": explanation
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/ai/execute")
+async def execute_ai_move():
+    """Execute the AI's move"""
+    try:
+        # Get AI move
+        components = []
+        for row in board.components:
+            component_row = []
+            for component in row:
+                component_row.append({
+                    "type": component.type.value,
+                    "is_occupied": component.is_occupied
+                })
+            components.append(component_row)
+        
+        marbles = []
+        for marble in board.marbles:
+            marbles.append({
+                "color": marble.color,
+                "x": marble.x,
+                "y": marble.y,
+                "direction": marble.direction,
+                "is_moving": marble.is_moving
+            })
+        
+        game_state = {
+            "components": components,
+            "marbles": marbles,
+            "red_marbles": board.red_marbles,
+            "blue_marbles": board.blue_marbles,
+            "active_launcher": board.active_launcher
+        }
+        
+        ai_move = ai_manager.get_ai_move(game_state)
+        if not ai_move:
+            raise HTTPException(status_code=500, detail="Failed to get AI move")
+        
+        # Execute the move
+        action = ai_move["action"]
+        parameters = ai_move["parameters"]
+        
+        if action == "add_component":
+            component_type = ComponentType(parameters["type"])
+            board.add_component(component_type, parameters["x"], parameters["y"])
+        elif action == "launch_marble":
+            board.launch_marble(parameters["color"])
+        elif action == "set_launcher":
+            board.set_active_launcher(parameters["launcher"])
+        else:
+            raise HTTPException(status_code=400, detail="Invalid AI move action")
+        
+        return {"message": "AI move executed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
