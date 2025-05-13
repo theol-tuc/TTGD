@@ -18,6 +18,7 @@ import {
     getMarbleCounts
 } from "./services/api";
 import {useChallenge} from "./components/challengeContext";
+import ChallengeCompleteOverlay from "./components/challengeCompleteOverlay";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -64,6 +65,7 @@ const App: React.FC = () => {
     const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
     const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
+    const [challengeComplete, setChallengeComplete] = useState(false);
 
     const buildBoard = (state: any): BoardCell[][] => {
         const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
@@ -378,6 +380,22 @@ const App: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (currentChallenge?.expectedOutput && marbleOutput.length > 0) {
+            // Check if the marble output matches the expected output
+            const outputStr = marbleOutput.join(',');
+            const expectedStr = currentChallenge.expectedOutput.join(',');
+
+            if (outputStr.includes(expectedStr)) {
+                setChallengeComplete(true);
+            }
+        }
+    }, [marbleOutput, currentChallenge]);
+
+    const handleCloseOverlay = () => {
+        setChallengeComplete(false);
+    };
+
     // Update marble counts periodically when running
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -543,6 +561,11 @@ const App: React.FC = () => {
                     <PartsPanel />
                 </Sider>
             </Layout>
+            <ChallengeCompleteOverlay
+                visible={challengeComplete}
+                challengeName={currentChallenge?.name || ''}
+                onClose={handleCloseOverlay}
+            />
             <AIOverlay onAIMove={handleAIMove} />
         </Layout>
     );
