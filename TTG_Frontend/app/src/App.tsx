@@ -5,6 +5,7 @@ import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
 import { CHALLENGES, updateChallengeInitialBoard, Challenge, DEFAULT_CHALLENGE } from './components/challenges';
+import { AIOverlay } from './components/AIOverlay';
 import {
     getBoardState,
     setLauncher,
@@ -392,6 +393,15 @@ const App: React.FC = () => {
         return () => clearInterval(interval);
     }, [isRunning]);
 
+    const handleAIMove = async () => {
+        await refreshBoard();
+        const state = await getBoardState();
+        setMarbleCounts({
+            red: state.red_marbles,
+            blue: state.blue_marbles
+        });
+    };
+
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
             {contextHolder}
@@ -533,6 +543,7 @@ const App: React.FC = () => {
                     <PartsPanel />
                 </Sider>
             </Layout>
+            <AIOverlay onAIMove={handleAIMove} />
         </Layout>
     );
 };
