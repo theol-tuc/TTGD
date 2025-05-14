@@ -9,7 +9,8 @@ import {
     VerticalAlignTopOutlined,
     CaretLeftOutlined,
     CaretRightOutlined,
-    PlayCircleOutlined
+    PlayCircleOutlined,
+    RobotOutlined
 } from '@ant-design/icons';
 
 interface ToolbarProps {
@@ -21,11 +22,13 @@ interface ToolbarProps {
     onResetMarbles: () => void;
     onTriggerLeft: () => void;
     onTriggerRight: () => void;
+    onToggleAI: () => void;
     isRunning: boolean;
     currentSpeed: number;
+    isAIVisible: boolean;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({onZoomIn, onZoomOut, onSlowDown, onSpeedUp, onClearBoard, onResetMarbles, onTriggerLeft, onTriggerRight, isRunning, currentSpeed,}) => {
+export const Toolbar: React.FC<ToolbarProps> = ({onZoomIn, onZoomOut, onSlowDown, onSpeedUp, onClearBoard, onResetMarbles, onTriggerLeft, onTriggerRight,onToggleAI, isRunning, currentSpeed, isAIVisible}) => {
     const speedOptions = [0.5, 1, 2, 5];
     return (
         <div style={{ padding: '8px' }}>
@@ -134,6 +137,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({onZoomIn, onZoomOut, onSlowDown
                             ghost
                         >
                             Trigger Right
+                        </Button>
+                    </Tooltip>
+
+                    <Divider style={{ margin: '12px 0' }} />
+
+                    <Tooltip title={isAIVisible ? "Hide AI Assistant" : "Show AI Assistant"}>
+                        <Button
+                            icon={<RobotOutlined />}
+                            block
+                            onClick={onToggleAI}
+                            type={isAIVisible ? 'primary' : 'default'}
+                            style={{ marginTop: 8 }}
+                        >
+                            {isAIVisible ? 'Hide AI' : 'AI Assistant'}
                         </Button>
                     </Tooltip>
                 </Space>

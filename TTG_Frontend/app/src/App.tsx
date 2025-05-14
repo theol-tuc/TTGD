@@ -66,6 +66,7 @@ const App: React.FC = () => {
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
     const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
     const [challengeComplete, setChallengeComplete] = useState(false);
+    const [isAIVisible, setIsAIVisible] = useState(false);
 
     const buildBoard = (state: any): BoardCell[][] => {
         const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
@@ -420,6 +421,14 @@ const App: React.FC = () => {
         });
     };
 
+    const handleToggleAI = () => {
+        setIsAIVisible(!isAIVisible);
+    };
+
+    const handleCloseAI = () => {
+        setIsAIVisible(false);
+    };
+
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
             {contextHolder}
@@ -520,7 +529,10 @@ const App: React.FC = () => {
                         onTriggerRight={handleTriggerRight}
                         isRunning={isRunning}
                         currentSpeed={currentSpeed}
+                        onToggleAI={handleToggleAI}
+                        isAIVisible={isAIVisible}
                     />
+                    {isAIVisible && <div style={{ position: 'relative' }}> <AIOverlay onAIMove={handleAIMove} onClose={handleCloseAI}/></div>}
                 </Sider>
                 <Content style={{
                     marginLeft: '200px',
@@ -566,7 +578,6 @@ const App: React.FC = () => {
                 challengeName={currentChallenge?.name || ''}
                 onClose={handleCloseOverlay}
             />
-            <AIOverlay onAIMove={handleAIMove} />
         </Layout>
     );
 };
