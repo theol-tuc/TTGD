@@ -11,6 +11,7 @@ export interface Challenge {
     availableParts?: {
         [key in ItemType]?: number; // Number available (undefined = unlimited)
     };
+    expectedOutput?: string[];
 }
 
 export const DEFAULT_CHALLENGE: Challenge = {
@@ -39,7 +40,8 @@ export const CHALLENGES: Challenge[] = [
         availableParts: {
             [ItemType.RampLeft]: 4
         },
-        initialBoard: []
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue']
     },
     {
         id: '2',
@@ -59,7 +61,8 @@ export const CHALLENGES: Challenge[] = [
             [ItemType.BallBlue]: 1,
             [ItemType.Intercept]: 3
         },
-        initialBoard: []
+        initialBoard: [],
+        expectedOutput: ['blue', 'red', 'blue', 'red', 'blue']
     },
     // ... other challenges
 ];

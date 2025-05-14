@@ -18,6 +18,7 @@ import {
     getMarbleCounts
 } from "./services/api";
 import {useChallenge} from "./components/challengeContext";
+import ChallengeCompleteOverlay from "./components/challengeCompleteOverlay";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -64,6 +65,8 @@ const App: React.FC = () => {
     const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
     const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
+    const [challengeComplete, setChallengeComplete] = useState(false);
+    const [isAIVisible, setIsAIVisible] = useState(false);
 
     const buildBoard = (state: any): BoardCell[][] => {
         const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
@@ -378,6 +381,22 @@ const App: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (currentChallenge?.expectedOutput && marbleOutput.length > 0) {
+            // Check if the marble output matches the expected output
+            const outputStr = marbleOutput.join(',');
+            const expectedStr = currentChallenge.expectedOutput.join(',');
+
+            if (outputStr.includes(expectedStr)) {
+                setChallengeComplete(true);
+            }
+        }
+    }, [marbleOutput, currentChallenge]);
+
+    const handleCloseOverlay = () => {
+        setChallengeComplete(false);
+    };
+
     // Update marble counts periodically when running
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -400,6 +419,14 @@ const App: React.FC = () => {
             red: state.red_marbles,
             blue: state.blue_marbles
         });
+    };
+
+    const handleToggleAI = () => {
+        setIsAIVisible(!isAIVisible);
+    };
+
+    const handleCloseAI = () => {
+        setIsAIVisible(false);
     };
 
     return (
@@ -502,7 +529,10 @@ const App: React.FC = () => {
                         onTriggerRight={handleTriggerRight}
                         isRunning={isRunning}
                         currentSpeed={currentSpeed}
+                        onToggleAI={handleToggleAI}
+                        isAIVisible={isAIVisible}
                     />
+                    {isAIVisible && <div style={{ position: 'relative' }}> <AIOverlay onAIMove={handleAIMove} onClose={handleCloseAI}/></div>}
                 </Sider>
                 <Content style={{
                     marginLeft: '200px',
@@ -543,7 +573,11 @@ const App: React.FC = () => {
                     <PartsPanel />
                 </Sider>
             </Layout>
-            <AIOverlay onAIMove={handleAIMove} />
+            <ChallengeCompleteOverlay
+                visible={challengeComplete}
+                challengeName={currentChallenge?.name || ''}
+                onClose={handleCloseOverlay}
+            />
         </Layout>
     );
 };
