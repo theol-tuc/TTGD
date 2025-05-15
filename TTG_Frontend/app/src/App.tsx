@@ -106,45 +106,33 @@ const App: React.FC = () => {
     useEffect(() => {
         const initializeApp = async () => {
             try {
-                // Get initial board state first
-                const state = await getBoardState();
-                setActiveLauncher(state.active_launcher as 'left' | 'right');
-                
-                // Try to fetch the default challenge from the backend
+                // Fetch the default challenge from the backend
                 const backendChallenge = await fetchChallengeById('default');
                 console.log("Backend Challenge:", backendChallenge); // Debugging
-                
-                if (backendChallenge) {
-                    // If backend is available, use its data
-                    setCurrentChallenge(DEFAULT_CHALLENGE);
-                    setBoard(backendChallenge.initialBoard);
-                    setMarbleCounts({
-                        red: backendChallenge.red_marbles,
-                        blue: backendChallenge.blue_marbles
-                    });
-                    setMarbleCountsAux({
-                        red: backendChallenge.red_marbles,
-                        blue: backendChallenge.blue_marbles
-                    });
-                } else {
-                    // If backend is not available, use default values
-                    setCurrentChallenge(DEFAULT_CHALLENGE);
-                    setBoard(buildBoard(state));
-                    setMarbleCounts({ red: 3, blue: 3 });
-                    setMarbleCountsAux({ red: 3, blue: 3 });
+                if (!backendChallenge) {
+                    throw new Error('Failed to fetch default challenge');
                 }
+
+                // Set the default challenge and board
+                setCurrentChallenge(DEFAULT_CHALLENGE);
+                setBoard(backendChallenge.initialBoard);
+
+                // Get initial board state
+                const state = await getBoardState();
+                setActiveLauncher(state.active_launcher as 'left' | 'right');
+                setMarbleCounts({
+                    red: backendChallenge.red_marbles,
+                    blue: backendChallenge.blue_marbles
+                });
+                setMarbleCountsAux({
+                    red: backendChallenge.red_marbles,
+                    blue: backendChallenge.blue_marbles
+                });
             } catch (error) {
                 console.error('Initialization error:', error);
-                // Use default values on error
-                setCurrentChallenge(DEFAULT_CHALLENGE);
-                setBoard(Array(numRows).fill(Array(numCols).fill({ type: ItemType.Empty })));
-                setMarbleCounts({ red: 3, blue: 3 });
-                setMarbleCountsAux({ red: 3, blue: 3 });
-                setActiveLauncher('left');
-                
-                api.warning({
-                    message: 'Limited Functionality',
-                    description: 'Running in offline mode with limited features.',
+                api.error({
+                    message: 'Initialization Error',
+                    description: 'Failed to initialize the application. Please try again.',
                 });
             }
         };
