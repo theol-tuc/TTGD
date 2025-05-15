@@ -39,30 +39,81 @@ export const CHALLENGES: Challenge[] = [
         ],
         availableParts: {
             [ItemType.RampLeft]: 4
+
         },
         initialBoard: [],
         expectedOutput: ['blue', 'blue', 'blue']
     },
     {
         id: '2',
-        name: 'Challenge 2: Bit Manipulation',
-        description: 'Create a circuit that can store a single bit of information using the gear bits. The marble should flip the bit state each time it passes through.',
+        name: 'Challenge 2: Re-Entry',
+        description: 'Make all of the blue balls (and only the blue balls) reach the end.',
         objectives: [
-            'Implement a working bit storage',
-            'Demonstrate bit flipping',
-            'Show reliable operation for 5 consecutive marbles'
+            'Complete the circuit as described',
         ],
         availableParts: {
-            [ItemType.RampLeft]: 4,
-            [ItemType.Crossover]: 2,
-            [ItemType.RampRight]: 4,
-            [ItemType.BitLeft]: 1,
-            [ItemType.BitRight]: 1,
-            [ItemType.BallBlue]: 1,
-            [ItemType.Intercept]: 3
+            [ItemType.RampLeft]: 5,
+
         },
         initialBoard: [],
-        expectedOutput: ['blue', 'red', 'blue', 'red', 'blue']
+        expectedOutput: ['blue', 'blue', 'blue','blue', 'blue', 'blue','blue', 'blue']
+    },
+    {
+        id: '3',
+        name: 'Challenge 3: Ignition',
+        description: 'Release one blue ball and then all of the red balls.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 6,
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red', 'red', 'red','red', 'red', 'red', 'red', 'blue']
+    },
+    {
+        id: '4',
+        name: 'Challenge 4: Fusion',
+        description: 'Release one red ball and then all of the blue balls.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 13,
+
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue','blue', 'blue', 'blue','blue', 'red']
+    },
+    {
+        id: '5',
+        name: 'Challenge 5: Entropy',
+        description: 'Make the pattern blue, red, blue, red, blue, red...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 9,
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red','blue', 'red', 'blue', 'red', 'blue', 'red','blue']
+    },
+    {
+        id: '6',
+        name: 'Challenge 6: Total Internal Reflection',
+        description: 'Make the pattern blue, red, blue, red, blue, red...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 2,
+            [ItemType.Crossover]: 5,
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red','blue', 'red', 'blue', 'red', 'blue', 'red','blue']
     },
     // ... other challenges
 ];
