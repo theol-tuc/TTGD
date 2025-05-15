@@ -3,10 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 
-from TTG_Backend import ai_manager
 from game_logic import GameBoard, ComponentType, Marble
 from challenges import CHALLENGES, serialize_challenge
+import ai_manager
 from ai_manager import AIManager
+import traceback
+
+ai = AIManager()
 
 app = FastAPI()
 
@@ -184,7 +187,7 @@ async def get_ai_move():
                     "is_occupied": component.is_occupied
                 })
             components.append(component_row)
-        
+
         marbles = []
         for marble in board.marbles:
             marbles.append({
@@ -194,7 +197,7 @@ async def get_ai_move():
                 "direction": marble.direction,
                 "is_moving": marble.is_moving
             })
-        
+
         game_state = {
             "components": components,
             "marbles": marbles,
@@ -202,20 +205,22 @@ async def get_ai_move():
             "blue_marbles": board.blue_marbles,
             "active_launcher": board.active_launcher
         }
-        
+
         # Get AI move
-        ai_move = ai_manager.get_ai_move(game_state)
+        ai_move = ai.get_ai_move(game_state)
         if not ai_move:
             raise HTTPException(status_code=500, detail="Failed to get AI move")
-        
+
         # Get AI explanation
-        explanation = ai_manager.get_ai_explanation(game_state, ai_move)
-        
+        explanation = ai.get_ai_explanation(game_state, ai_move)
+
         return {
             "move": ai_move,
             "explanation": explanation
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/ai/execute")
@@ -232,7 +237,7 @@ async def execute_ai_move():
                     "is_occupied": component.is_occupied
                 })
             components.append(component_row)
-        
+
         marbles = []
         for marble in board.marbles:
             marbles.append({
@@ -242,7 +247,7 @@ async def execute_ai_move():
                 "direction": marble.direction,
                 "is_moving": marble.is_moving
             })
-        
+
         game_state = {
             "components": components,
             "marbles": marbles,
@@ -250,15 +255,15 @@ async def execute_ai_move():
             "blue_marbles": board.blue_marbles,
             "active_launcher": board.active_launcher
         }
-        
+
         ai_move = ai_manager.get_ai_move(game_state)
         if not ai_move:
             raise HTTPException(status_code=500, detail="Failed to get AI move")
-        
+
         # Execute the move
         action = ai_move["action"]
         parameters = ai_move["parameters"]
-        
+
         if action == "add_component":
             component_type = ComponentType(parameters["type"])
             board.add_component(component_type, parameters["x"], parameters["y"])
@@ -268,7 +273,8 @@ async def execute_ai_move():
             board.set_active_launcher(parameters["launcher"])
         else:
             raise HTTPException(status_code=400, detail="Invalid AI move action")
-        
+
         return {"message": "AI move executed successfully"}
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

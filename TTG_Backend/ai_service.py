@@ -4,51 +4,65 @@ from board_encoder import BoardEncoder
 from game_logic import GameBoard
 
 class AIService:
-    def __init__(self, llm_server_url: str = "http://cloud-247.rz.tu-clausthal.de:8001"):
+    def __init__(self, llm_server_url: str = "http://localhost:8001"):
         self.llm_server_url = llm_server_url
         self.board_encoder = BoardEncoder()
 
     def get_ai_move(self, board: GameBoard) -> Dict[str, Any]:
         """
-        Get AI's next move based on current board state
-        Returns a dictionary with action and parameters
+        Get AI's next move based on current board state.
+        Returns a dictionary with action and parameters.
         """
-        # Encode board state
         encoded_state = self.board_encoder.encode_board(board)
-        
-        # Prepare prompt for LLM
-        prompt = f"""Given the following Turing Tumble game state, suggest the next best move:
 
+        prompt = f"""You are an expert Turing Tumble assistant. Given the board state below, suggest the optimal next move.
+
+Turing Tumble Game State:
 {encoded_state}
 
-Please respond in the following JSON format:
+Respond ONLY with a valid JSON object using the format below.
+Do NOT include any commentary, text, or explanation outside the JSON.
+Do NOT write markdown or tags.
+
+Example format:
 {{
-    "action": "add_component|launch_marble|set_launcher",
-    "parameters": {{
-        // For add_component: "type": "GEAR|BIT_LEFT|BIT_RIGHT|RAMP_LEFT|RAMP_RIGHT|CROSSOVER|INTERCEPTOR",
-        //                     "x": number, "y": number
-        // For launch_marble: "color": "red|blue"
-        // For set_launcher: "launcher": "left|right"
-    }},
-    "explanation": "Brief explanation of why this move is suggested"
-}}"""
+  "action": "launch_marble",
+  "parameters": {{
+    "color": "red"
+  }},
+  "explanation": "Launching a red marble will trigger the current setup and allow progress."
+}}
+
+Valid actions:
+- "add_component"
+- "launch_marble"
+- "set_launcher"
+
+Return ONLY the JSON object.
+"""
+
+        print("[AIService] Prompt sent to LLaMA:\n", prompt)
 
         try:
-            # Send to LLM server
             response = requests.post(
                 f"{self.llm_server_url}/generate",
                 json={"prompt": prompt}
             )
+
+            print("[AIService] Raw response from LLaMA:\n", response.text)
             response.raise_for_status()
-            
-            # Parse LLM response
+
             llm_response = response.json()
+            if "response" not in llm_response:
+                print("[AIService] ERROR: 'response' key missing in LLaMA output.")
+                raise ValueError("Missing 'response' in LLaMA output")
+
             move = llm_response["response"]
-            
+            print("[AIService] Parsed LLaMA move:\n", move)
             return move
-            
+
         except Exception as e:
-            print(f"Error getting AI move: {str(e)}")
+            print(f"[AIService] Error getting AI move: {str(e)}")
             return {
                 "action": "launch_marble",
                 "parameters": {"color": "red"},
@@ -57,28 +71,39 @@ Please respond in the following JSON format:
 
     def get_ai_explanation(self, board: GameBoard, move: Dict[str, Any]) -> str:
         """
-        Get AI's explanation for a specific move
+        Get AI's explanation for a specific move.
         """
         encoded_state = self.board_encoder.encode_board(board)
-        
-        prompt = f"""Given the following Turing Tumble game state and move:
 
-State:
+        prompt = f"""Explain why the following move is a good strategic choice in the Turing Tumble game.
+
+Game State:
 {encoded_state}
 
 Move:
 {str(move)}
 
-Please explain why this move is a good choice and what it accomplishes."""
+Respond with a clear, concise explanation. Do not include formatting or tags.
+"""
+
+        print("[AIService] Prompt for explanation:\n", prompt)
 
         try:
             response = requests.post(
                 f"{self.llm_server_url}/generate",
                 json={"prompt": prompt}
             )
+
+            print("[AIService] Raw explanation response:\n", response.text)
             response.raise_for_status()
-            
-            return response.json()["response"]
-            
+
+            response_json = response.json()
+            if "response" not in response_json:
+                print("[AIService] ERROR: 'response' key missing in explanation output.")
+                return "Error: LLaMA response did not include explanation."
+
+            return response_json["response"]
+
         except Exception as e:
-            return f"Error getting AI explanation: {str(e)}" 
+            print(f"[AIService] Error getting explanation: {str(e)}")
+            return "Error getting AI explanation."
