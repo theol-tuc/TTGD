@@ -116,6 +116,19 @@ export const CHALLENGES: Challenge[] = [
         expectedOutput: ['red','blue', 'red', 'blue', 'red', 'blue', 'red','blue']
     },
     // ... other challenges
+    {
+        id: '16',
+        name: 'Challenge 16: Termination',
+        description: 'Let only 3 blue balls reach the bottom and catch the 4th ball in the interceptor.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 10
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue']
+    },
 ];
 
 export const updateChallengeInitialBoard = async (challengeId: string) => {
