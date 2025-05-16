@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import {Layout, Dropdown, Menu, Space, Button, Drawer, Typography, notification } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout, Dropdown, Menu, Space, Button, Drawer, Typography, notification } from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
+import AIAssistant from './components/AIAssistant';
+
 import { CHALLENGES, getChallengeById, Challenge, DEFAULT_CHALLENGE } from './components/challenges';
 import {
     getBoardState,
@@ -12,7 +14,8 @@ import {
     resetBoard,
     updateBoard
 } from "./services/api";
-import {useChallenge} from "./components/challengeContext";
+import { useChallenge } from "./components/challengeContext";
+import html2canvas from 'html2canvas';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -27,25 +30,21 @@ const App: React.FC = () => {
     const { currentChallenge, setCurrentChallenge, resetToDefault } = useChallenge();
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
     const [api, contextHolder] = notification.useNotification();
+    const boardRef = useRef<HTMLDivElement>(null);  // ✅ ref برای گرفتن عکس
 
-    // Initialize board and challenge from backend
     useEffect(() => {
         const initializeApp = async () => {
             try {
-                // Initialize with default challenge
                 setCurrentChallenge(DEFAULT_CHALLENGE);
-
-                // Get initial board state
                 const state = await getBoardState();
                 setActiveLauncher(state.active_launcher as 'left' | 'right');
                 setMarbleCounts({
                     red: state.red_marbles,
                     blue: state.blue_marbles
                 });
-
-                // Initialize frontend board
                 const initialBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
-                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty })))
+                    Array.from({ length: 15 }, () => ({ type: ItemType.Empty }))
+                );
                 setBoard(initialBoard);
             } catch (error) {
                 console.error('Initialization error:', error);
@@ -63,17 +62,12 @@ const App: React.FC = () => {
         try {
             const challenge = getChallengeById(challengeId);
             if (!challenge) return;
-
             setCurrentChallenge(challenge);
             setInfoPanelVisible(true);
             await resetBoard();
-
-            // Load initial board if defined
             if (challenge.initialBoard) {
                 setBoard(challenge.initialBoard);
             } else {
-                const state = await getBoardState();
-                // Convert backend state to frontend board format
                 const newBoard: BoardCell[][] = Array.from({ length: 17 }, () =>
                     Array.from({ length: 15 }, () => ({ type: ItemType.Empty }))
                 );
@@ -91,10 +85,6 @@ const App: React.FC = () => {
                 description: 'Failed to load the selected challenge. Please try again.',
             });
         }
-    };
-
-    const getCurrentChallenge = () => {
-        return currentChallenge;
     };
 
     const handleResetChallenge = async () => {
@@ -121,76 +111,41 @@ const App: React.FC = () => {
         }
     };
 
-    const challengesMenu = (
-        <Menu>
-            {CHALLENGES.map(challenge => (
-                <Menu.Item
-                    key={challenge.id}
-                    onClick={() => handleChallengeSelect(challenge.id)}
-                >
-                    {challenge.name}
-                </Menu.Item>
-            ))}
-        </Menu>
-    );
-
-    const handleZoomIn = () => {
-        setZoomLevel(prev => Math.min(prev + 0.1, 2));
-    };
-
-    const handleZoomOut = () => {
-        setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
-    };
+    const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 2));
+    const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
 
     const handleSlowDown = () => {
         const speedOptions = [0.5, 1, 2, 5];
-        const currentIndex = speedOptions.indexOf(currentSpeed);
-        if (currentIndex > 0) {
-            setCurrentSpeed(speedOptions[currentIndex - 1]);
-        }
+        const index = speedOptions.indexOf(currentSpeed);
+        if (index > 0) setCurrentSpeed(speedOptions[index - 1]);
         setIsRunning(false);
     };
 
     const handleSpeedUp = () => {
         const speedOptions = [0.5, 1, 2, 5];
-        const currentIndex = speedOptions.indexOf(currentSpeed);
-        if (currentIndex < speedOptions.length - 1) {
-            setCurrentSpeed(speedOptions[currentIndex + 1]);
-        }
+        const index = speedOptions.indexOf(currentSpeed);
+        if (index < speedOptions.length - 1) setCurrentSpeed(speedOptions[index + 1]);
         setIsRunning(true);
     };
 
     const handleClearBoard = async () => {
         await resetBoard();
         const state = await getBoardState();
-        setMarbleCounts({
-            red: state.red_marbles,
-            blue: state.blue_marbles
-        });
+        setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
     };
 
     const handleResetMarbles = async () => {
         await resetBoard();
         const state = await getBoardState();
-        setMarbleCounts({
-            red: state.red_marbles,
-            blue: state.blue_marbles
-        });
+        setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
     };
 
     const handleTriggerLeft = async () => {
         try {
-            console.log('Setting launcher to left...');
             await setLauncher("left");
-            console.log('Launcher set, launching blue marble...');
             await launchMarble("blue");
-            console.log('Marble launched, getting board state...');
             const state = await getBoardState();
-            console.log('Board state updated:', state);
-            setMarbleCounts({
-                red: state.red_marbles,
-                blue: state.blue_marbles
-            });
+            setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
             setActiveLauncher('left');
         } catch (error) {
             console.error('Error in handleTriggerLeft:', error);
@@ -199,24 +154,16 @@ const App: React.FC = () => {
 
     const handleTriggerRight = async () => {
         try {
-            console.log('Setting launcher to right...');
             await setLauncher("right");
-            console.log('Launcher set, launching red marble...');
             await launchMarble("red");
-            console.log('Marble launched, getting board state...');
             const state = await getBoardState();
-            console.log('Board state updated:', state);
-            setMarbleCounts({
-                red: state.red_marbles,
-                blue: state.blue_marbles
-            });
+            setMarbleCounts({ red: state.red_marbles, blue: state.blue_marbles });
             setActiveLauncher('right');
         } catch (error) {
             console.error('Error in handleTriggerRight:', error);
         }
     };
 
-    // Update marble counts periodically when running
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (isRunning) {
@@ -248,52 +195,32 @@ const App: React.FC = () => {
                         Turing Tumble Simulator
                     </Text>
                 </Space>
-
                 <Space>
                     <Text style={{ color: '#fff' }}>
                         Red: {marbleCounts.red} | Blue: {marbleCounts.blue} |
                         Launcher: {activeLauncher === 'left' ? 'Blue (Left)' : 'Red (Right)'}
                     </Text>
                 </Space>
-
                 <Space>
-                    <Button
-                        type="text"
-                        style={{ color: '#fff' }}
-                        onClick={() => setInfoPanelVisible(!infoPanelVisible)}
-                    >
+                    <Button type="text" style={{ color: '#fff' }} onClick={() => setInfoPanelVisible(!infoPanelVisible)}>
                         {infoPanelVisible ? 'Hide Info' : 'Show Info'}
                     </Button>
-                    <Dropdown
-                        overlay={
-                            <Menu>
-                                {CHALLENGES.map(challenge => (
-                                    <Menu.Item
-                                        key={challenge.id}
-                                        onClick={() => handleChallengeSelect(challenge.id)}
-                                    >
-                                        {challenge.name}
-                                    </Menu.Item>
-                                ))}
-                            </Menu>
-                        }
-                        placement="bottomRight"
-                    >
-                        <Button type="text" style={{ color: '#fff' }}>
-                            ▼ Challenges
-                        </Button>
+                    <Dropdown overlay={
+                        <Menu>
+                            {CHALLENGES.map(challenge => (
+                                <Menu.Item key={challenge.id} onClick={() => handleChallengeSelect(challenge.id)}>
+                                    {challenge.name}
+                                </Menu.Item>
+                            ))}
+                        </Menu>
+                    }>
+                        <Button type="text" style={{ color: '#fff' }}>▼ Challenges</Button>
                     </Dropdown>
-                    <Button
-                        type="text"
-                        style={{ color: '#fff' }}
-                        onClick={handleResetChallenge}
-                    >
-                        Reset
-                    </Button>
+                    <Button type="text" style={{ color: '#fff' }} onClick={handleResetChallenge}>Reset</Button>
                 </Space>
             </Header>
             <Drawer
-                title={getCurrentChallenge()?.name || 'Challenge Info'}
+                title={currentChallenge?.name || 'Challenge Info'}
                 placement="right"
                 closable={true}
                 onClose={() => setInfoPanelVisible(false)}
@@ -304,11 +231,11 @@ const App: React.FC = () => {
                 {currentChallenge ? (
                     <>
                         <Title level={4}>Description</Title>
-                        <Paragraph>{getCurrentChallenge()?.description}</Paragraph>
+                        <Paragraph>{currentChallenge.description}</Paragraph>
                         <Title level={4}>Objectives</Title>
                         <Paragraph>
                             <ul>
-                                {getCurrentChallenge()?.objectives?.map((obj, i) => (
+                                {currentChallenge.objectives?.map((obj, i) => (
                                     <li key={i}>{obj}</li>
                                 ))}
                             </ul>
@@ -319,18 +246,7 @@ const App: React.FC = () => {
                 )}
             </Drawer>
             <Layout style={{ overflow: 'hidden' }}>
-                <Sider
-                    width={200}
-                    style={{
-                        background: '#fff',
-                        boxShadow: '2px 0 8px 0 rgba(29, 35, 41, 0.05)',
-                        height: 'calc(100vh - 64px)',
-                        position: 'fixed',
-                        left: 0,
-                        top: 64,
-                        overflowY: 'auto',
-                        padding: '16px'
-                    }}>
+                <Sider width={200} style={{ background: '#fff', boxShadow: '2px 0 8px rgba(0,0,0,0.1)' }}>
                     <Toolbar
                         onZoomIn={handleZoomIn}
                         onZoomOut={handleZoomOut}
@@ -342,43 +258,18 @@ const App: React.FC = () => {
                         onTriggerRight={handleTriggerRight}
                         isRunning={isRunning}
                         currentSpeed={currentSpeed}
+                        boardRef={boardRef} // ✅ ارسال ref به toolbar
                     />
                 </Sider>
-                <Content style={{
-                    marginLeft: '200px',
-                    marginRight: '200px',
-                    padding: '24px',
-                    height: 'calc(100vh - 64px)',
-                    background: '#f0f0f0',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    overflow: 'hidden'
-                }}>
-                    <div style={{
-                        transform: `scale(${zoomLevel})`,
-                        transformOrigin: 'center'
-                    }}>
-                        <Board
-                            board={board}
-                            setBoard={setBoard}
-                            isRunning={isRunning}
-                            currentSpeed={currentSpeed}
-                        />
+                <Content style={{ marginLeft: 200, marginRight: 200, padding: '24px', height: 'calc(100vh - 64px)', background: '#f0f0f0' }}>
+                    <div
+                        ref={boardRef}
+                        style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center' }}
+                    >
+                        <Board board={board} setBoard={setBoard} isRunning={isRunning} currentSpeed={currentSpeed} />
                     </div>
                 </Content>
-                <Sider
-                    width={200}
-                    style={{
-                        background: '#fff',
-                        boxShadow: '-2px 0 8px 0 rgba(29, 35, 41, 0.05)',
-                        height: 'calc(100vh - 64px)',
-                        position: 'fixed',
-                        right: 0,
-                        top: 64,
-                        overflowY: 'auto',
-                        padding: '10px'
-                    }}>
+                <Sider width={200} style={{ background: '#fff', boxShadow: '-2px 0 8px rgba(0,0,0,0.1)' }}>
                     <PartsPanel />
                 </Sider>
             </Layout>

@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
+from services.vision_nim import send_to_vila
+import logging
 
 app = FastAPI()
 
@@ -128,3 +130,21 @@ async def reset_board():
 async def get_counts():
     """Get marble counts"""
     return board.get_marble_counts()
+
+@app.post("/analyze-board")
+async def analyze_board(file: UploadFile = File(...)):
+    try:
+        content_type = file.content_type
+        if not content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        contents = await file.read()
+        result = send_to_vila(contents, file.filename)
+        
+        return {
+            "analysis": result["choices"][0]["message"]["content"],
+            "status": "success"
+        }
+    except Exception as e:
+        logging.error(f"Error analyzing board: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
