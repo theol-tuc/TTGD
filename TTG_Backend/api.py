@@ -19,9 +19,7 @@ app.add_middleware(
 
 GameBoardRef = Optional['GameBoard']
 
-# Initialize game board and AI manager
-board = GameBoard(red=3, blue=3)  # Initialize with 3 red and 3 blue marbles
-ai_manager = AIManager()
+board = GameBoard(8, 8)
 
 class ComponentRequest(BaseModel):
     type: str
@@ -48,14 +46,6 @@ class BoardState(BaseModel):
 
 @app.get("/")
 async def root():
-    # Initialize marbles
-    board.set_number_of_marbles(red=3, blue=3)
-    
-    # Add some basic components
-    board.add_component(ComponentType.RAMP_RIGHT, 4, 4)
-    board.add_component(ComponentType.GEAR, 6, 4)
-    board.add_component(ComponentType.RAMP_LEFT, 8, 4)
-    
     return {"message": "Welcome to Turing Tumble API"}
 
 @app.get("/board")
@@ -70,7 +60,7 @@ async def get_board():
                 "is_occupied": component.is_occupied
             })
         components.append(component_row)
-    
+
     marbles = []
     for marble in board.marbles:
         marbles.append({
@@ -80,7 +70,7 @@ async def get_board():
             "direction": marble.direction,
             "is_moving": marble.is_moving
         })
-    
+
     return BoardState(
         components=components,
         marbles=marbles,
@@ -148,18 +138,20 @@ async def get_counts():
 @app.get("/challenge_id")
 async def get_challenge(challenge_id: str):
     """Get a specific challenge"""
+    global board
     if not challenge_id:
         raise HTTPException(status_code=422, detail="Missing challenge_id parameter")
-    
+
     challenge = CHALLENGES.get(challenge_id)
     if not challenge:
         raise HTTPException(status_code=404, detail="Challenge not found")
     
+    board = challenge["board"]
     return {
         "id": challenge["id"],
         "initialBoard": serialize_challenge(challenge["board"]),
         "red_marbles": challenge["board"].red_marbles,
-        "blue_marbles": challenge["board"].blue_marbles
+        "blue_marbles": challenge["board"].blue_marbles,
     }
 
 @app.post("/ai/move")

@@ -41,7 +41,7 @@ export const CHALLENGES: Challenge[] = [
             [ItemType.RampLeft]: 4
         },
         initialBoard: [],
-        expectedOutput: ['blue', 'blue', 'blue']
+        expectedOutput: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue']
     },
     {
         id: '2',
