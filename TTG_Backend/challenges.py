@@ -2,12 +2,10 @@ from game_logic import GameBoard, ComponentType, Marble
 
 def create_default_board():
     board = GameBoard(8, 8)
-    # board.set_number_of_marbles(8, 8)
     return board
 
 def create_challenge_1_board():
     board = GameBoard(8, 8)
-    # board.set_number_of_marbles(8, 8)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 3)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 5)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 7)
@@ -79,6 +77,13 @@ def create_challenge_6_board():
     board.add_component(ComponentType.RAMP_LEFT, 8, 4)
     return board
 
+def create_challenge_16_board():
+    board = GameBoard(8,8)
+    board.add_component(ComponentType.BIT_LEFT, 5, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 4, 4)
+    board.add_component(ComponentType.BIT_LEFT, 5, 5)
+    board.add_component(ComponentType.INTERCEPTOR, 4, 6)
+    return board
 
 CHALLENGES = {
     "default": {
@@ -121,6 +126,12 @@ CHALLENGES = {
     "6": {
         "id":  "6",
         "board": create_challenge_6_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
+    },
+    "16": {
+        "id":  "16",
+        "board": create_challenge_16_board(),
         "red_marbles": 8,
         "blue_marbles": 8
     }
