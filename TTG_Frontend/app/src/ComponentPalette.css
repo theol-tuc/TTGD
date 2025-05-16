@@ -1,0 +1,36 @@
+.component-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 20px 20px 0;
+}
+
+.palette-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 16px;
+  background: #f0f0f0;
+  border: 2px solid #4CAF50;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+
+.palette-btn.selected, .palette-btn:hover {
+  background: #4CAF50;
+  color: #fff;
+  border-color: #388e3c;
+}
+
+.palette-symbol {
+  font-size: 22px;
+  font-family: monospace;
+  min-width: 24px;
+  text-align: center;
+}
+
+.palette-label {
+  font-size: 15px;
+} 

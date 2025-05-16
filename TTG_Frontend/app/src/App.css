@@ -1,0 +1,130 @@
+.App {
+  text-align: center;
+  padding: 20px;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 1px solid #ef9a9a;
+}
+
+.game-controls {
+  margin-bottom: 20px;
+}
+
+.component-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.component-buttons button {
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.component-buttons button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.component-buttons button.selected {
+  background-color: #45a049;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.game-board {
+  display: inline-block;
+  border: 2px solid #333;
+  margin: 20px 0;
+  background-color: white;
+}
+
+.board-row {
+  display: flex;
+}
+
+.board-cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 20px;
+  cursor: pointer;
+  background-color: #f8f8f8;
+  transition: background-color 0.2s ease;
+}
+
+.board-cell:hover {
+  background-color: #e8e8e8;
+}
+
+.game-actions {
+  margin-top: 20px;
+}
+
+.game-actions button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.game-actions button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.game-actions button:hover:not(:disabled) {
+  background-color: #1976D2;
+}

@@ -1,0 +1,11 @@
+{
+  "board_data": {
+    "cells": [
+      {"x": 0, "y": 0, "type": "BALL", "dir": "left"},
+      {"x": 1, "y": 1, "type": "RAMP", "dir": "right"}
+    ],
+    "width": 5,
+    "height": 5,
+    "marbles": ["blue"]
+  }
+}

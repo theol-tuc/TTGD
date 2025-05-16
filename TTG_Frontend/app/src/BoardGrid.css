@@ -1,0 +1,28 @@
+.board-grid {
+  display: inline-block;
+  border: 2px solid #333;
+  background: #fff;
+  margin: 20px 0;
+}
+
+.board-row {
+  display: flex;
+}
+
+.board-cell {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 22px;
+  cursor: pointer;
+  background-color: #f8f8f8;
+  transition: background 0.2s;
+}
+
+.board-cell:hover {
+  background: #e0e0e0;
+} 
