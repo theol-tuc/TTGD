@@ -12,6 +12,7 @@ export interface Challenge {
         [key in ItemType]?: number; // Number available (undefined = unlimited)
     };
     expectedOutput?: string[];
+
 }
 
 export const DEFAULT_CHALLENGE: Challenge = {
@@ -129,6 +130,101 @@ export const CHALLENGES: Challenge[] = [
         initialBoard: [],
         expectedOutput: ['blue', 'blue', 'blue']
     },
+    {
+        id: '17',
+        name: 'Challenge 17: Fixed Ratio',
+        description: 'Make the pattern blue, blue, blue, red, red, red',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'red', 'red', 'red']
+    },
+    {
+        id: '18',
+        name: 'Challenge 18: Entanglement',
+        description: 'If the top bit AND the bottom bit start pointed to the right, put a ball in the left interceptor. Else, put a ball in the right interceptor.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 7
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
+    {
+        id: '19',
+        name: 'Challenge 19: Entanglement',
+        description: ': If the top bit AND the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999,
+            [ItemType.Crossover]: 2
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
+    {
+        id: '20',
+        name: 'Challenge 20: Symbiosis',
+        description: 'If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999,
+            [ItemType.Crossover]: 2
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
+    {
+        id: '20',
+        name: 'Challenge 20: Symbiosis',
+        description: 'If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999,
+            [ItemType.Crossover]: 2
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
+    {
+        id: '21',
+        name: 'Challenge 21: Quantum Number',
+        description: 'Use register A to count the number of blue balls.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 5
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
+    {
+        id: '22',
+        name: 'Challenge 22: Depletion',
+        description: 'Register A starts at 15. Subtract the number of blue balls from the register.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 4
+        },
+        initialBoard: [],
+        expectedOutput: []
+    }
+    
 ];
 
 export const updateChallengeInitialBoard = async (challengeId: string) => {
