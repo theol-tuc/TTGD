@@ -19,6 +19,22 @@ interface BoardProps {
     currentSpeed: number;
 }
 
+export interface GameState {
+    components: Array<Array<{
+        type: string;
+        is_occupied: boolean;
+    }>>;
+    marbles: Array<{
+        color: string;
+        x: number;
+        y: number;
+        direction: string;
+        is_moving: boolean;
+    }>;
+    red_marbles: number;
+    blue_marbles: number;
+    active_launcher: string;
+}
 
 const unlimitedParts = {
     ramp: Infinity,

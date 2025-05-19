@@ -1,4 +1,5 @@
 import requests
+import json
 from typing import Dict, Any, Optional
 from board_encoder import BoardEncoder
 from game_logic import GameBoard
@@ -8,72 +9,105 @@ class AIService:
         self.llm_server_url = llm_server_url
         self.board_encoder = BoardEncoder()
 
-    def get_ai_move(self, board: GameBoard) -> Dict[str, Any]:
-        """
-        Get AI's next move based on current board state.
-        Returns a dictionary with action and parameters.
-        """
-        encoded_state = self.board_encoder.encode_board(board)
+    def get_ai_move(self, board: GameBoard, challenge_id: str = None) -> Dict[str, Any]:
+        """Get AI move suggestion for the current board state."""
+        try:
+            # Encode the board state
+            encoded_state = self.board_encoder.encode_board(board)
+            
+            # Get challenge context if challenge_id is provided
+            challenge_context = ""
+            if challenge_id:
+                challenge = self.challenges.get_challenge(challenge_id)
+                if challenge:
+                    challenge_context = f"\nChallenge Context:\n{challenge.description}\n"
+            
+            # Construct a strict prompt that enforces JSON output
+            prompt = f"""
+You are an expert Turing Tumble assistant. Your task is to suggest the best next move based on the board state.
 
-        prompt = f"""You are an expert Turing Tumble assistant. Given the board state below, suggest the optimal next move.
+{challenge_context}
 
 Turing Tumble Game State:
 {encoded_state}
 
-Respond ONLY with a valid JSON object using the format below.
-Do NOT include any commentary, text, or explanation outside the JSON.
-Do NOT write markdown or tags.
+IMPORTANT:
+- Respond ONLY with a VALID JSON object.
+- DO NOT include any explanation before or after the JSON.
+- DO NOT use markdown, bullet points, or tags.
 
-Example format:
+Valid format:
 {{
-  "action": "launch_marble",
+  "action": "add_component",  # or "launch_marble" or "set_launcher"
   "parameters": {{
-    "color": "red"
+    "type": "ramp_left",      # if applicable
+    "x": 3,
+    "y": 5
   }},
-  "explanation": "Launching a red marble will trigger the current setup and allow progress."
+  "explanation": "A ramp at (3, 5) helps guide the marble left."
 }}
 
-Valid actions:
-- "add_component"
-- "launch_marble"
-- "set_launcher"
-
-Return ONLY the JSON object.
+Output this JSON object directly, and nothing else.
 """
-
-        print("[AIService] Prompt sent to LLaMA:\n", prompt)
-
-        try:
+            
+            print("[AIService] Prompt sent to LLaMA:\n", prompt)
+            
+            # Get response from LLM using direct HTTP request
             response = requests.post(
                 f"{self.llm_server_url}/generate",
                 json={"prompt": prompt}
             )
-
+            
             print("[AIService] Raw response from LLaMA:\n", response.text)
             response.raise_for_status()
-
+            
             llm_response = response.json()
             if "response" not in llm_response:
                 print("[AIService] ERROR: 'response' key missing in LLaMA output.")
                 raise ValueError("Missing 'response' in LLaMA output")
-
+            
+            # Get the move from the response
             move = llm_response["response"]
-            print("[AIService] Parsed LLaMA move:\n", move)
+            
+            # Force stringify if already parsed
+            if isinstance(move, dict):
+                move = json.dumps(move)
+            
+            # Try to parse the move as JSON
+            try:
+                move = json.loads(move)
+            except json.JSONDecodeError:
+                print("[AIService] ERROR: Could not parse move as JSON.")
+                raise ValueError("Invalid JSON format in move")
+            
+            # Validate move structure
+            if not isinstance(move, dict):
+                print("[AIService] ERROR: Move is not a dictionary.")
+                raise ValueError("Invalid move format: expected dictionary")
+                
+            if "action" not in move:
+                print("[AIService] ERROR: Move missing 'action' field.")
+                raise ValueError("Invalid move format: missing 'action' field")
+                
             return move
-
+            
         except Exception as e:
             print(f"[AIService] Error getting AI move: {str(e)}")
-            return {
-                "action": "launch_marble",
-                "parameters": {"color": "red"},
-                "explanation": "Error getting AI move, defaulting to launching a red marble"
-            }
+            raise
 
-    def get_ai_explanation(self, board: GameBoard, move: Dict[str, Any]) -> str:
+    def get_ai_explanation(self, board: GameBoard, move: Dict[str, Any], challenge_id: str = None) -> str:
         """
-        Get AI's explanation for a specific move.
+        Get AI's explanation for a specific move in the context of a challenge.
         """
         encoded_state = self.board_encoder.encode_board(board)
+
+        # Add challenge context to explanation request
+        challenge_context = ""
+        if challenge_id:
+            if challenge_id == "1":
+                challenge_context = "\nThis move is part of Challenge 1: Gravity, where we need to guide all blue marbles to the end."
+            elif challenge_id == "2":
+                challenge_context = "\nThis move is part of Challenge 2: Re-Entry, where we need to create a path for blue marbles to re-enter."
 
         prompt = f"""Explain why the following move is a good strategic choice in the Turing Tumble game.
 
@@ -82,6 +116,7 @@ Game State:
 
 Move:
 {str(move)}
+{challenge_context}
 
 Respond with a clear, concise explanation. Do not include formatting or tags.
 """

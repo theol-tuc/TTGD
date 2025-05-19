@@ -1,40 +1,32 @@
-import axios from 'axios';
+import { GameState } from '../board/board';
+import { api } from './api';
 
-const API_BASE_URL = 'http://localhost:8000';  // Adjust this to match your backend URL
+const API_URL = 'http://localhost:8000';
 
 export interface AIMove {
-    action: 'add_component' | 'launch_marble' | 'set_launcher';
-    parameters: {
-        type?: string;
-        x?: number;
-        y?: number;
-        color?: string;
-        launcher?: string;
-    };
+    action: string;
+    parameters: any;
 }
 
 export interface AIResponse {
-    move: AIMove;
+    action: string;
+    parameters: Record<string, any>;
     explanation: string;
 }
 
 export const aiService = {
-    async getAIMove(): Promise<AIResponse> {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/ai/move`);
-            return response.data;
-        } catch (error) {
-            console.error('Error getting AI move:', error);
-            throw error;
-        }
+    async getAIMove(gameState: GameState, challengeId?: string): Promise<AIResponse> {
+        const response = await api.post('/ai/move', {
+            gameState,
+            challengeId
+        });
+        return response.data;
     },
 
-    async executeAIMove(): Promise<void> {
-        try {
-            await axios.post(`${API_BASE_URL}/ai/execute`);
-        } catch (error) {
-            console.error('Error executing AI move:', error);
-            throw error;
-        }
+    async executeAIMove(gameState: GameState, challengeId?: string): Promise<void> {
+        await api.post('/ai/execute', {
+            gameState,
+            challengeId
+        });
     }
 }; 

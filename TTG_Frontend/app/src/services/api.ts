@@ -1,11 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
-
-// Add axios instance with timeout and retry
-const api = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 5000,
+export const api = axios.create({
+    baseURL: 'http://localhost:8000',
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 export interface BoardState {
@@ -111,4 +110,19 @@ export const fetchChallengeById = async (challengeId: string) => {
         console.error(`Error fetching challenge ${challengeId}:`, error);
         return null;
     }
+};
+
+export const updateBoardState = async (gameState: any) => {
+    const response = await api.post('/board/state', gameState);
+    return response.data;
+};
+
+export const getChallenges = async () => {
+    const response = await api.get('/challenges');
+    return response.data;
+};
+
+export const getChallenge = async (id: string) => {
+    const response = await api.get(`/challenges/${id}`);
+    return response.data;
 };
