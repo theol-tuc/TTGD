@@ -7,31 +7,23 @@ The process stops when either the reservoir supposed to supply the next ball is 
 
 The objective of the game may be to produce a predefined pattern of blue and red balls in the collection trough at the bottom, or to reach specific configurations of blocks that change their position. These blocks with two positions can be interpreted as bits, thus acting as memory or counters.
 
-Parts:
-
-Ball guides:
-
--Ramps (ItemType.RAMP_LEFT or ItemType.RAMP_RIGHT) : Direct the ball left or right.
-
--Crossovers(ItemType.CROSSOVER): Allow balls coming from the left to go right, and vice versa.
-
-Bits (ItemType.BIT_LEFT or ItemType.BIT_RIGHT):
-
--Have two distinct states (flipped to the left or flipped to the right).
-
--Direct balls left or right depending on their current state. A bit flipped to the left will direct the ball to the right, while a bit flipped to the right will direct the ball to the left.
-
--Switch states each time a ball passes through.
-
-Gear bits (ItemType.GEAR_BIT_LEFT or ItemType.GEAR_BIT_RIGHT) and gears (ItemType.GEAR):
-
--Gear bits are similar to bits, but they can be connected by gears and function as a group where every gear bit has the same state.
-
--When a ball passes through a gear bit, the whole group of gear bits switches states.
-
-Capture block (ItemType.INTERCEPTOR):
-
--Captures balls and stops the sequence.
+This is how the Parts are displayed in the encoded Board:
+```{python} 
+ComponentType.EMPTY: row.append(".")
+ComponentType.GEAR: row.append("G")
+ComponentType.BIT_LEFT: row.append("L")
+ComponentType.BIT_RIGHT: row.append("R")
+ComponentType.RAMP_LEFT: row.append("\\")
+ComponentType.RAMP_RIGHT: row.append("/")
+ComponentType.CROSSOVER: row.append("X")
+ComponentType.INTERCEPTOR: row.append("I")
+ComponentType.LAUNCHER: row.append("S")
+ComponentType.LEVER_BLUE: row.append("B")
+ComponentType.LEVER_RED: row.append("r")
+ComponentType.GRAY_SPACE: row.append("#")
+else:
+row.append(" ")
+```
 
 The functions in the library are used to place the named Part on the actual board, which is then executed by a parser. The position is a tuple of two integers, representing the x and y coordinates on the board.
 
