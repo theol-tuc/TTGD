@@ -4,7 +4,7 @@ import json
 
 class GameStateSerializer:
     """Handles serialization and deserialization of the Turing Tumble game state"""
-    
+
     @staticmethod
     def serialize_board(board: GameBoard) -> Dict[str, Any]:
         """Convert the game board state to a JSON-serializable dictionary"""
@@ -17,7 +17,7 @@ class GameStateSerializer:
             "red_marbles": board.red_marbles,
             "blue_marbles": board.blue_marbles
         }
-    
+
     @staticmethod
     def _serialize_components(components: List[List[Component]]) -> List[List[Dict[str, Any]]]:
         """Convert the 2D array of components to a serializable format"""
@@ -35,7 +35,7 @@ class GameStateSerializer:
             ]
             for row in components
         ]
-    
+
     @staticmethod
     def _serialize_marbles(marbles: List[Marble]) -> List[Dict[str, Any]]:
         """Convert the list of marbles to a serializable format"""
@@ -49,41 +49,41 @@ class GameStateSerializer:
             }
             for marble in marbles
         ]
-    
+
     @staticmethod
     def to_json(board: GameBoard) -> str:
         """Convert the game board state to a JSON string"""
         return json.dumps(GameStateSerializer.serialize_board(board), indent=2)
-    
+
     @staticmethod
     def from_json(json_str: str) -> Dict[str, Any]:
         """Convert a JSON string back to a game state dictionary"""
         return json.loads(json_str)
-    
+
     @staticmethod
     def from_json_to_board(json_str: str) -> GameBoard:
         """Convert a JSON string back to a GameBoard object"""
         state_dict = GameStateSerializer.from_json(json_str)
         return GameStateSerializer._deserialize_board(state_dict)
-    
+
     @staticmethod
     def _deserialize_board(state_dict: Dict[str, Any]) -> GameBoard:
         """Convert a state dictionary to a GameBoard object"""
         board = GameBoard(state_dict["width"], state_dict["height"])
-        
+
         # Deserialize components
         GameStateSerializer._deserialize_components(board, state_dict["components"])
-        
+
         # Deserialize marbles
         GameStateSerializer._deserialize_marbles(board, state_dict["marbles"])
-        
+
         # Set other properties
         board.active_launcher = state_dict["active_launcher"]
         board.red_marbles = state_dict["red_marbles"]
         board.blue_marbles = state_dict["blue_marbles"]
-        
+
         return board
-    
+
     @staticmethod
     def _deserialize_components(board: GameBoard, components_data: List[List[Dict[str, Any]]]) -> None:
         """Convert serialized components back to Component objects"""
@@ -95,7 +95,7 @@ class GameStateSerializer:
                 component.gear_rotation = component_data["gear_rotation"]
                 component.gear_bit_state = component_data["gear_bit_state"]
                 board.components[y][x] = component
-    
+
     @staticmethod
     def _deserialize_marbles(board: GameBoard, marbles_data: List[Dict[str, Any]]) -> None:
         """Convert serialized marbles back to Marble objects"""
@@ -115,12 +115,12 @@ class GameStateSerializer:
 if __name__ == "__main__":
     # Create a test board
     board = GameBoard()
-    
+
     # Serialize to JSON
     json_state = GameStateSerializer.to_json(board)
     print("Serialized Game State:")
     print(json_state)
-    
+
     # Deserialize back to board
     reconstructed_board = GameStateSerializer.from_json_to_board(json_state)
     print("\nReconstructed Board Properties:")
