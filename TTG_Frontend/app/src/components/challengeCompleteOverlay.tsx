@@ -10,9 +10,10 @@ interface ChallengeCompleteOverlayProps {
     onClose: () => void;
     onRestart?: () => void;
     onNextChallenge?: () => void;
+    hasNextChallenge: boolean;
 }
 
-const ChallengeCompleteOverlay: React.FC<ChallengeCompleteOverlayProps> = ({visible, challengeName, onClose, onRestart, onNextChallenge}) => {
+const ChallengeCompleteOverlay: React.FC<ChallengeCompleteOverlayProps> = ({visible, challengeName, onClose, onRestart, onNextChallenge, hasNextChallenge}) => {
     return (
         <Modal
             title={
@@ -30,15 +31,13 @@ const ChallengeCompleteOverlay: React.FC<ChallengeCompleteOverlayProps> = ({visi
                 textAlign: 'center',
                 padding: '24px'
             }}
-            className="challenge-complete-modal"
+            maskClosable={false}
+            closable={true}
         >
             <div style={{ marginBottom: 32 }}>
                 <Title level={2} style={{ color: '#389e0d' }}>🎉 Congratulations! 🎉</Title>
                 <Paragraph style={{ fontSize: '18px', marginBottom: 8 }}>
                     You've successfully completed <strong>{challengeName}</strong>!
-                </Paragraph>
-                <Paragraph type="secondary">
-                    The marble output matched the expected sequence for this challenge.
                 </Paragraph>
             </div>
 
@@ -57,21 +56,23 @@ const ChallengeCompleteOverlay: React.FC<ChallengeCompleteOverlayProps> = ({visi
                         Restart Challenge
                     </Button>
                 </Col>
-                <Col>
-                    <Button
-                        type="primary"
-                        icon={<ArrowRightOutlined />}
-                        size="large"
-                        onClick={onNextChallenge}
-                        style={{
-                            borderRadius: '8px',
-                            padding: '0 24px',
-                            height: '40px'
-                        }}
-                    >
-                        Next Challenge
-                    </Button>
-                </Col>
+                {hasNextChallenge && (
+                    <Col>
+                        <Button
+                            type="primary"
+                            icon={<ArrowRightOutlined />}
+                            size="large"
+                            onClick={onNextChallenge}
+                            style={{
+                                borderRadius: '8px',
+                                padding: '0 24px',
+                                height: '40px'
+                            }}
+                        >
+                            Next Challenge
+                        </Button>
+                    </Col>
+                )}
             </Row>
         </Modal>
     );
