@@ -61,16 +61,22 @@ async def root():
     return {"message": "Welcome to Turing Tumble API"}
 
 
-@app.get("/board")
-async def get_board():
-    """Get the current state of the board"""
+@app.get("/board/state")
+async def get_board_state():
+    """Get the current state of the board with full component details"""
     components = []
     for row in board.components:
         component_row = []
         for component in row:
             component_row.append({
                 "type": component.type.value,
-                "is_occupied": component.is_occupied
+                "is_occupied": component.is_occupied,
+                "is_gear": component.is_gear,
+                "gear_rotation": component.gear_rotation if component.is_gear else None,
+                "is_gear_bit": component.is_gear_bit,
+                "gear_bit_state": component.gear_bit_state if component.is_gear_bit else None,
+                "x": component.x,
+                "y": component.y
             })
         components.append(component_row)
 
@@ -84,13 +90,15 @@ async def get_board():
             "is_moving": marble.is_moving
         })
 
-    return BoardState(
-        components=components,
-        marbles=marbles,
-        red_marbles=board.red_marbles,
-        blue_marbles=board.blue_marbles,
-        active_launcher=board.active_launcher
-    )
+    return {
+        "components": components,
+        "marbles": marbles,
+        "red_marbles": board.red_marbles,
+        "blue_marbles": board.blue_marbles,
+        "active_launcher": board.active_launcher,
+        "width": board.width,
+        "height": board.height
+    }
 
 
 @app.post("/components")
@@ -196,3 +204,20 @@ async def execute_ai_move(game_state: Dict[str, Any], challenge_id: str = None):
         return {"move": move, "explanation": explanation}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/debug/components")
+async def debug_components():
+    """Debug endpoint to check board components"""
+    components = []
+    for y in range(board.height):
+        for x in range(board.width):
+            component = board.components[y][x]
+            if component.type not in [ComponentType.EMPTY, ComponentType.GRAY_SPACE, ComponentType.INVALID]:
+                components.append({
+                    "type": component.type.value,
+                    "x": x,
+                    "y": y,
+                    "is_gear": component.is_gear,
+                    "is_gear_bit": component.is_gear_bit
+                })
+    return components

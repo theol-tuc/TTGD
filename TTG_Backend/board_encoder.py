@@ -70,13 +70,46 @@ Possible Actions:
         for y in range(board.height):
             for x in range(board.width):
                 component = board.components[y][x]
-                if component.type != ComponentType.EMPTY and component.type != ComponentType.GRAY_SPACE:
-                    desc = f"- {component.type.value} at position ({x}, {y})"
-                    if component.is_gear:
-                        desc += f" (rotation: {component.gear_rotation}°)"
-                    if component.is_gear_bit:
-                        desc += f" (state: {'1' if component.gear_bit_state else '0'})"
-                    components.append(desc)
+                # Skip empty spaces, gray spaces, and invalid spaces
+                if component.type in [ComponentType.EMPTY, ComponentType.GRAY_SPACE, ComponentType.INVALID]:
+                    continue
+                    
+                # Skip border components unless they're special
+                if component.type in [
+                    ComponentType.BORDER_VERTICAL,
+                    ComponentType.BORDER_HORIZONTAL,
+                    ComponentType.BORDER_DIAGONAL_LEFT,
+                    ComponentType.BORDER_DIAGONAL_RIGHT,
+                    ComponentType.CORNER_LEFT,
+                    ComponentType.CORNER_RIGHT
+                ]:
+                    continue
+                
+                # Format the component description
+                desc = f"- {component.type.value} at position ({x}, {y})"
+                
+                # Add gear-specific details
+                if component.is_gear:
+                    desc += f" (rotation: {component.gear_rotation}°)"
+                if component.is_gear_bit:
+                    desc += f" (state: {'1' if component.gear_bit_state else '0'})"
+                
+                # Add special details for other components
+                if component.type in [ComponentType.RAMP_LEFT, ComponentType.RAMP_RIGHT]:
+                    desc += " (changes marble direction)"
+                elif component.type in [ComponentType.BIT_LEFT, ComponentType.BIT_RIGHT]:
+                    desc += " (stores binary state)"
+                elif component.type == ComponentType.CROSSOVER:
+                    desc += " (allows marbles to cross paths)"
+                elif component.type == ComponentType.INTERCEPTOR:
+                    desc += " (stops marbles)"
+                elif component.type == ComponentType.LAUNCHER:
+                    desc += " (launches marbles)"
+                elif component.type in [ComponentType.LEVER_BLUE, ComponentType.LEVER_RED]:
+                    desc += " (controls marble flow)"
+                
+                components.append(desc)
+        
         return "\n".join(components) if components else "No active components"
 
     @staticmethod

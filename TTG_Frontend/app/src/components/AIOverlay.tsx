@@ -22,8 +22,13 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
         setIsLoading(true);
         setError(null);
         try {
+            // Get the current board state
             const gameState = await getBoardState();
+            console.log('Current board state:', gameState);
+            
+            // Get AI suggestion with board state and challenge ID
             const response = await aiService.getAIMove(gameState, currentChallenge.id);
+            console.log('AI response:', response);
             
             // Validate response structure
             if (!response?.action || typeof response.action !== 'string') {
@@ -33,7 +38,7 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
             setAIResponse(response);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to get AI move. Please try again.');
-            console.error(err);
+            console.error('Error getting AI move:', err);
             setAIResponse(null);
         } finally {
             setIsLoading(false);
@@ -52,7 +57,7 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
             setAIResponse(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to execute AI move. Please try again.');
-            console.error(err);
+            console.error('Error executing AI move:', err);
         } finally {
             setIsLoading(false);
         }

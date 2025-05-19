@@ -8,7 +8,14 @@ export const api = axios.create({
 });
 
 export interface BoardState {
-    components: Array<Array<{ type: string; is_occupied: boolean }>>;
+    components: Array<Array<{
+        type: string;
+        is_occupied: boolean;
+        is_gear?: boolean;
+        gear_rotation?: number;
+        is_gear_bit?: boolean;
+        gear_bit_state?: boolean;
+    }>>;
     marbles: Array<{
         color: string;
         x: number;
@@ -19,21 +26,29 @@ export interface BoardState {
     red_marbles: number;
     blue_marbles: number;
     active_launcher: string;
+    width: number;
+    height: number;
 }
 
 export const getBoardState = async (): Promise<BoardState> => {
     try {
-        const response = await api.get('/board');
+        const response = await api.get('/board/state');
+        console.log('Board state from backend:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching board state:', error);
         // Return a default board state if the backend is not available
         return {
-            components: Array(12).fill(Array(12).fill({ type: 'EMPTY', is_occupied: false })),
+            components: Array(12).fill(Array(12).fill({ 
+                type: 'EMPTY', 
+                is_occupied: false 
+            })),
             marbles: [],
             red_marbles: 3,
             blue_marbles: 3,
-            active_launcher: 'left'
+            active_launcher: 'left',
+            width: 12,
+            height: 12
         };
     }
 };
