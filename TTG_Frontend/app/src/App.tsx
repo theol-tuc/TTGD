@@ -397,6 +397,18 @@ const App: React.FC = () => {
         setChallengeComplete(false);
     };
 
+    const handleRestartChallenge = () => {
+        // TODO: Implement restart functionality
+        console.log('Restarting challenge...');
+        setChallengeComplete(false);
+    };
+
+    const handleNextChallenge = () => {
+        // TODO: Implement next challenge functionality
+        console.log('Moving to next challenge...');
+        setChallengeComplete(false);
+    };
+
     // Update marble counts periodically when running
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -577,6 +589,8 @@ const App: React.FC = () => {
                 visible={challengeComplete}
                 challengeName={currentChallenge?.name || ''}
                 onClose={handleCloseOverlay}
+                onRestart={handleRestartChallenge}
+                onNextChallenge={handleNextChallenge}
             />
         </Layout>
     );
