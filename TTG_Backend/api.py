@@ -183,14 +183,43 @@ async def get_challenge(challenge_id: str):
     }
 
 @app.post("/ai/move")
-async def get_ai_move(game_state: Dict[str, Any], challenge_id: str = None):
+async def get_ai_move(request: Dict[str, Any]):
     """
     Get AI's next move based on current game state and challenge context.
     """
     try:
-        move = ai_manager.get_ai_move(game_state, challenge_id)
+        print("Received request:", request)
+        game_state = request.get('gameState')
+        challenge_id = request.get('challengeId')
+        
+        if not game_state:
+            raise HTTPException(status_code=422, detail="Missing gameState in request")
+            
+        # Validate required fields
+        required_fields = ['components', 'marbles', 'red_marbles', 'blue_marbles', 'active_launcher']
+        missing_fields = [field for field in required_fields if field not in game_state]
+        if missing_fields:
+            raise HTTPException(
+                status_code=422, 
+                detail=f"Missing required fields in gameState: {', '.join(missing_fields)}"
+            )
+
+        # Convert the received game state to a format AI Manager can understand
+        board_state = {
+            "components": game_state['components'],
+            "marbles": game_state['marbles'],
+            "red_marbles": game_state['red_marbles'],
+            "blue_marbles": game_state['blue_marbles'],
+            "active_launcher": game_state['active_launcher']
+        }
+        print("Processed board state:", board_state)
+        move = ai_manager.get_ai_move(board_state, challenge_id)
         return move
+    except HTTPException as he:
+        raise he
     except Exception as e:
+        print(f"Error in get_ai_move: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/ai/execute")
