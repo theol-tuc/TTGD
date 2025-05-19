@@ -39,7 +39,7 @@ The functions in the library are used to place the named Part on the actual boar
 Solve the challenge by building the board as a Matrix with all of the parts defined in: ${matrixParts}
 
 ## Challenge
-The challenge you need to solve using the library is: ${question}
+The challenge you need to solve is: ${question}
 
 ## Output
-The Output should be collection of the functions from the library to be executed in the order they are needed to solve the challenge. The output should be in the form of a list of functions, with each function being represented as a string.
+The Output should be a Matrix of lists, with every space of the board filled with the symbol corresponding to the part in that space.

@@ -26,5 +26,6 @@ def generate_ai_prompt(challenge_id: str):
         toolbox=toolbox_code,
         question=challenge_description
     )
-
+    print(filled_prompt.len())
     return filled_prompt
+prompt = generate_ai_prompt(1)
