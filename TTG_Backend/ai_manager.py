@@ -11,7 +11,7 @@ class AIManager:
         try:
             # Randomly choose an action
             action = random.choice(self.possible_actions)
-            
+
             if action == "add_component":
                 # Find an empty spot on the board
                 empty_spots = []
@@ -19,7 +19,7 @@ class AIManager:
                     for x in range(len(game_state['components'][y])):
                         if not game_state['components'][y][x]['is_occupied']:
                             empty_spots.append((x, y))
-                
+
                 if empty_spots:
                     x, y = random.choice(empty_spots)
                     return {
@@ -30,7 +30,7 @@ class AIManager:
                             "y": y
                         }
                     }
-            
+
             elif action == "launch_marble":
                 return {
                     "action": "launch_marble",
@@ -38,7 +38,7 @@ class AIManager:
                         "color": random.choice(["red", "blue"])
                     }
                 }
-            
+
             elif action == "set_launcher":
                 return {
                     "action": "set_launcher",
@@ -46,9 +46,9 @@ class AIManager:
                         "launcher": random.choice(["left", "right"])
                     }
                 }
-            
+
             return None
-            
+
         except Exception as e:
             print(f"Error in get_ai_move: {e}")
             return None
@@ -58,7 +58,7 @@ class AIManager:
         try:
             action = move["action"]
             params = move["parameters"]
-            
+
             if action == "add_component":
                 return f"Adding a {params['type']} at position ({params['x']}, {params['y']}) to create a new path for marbles."
             elif action == "launch_marble":
@@ -67,7 +67,7 @@ class AIManager:
                 return f"Setting the active launcher to {params['launcher']} to try a different starting position."
             else:
                 return "Making a strategic move to improve the board configuration."
-            
+
         except Exception as e:
             print(f"Error in get_ai_explanation: {e}")
             return "Making a strategic move to improve the board configuration." 

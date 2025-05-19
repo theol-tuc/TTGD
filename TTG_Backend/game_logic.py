@@ -59,7 +59,7 @@ class GameBoard:
         self.blue_marbles = blue
         self.initial_red = red
         self.initial_blue = blue
-        self.marble_output: List[str] = [] 
+        self.marble_output: List[str] = []
         self.initialize_board()
 
     def set_number_of_marbles(self, red: int, blue: int) -> None:
@@ -71,9 +71,9 @@ class GameBoard:
     def initialize_board(self) -> None:
         """Initialize the board with empty components"""
         self.components = [[Component(ComponentType.EMPTY, x, y)
-                          for x in range(self.width)]
-                          for y in range(self.height)]
-        
+                            for x in range(self.width)]
+                           for y in range(self.height)]
+
         # Set up borders and invalid spaces
         self.setup_board_structure()
 
@@ -179,7 +179,7 @@ class GameBoard:
             for x in range(1, self.width - 1):
                 if (x <= 6) or (x >= 8):
                     self.components[y][x].type = ComponentType.INVALID
-        
+
         self.components[14][6].type = ComponentType.LEVER_BLUE
         self.components[14][5].type = ComponentType.LEVER_BLUE
         self.components[14][3].type = ComponentType.LEVER_BLUE
@@ -206,7 +206,7 @@ class GameBoard:
                 x = 9  # Right launcher position
                 direction = "left"
             y = 0
-            
+
             # Check if position is valid
             if 0 <= x < self.width and 0 <= y < self.height:
                 if not self.check_collision(x, y):
@@ -219,7 +219,7 @@ class GameBoard:
     def check_collision(self, x: int, y: int) -> bool:
         """Check if a position is occupied"""
         return self.components[y][x].is_occupied
-    
+
     def set_bit_type(self, component: Component) -> None:
         """
         Set the correct bit type based on the current component type.
@@ -233,7 +233,7 @@ class GameBoard:
             component.type = ComponentType.BIT_LEFT
             return "left"
         return None  # If no change is made, return None
-        
+
     def flip_gears(self, x: int, y: int, visited=None) -> None:
         """
         Flip all connected gears starting from position (x, y).
@@ -241,17 +241,17 @@ class GameBoard:
         """
         if visited is None:
             visited = set()
-            
+
         # Mark current position as visited
         visited.add((x, y))
-        
+
         # Get the current component
         component = self.components[y][x]
-        
+
         # If not a gear or gear bit, return
         if not (component.is_gear or component.is_gear_bit):
             return
-            
+
         # Flip gear bits
         if component.type == ComponentType.GEAR_BIT_LEFT:
             component.type = ComponentType.GEAR_BIT_RIGHT
@@ -259,15 +259,15 @@ class GameBoard:
         elif component.type == ComponentType.GEAR_BIT_RIGHT:
             component.type = ComponentType.GEAR_BIT_LEFT
             print(f"Flipped gear bit at ({x}, {y}) from RIGHT to LEFT")
-            
+
         # Check adjacent cells (up, right, down, left)
         directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
         for dx, dy in directions:
             new_x, new_y = x + dx, y + dy
-            
+
             # Check if the new position is valid and not visited
-            if (0 <= new_x < self.width and 0 <= new_y < self.height and 
-                (new_x, new_y) not in visited):
+            if (0 <= new_x < self.width and 0 <= new_y < self.height and
+                    (new_x, new_y) not in visited):
                 # Recursively flip connected gears
                 self.flip_gears(new_x, new_y, visited)
 
@@ -278,24 +278,24 @@ class GameBoard:
         for marble in self.marbles:
             if not marble.is_moving:
                 continue
-                
+
             print(f"Marble at ({marble.x}, {marble.y}) is moving {marble.direction}")
-            
+
             current_component = self.components[marble.y][marble.x]
-            
+
             if current_component.type == ComponentType.RAMP_LEFT:
-                if (marble.y + 1 < self.height and 
-                    marble.x - 1 >= 0 and 
-                    not self.check_collision(marble.x - 1, marble.y + 1)):
+                if (marble.y + 1 < self.height and
+                        marble.x - 1 >= 0 and
+                        not self.check_collision(marble.x - 1, marble.y + 1)):
                     marble.direction = "left"
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.y += 1
                     marble.x -= 1
                     self.components[marble.y][marble.x].is_occupied = True
             elif current_component.type == ComponentType.RAMP_RIGHT:
-                if (marble.y + 1 < self.height and 
-                    marble.x + 1 < self.width and 
-                    not self.check_collision(marble.x + 1, marble.y + 1)):
+                if (marble.y + 1 < self.height and
+                        marble.x + 1 < self.width and
+                        not self.check_collision(marble.x + 1, marble.y + 1)):
                     marble.direction = "right"
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.y += 1
@@ -307,13 +307,13 @@ class GameBoard:
                 new_x, new_y = marble.x, marble.y
                 if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
                     new_x += 1
-                elif (new_y + 1 < self.height and new_x + 1 < self.width and 
+                elif (new_y + 1 < self.height and new_x + 1 < self.width and
                       not self.check_collision(new_x + 1, new_y + 1)):
                     new_x += 1
                     new_y += 1
                 else:
                     marble.is_moving = False
-                
+
                 if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
@@ -324,13 +324,13 @@ class GameBoard:
                 new_x, new_y = marble.x, marble.y
                 if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
                     new_x -= 1
-                elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
+                elif (new_y + 1 < self.height and new_x - 1 >= 0 and
                       not self.check_collision(new_x - 1, new_y + 1)):
                     new_x -= 1
                     new_y += 1
                 else:
                     marble.is_moving = False
-                
+
                 if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
@@ -340,7 +340,7 @@ class GameBoard:
                 if marble.direction == "left":
                     if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
                         new_x -= 1
-                    elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
+                    elif (new_y + 1 < self.height and new_x - 1 >= 0 and
                           not self.check_collision(new_x - 1, new_y + 1)):
                         new_x -= 1
                         new_y += 1
@@ -349,13 +349,13 @@ class GameBoard:
                 else:
                     if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
                         new_x += 1
-                    elif (new_y + 1 < self.height and new_x + 1 < self.width and 
+                    elif (new_y + 1 < self.height and new_x + 1 < self.width and
                           not self.check_collision(new_x + 1, new_y + 1)):
                         new_x += 1
                         new_y += 1
                     else:
                         marble.is_moving = False
-                
+
                 if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
@@ -367,13 +367,13 @@ class GameBoard:
                 new_x, new_y = marble.x, marble.y
                 if new_x + 1 < self.width and not self.check_collision(new_x + 1, new_y):
                     new_x += 1
-                elif (new_y + 1 < self.height and new_x + 1 < self.width and 
+                elif (new_y + 1 < self.height and new_x + 1 < self.width and
                       not self.check_collision(new_x + 1, new_y + 1)):
                     new_x += 1
                     new_y += 1
                 else:
                     marble.is_moving = False
-                
+
                 if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
@@ -382,17 +382,17 @@ class GameBoard:
                 # Flip all connected gears and change direction
                 self.flip_gears(marble.x, marble.y)
                 marble.direction = "left"
-                
+
                 new_x, new_y = marble.x, marble.y
                 if new_x - 1 >= 0 and not self.check_collision(new_x - 1, new_y):
                     new_x -= 1
-                elif (new_y + 1 < self.height and new_x - 1 >= 0 and 
+                elif (new_y + 1 < self.height and new_x - 1 >= 0 and
                       not self.check_collision(new_x - 1, new_y + 1)):
                     new_x -= 1
                     new_y += 1
                 else:
                     marble.is_moving = False
-                
+
                 if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
                     self.components[marble.y][marble.x].is_occupied = False
                     marble.x, marble.y = new_x, new_y
@@ -436,7 +436,7 @@ class GameBoard:
             else:  # EMPTY or other components
                 # Calculate new position based on current direction and gravity
                 new_x, new_y = marble.x, marble.y
-                
+
                 # First try to move down (gravity)
                 if new_y + 1 < self.height and not self.check_collision(new_x, new_y + 1):
                     new_y += 1
@@ -447,8 +447,8 @@ class GameBoard:
                             new_x -= 1
                         else:
                             # If blocked, try to move down-left if possible
-                            if (new_y + 1 < self.height and new_x - 1 >= 0 and 
-                                not self.check_collision(new_x - 1, new_y + 1)):
+                            if (new_y + 1 < self.height and new_x - 1 >= 0 and
+                                    not self.check_collision(new_x - 1, new_y + 1)):
                                 new_x -= 1
                                 new_y += 1
                             else:
@@ -458,8 +458,8 @@ class GameBoard:
                             new_x += 1
                         else:
                             # If blocked, try to move down-right if possible
-                            if (new_y + 1 < self.height and new_x + 1 < self.width and 
-                                not self.check_collision(new_x + 1, new_y + 1)):
+                            if (new_y + 1 < self.height and new_x + 1 < self.width and
+                                    not self.check_collision(new_x + 1, new_y + 1)):
                                 new_x += 1
                                 new_y += 1
                             else:
@@ -474,7 +474,7 @@ class GameBoard:
                             new_y += 1
                         else:
                             marble.is_moving = False
-                
+
                 # Update position if still moving
                 if marble.is_moving and 0 <= new_x < self.width and 0 <= new_y < self.height:
                     self.components[marble.y][marble.x].is_occupied = False
@@ -487,7 +487,7 @@ class GameBoard:
                     else:
                         self.blue_marbles += 1
                     marbles_to_remove.append(marble)
-        
+
         # Remove marbles that went out of bounds or hit the interceptor
         for marble in marbles_to_remove:
             self.components[marble.y][marble.x].is_occupied = False
@@ -499,7 +499,7 @@ class GameBoard:
             "red": self.red_marbles,
             "blue": self.blue_marbles
         }
-    
+
     def get_marble_output(self) -> List[str]:
         """Get the marble output sequence"""
         return {"output": self.marble_output}

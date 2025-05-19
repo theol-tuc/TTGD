@@ -67,6 +67,8 @@ const App: React.FC = () => {
     const [initialComponents, setInitialComponents] = useState<Array<Array<{ type: string; is_occupied: boolean }>>>([]);
     const [challengeComplete, setChallengeComplete] = useState(false);
     const [isAIVisible, setIsAIVisible] = useState(false);
+    const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+    const [showCompletion, setShowCompletion] = useState(false);
 
     const buildBoard = (state: any): BoardCell[][] => {
         const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
@@ -382,19 +384,36 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        if (currentChallenge?.expectedOutput && marbleOutput.length > 0) {
-            // Check if the marble output matches the expected output
+        if (currentChallenge?.expectedOutput && marbleOutput.length > 0 && !completedChallenges.has(currentChallenge.id)) {
             const outputStr = marbleOutput.join(',');
             const expectedStr = currentChallenge.expectedOutput.join(',');
 
             if (outputStr.includes(expectedStr)) {
-                setChallengeComplete(true);
+                setCompletedChallenges(prev => new Set(prev).add(currentChallenge.id));
+                setShowCompletion(true);
             }
         }
-    }, [marbleOutput, currentChallenge]);
+    }, [marbleOutput, currentChallenge, completedChallenges]);
 
     const handleCloseOverlay = () => {
-        setChallengeComplete(false);
+        setShowCompletion(false);
+    };
+
+    const handleRestartChallenge = async () => {
+        if (!currentChallenge) return;
+
+        setShowCompletion(false);
+        await handleChallengeSelect(currentChallenge.id);
+    };
+
+    const handleNextChallenge = () => {
+        if (!currentChallenge) return;
+
+        setShowCompletion(false);
+        const currentIndex = CHALLENGES.findIndex(c => c.id === currentChallenge.id);
+        if (currentIndex < CHALLENGES.length - 1) {
+            handleChallengeSelect(CHALLENGES[currentIndex + 1].id);
+        }
     };
 
     // Update marble counts periodically when running
@@ -574,9 +593,16 @@ const App: React.FC = () => {
                 </Sider>
             </Layout>
             <ChallengeCompleteOverlay
-                visible={challengeComplete}
+                visible={showCompletion}
                 challengeName={currentChallenge?.name || ''}
                 onClose={handleCloseOverlay}
+                onRestart={handleRestartChallenge}
+                onNextChallenge={handleNextChallenge}
+                hasNextChallenge={
+                    currentChallenge ?
+                        CHALLENGES.findIndex(c => c.id === currentChallenge.id) < CHALLENGES.length - 1 :
+                        false
+                }
             />
         </Layout>
     );

@@ -5,6 +5,7 @@ from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
 from challenges import CHALLENGES, serialize_challenge
 from ai_manager import AIManager
+from prompting import generate_ai_prompt
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ app.add_middleware(
 
 GameBoardRef = Optional['GameBoard']
 
+board = GameBoard(8, 8)
 board = GameBoard(8, 8)
 
 class ComponentRequest(BaseModel):
@@ -61,6 +63,7 @@ async def get_board():
             })
         components.append(component_row)
 
+
     marbles = []
     for marble in board.marbles:
         marbles.append({
@@ -70,6 +73,7 @@ async def get_board():
             "direction": marble.direction,
             "is_moving": marble.is_moving
         })
+
 
     return BoardState(
         components=components,
@@ -139,8 +143,10 @@ async def get_counts():
 async def get_challenge(challenge_id: str):
     """Get a specific challenge"""
     global board
+    global board
     if not challenge_id:
         raise HTTPException(status_code=422, detail="Missing challenge_id parameter")
+
 
     challenge = CHALLENGES.get(challenge_id)
     if not challenge:
@@ -152,7 +158,19 @@ async def get_challenge(challenge_id: str):
         "initialBoard": serialize_challenge(challenge["board"]),
         "red_marbles": challenge["board"].red_marbles,
         "blue_marbles": challenge["board"].blue_marbles,
+        "blue_marbles": challenge["board"].blue_marbles,
     }
+
+@app.get("/ai/prompt")
+async def get_ai_prompt(challenge_id: str):
+    """Generate an AI prompt for the given challenge"""
+    try:
+        prompt = generate_ai_prompt(challenge_id)
+        return {"prompt": prompt}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/ai/move")
 async def get_ai_move():
@@ -168,7 +186,7 @@ async def get_ai_move():
                     "is_occupied": component.is_occupied
                 })
             components.append(component_row)
-        
+
         marbles = []
         for marble in board.marbles:
             marbles.append({
@@ -178,7 +196,7 @@ async def get_ai_move():
                 "direction": marble.direction,
                 "is_moving": marble.is_moving
             })
-        
+
         game_state = {
             "components": components,
             "marbles": marbles,
@@ -186,15 +204,15 @@ async def get_ai_move():
             "blue_marbles": board.blue_marbles,
             "active_launcher": board.active_launcher
         }
-        
+
         # Get AI move
         ai_move = ai_manager.get_ai_move(game_state)
         if not ai_move:
             raise HTTPException(status_code=500, detail="Failed to get AI move")
-        
+
         # Get AI explanation
         explanation = ai_manager.get_ai_explanation(game_state, ai_move)
-        
+
         return {
             "move": ai_move,
             "explanation": explanation
@@ -216,7 +234,7 @@ async def execute_ai_move():
                     "is_occupied": component.is_occupied
                 })
             components.append(component_row)
-        
+
         marbles = []
         for marble in board.marbles:
             marbles.append({
@@ -226,7 +244,7 @@ async def execute_ai_move():
                 "direction": marble.direction,
                 "is_moving": marble.is_moving
             })
-        
+
         game_state = {
             "components": components,
             "marbles": marbles,
@@ -234,15 +252,15 @@ async def execute_ai_move():
             "blue_marbles": board.blue_marbles,
             "active_launcher": board.active_launcher
         }
-        
+
         ai_move = ai_manager.get_ai_move(game_state)
         if not ai_move:
             raise HTTPException(status_code=500, detail="Failed to get AI move")
-        
+
         # Execute the move
         action = ai_move["action"]
         parameters = ai_move["parameters"]
-        
+
         if action == "add_component":
             component_type = ComponentType(parameters["type"])
             board.add_component(component_type, parameters["x"], parameters["y"])
@@ -252,7 +270,7 @@ async def execute_ai_move():
             board.set_active_launcher(parameters["launcher"])
         else:
             raise HTTPException(status_code=400, detail="Invalid AI move action")
-        
+
         return {"message": "AI move executed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

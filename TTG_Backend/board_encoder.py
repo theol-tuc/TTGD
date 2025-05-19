@@ -3,7 +3,7 @@ from game_logic import GameBoard, ComponentType
 
 class BoardEncoder:
     """Converts the game board state into LLM-friendly text format"""
-    
+
     @staticmethod
     def encode_board(board: GameBoard) -> str:
         """Convert the game board state to a text description"""
@@ -84,7 +84,7 @@ Possible Actions:
         """Create a text description of all marbles"""
         if not board.marbles:
             return "No marbles on the board"
-        
+
         marbles = []
         for marble in board.marbles:
             state = "moving" if marble.is_moving else "stopped"
@@ -140,16 +140,16 @@ Possible Actions:
 if __name__ == "__main__":
     # Create a test board
     board = GameBoard()
-    
+
     # Add some test components
     board.add_component(ComponentType.GEAR, 7, 7)
     board.add_component(ComponentType.BIT_LEFT, 6, 6)
     board.add_component(ComponentType.RAMP_LEFT, 8, 8)
-    
+
     # Encode the board
     encoded_state = BoardEncoder.encode_board(board)
     print(encoded_state)
-    
+
     # Print game rules
     print("\nGame Rules:")
     print(BoardEncoder.encode_game_rules()) 
