@@ -2,18 +2,87 @@ from game_logic import GameBoard, ComponentType, Marble
 
 def create_default_board():
     board = GameBoard(8, 8)
-    # board.set_number_of_marbles(8, 8)
     return board
 
 def create_challenge_1_board():
     board = GameBoard(8, 8)
-    # board.set_number_of_marbles(8, 8)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 3)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 5)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 7)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 9)
     board.add_component(ComponentType.RAMP_RIGHT, 5, 11)
     board.add_component(ComponentType.RAMP_LEFT, 6, 4)
+    return board
+
+def create_challenge_2_board():
+    board = GameBoard(8,8)
+    board.set_number_of_marbles(8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 4)
+    board.add_component(ComponentType.RAMP_RIGHT, 7, 5)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 6)
+    board.add_component(ComponentType.RAMP_RIGHT, 9, 7)
+    board.add_component(ComponentType.RAMP_RIGHT, 10, 8)
+    return board
+
+def create_challenge_3_board():
+    board = GameBoard(8,8)
+    board.set_number_of_marbles(8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 3)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 10, 12)
+    board.add_component(ComponentType.RAMP_RIGHT, 10, 10)
+    board.add_component(ComponentType.RAMP_LEFT, 11, 11)
+    board.add_component(ComponentType.RAMP_LEFT, 11, 9)
+    return board
+
+def create_challenge_4_board():
+    board = GameBoard(8,8)
+    board.set_number_of_marbles(8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 9, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 10, 4)
+    board.add_component(ComponentType.RAMP_RIGHT, 11, 5)
+    board.add_component(ComponentType.RAMP_LEFT, 5, 3)
+    board.add_component(ComponentType.RAMP_LEFT, 4, 4)
+    board.add_component(ComponentType.RAMP_LEFT, 3, 5)
+    return board
+
+def create_challenge_5_board():
+    board = GameBoard(8,8)
+    board.set_number_of_marbles(8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 4)
+    board.add_component(ComponentType.CROSSOVER, 7, 5)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 12)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 10)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 6)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 11)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 9)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 7)
+    return board
+
+def create_challenge_6_board():
+    board = GameBoard(8,8)
+    board.set_number_of_marbles(8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 4)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 6)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 10)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 12)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 12)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 10)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 8)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 6)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 4)
+    return board
+
+def create_challenge_16_board():
+    board = GameBoard(8,8)
+    board.add_component(ComponentType.BIT_LEFT, 5, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 4, 4)
+    board.add_component(ComponentType.BIT_LEFT, 5, 5)
+    board.add_component(ComponentType.INTERCEPTOR, 4, 6)
     return board
 
 CHALLENGES = {
@@ -28,7 +97,47 @@ CHALLENGES = {
         "board": create_challenge_1_board(),
         "red_marbles": 8,
         "blue_marbles": 8
+    },
+    "2": {
+        "id":  "2",
+        "board": create_challenge_2_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
+    },
+    "3": {
+        "id":  "3",
+        "board": create_challenge_3_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
+    },
+    "4": {
+        "id":  "4",
+        "board": create_challenge_4_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
+    },
+    "5": {
+        "id":  "5",
+        "board": create_challenge_5_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
     }
+    ,
+    "6": {
+        "id":  "6",
+        "board": create_challenge_6_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
+    },
+    "16": {
+        "id":  "16",
+        "board": create_challenge_16_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8
+    }
+
+
+
 }
 
 def serialize_challenge(board: GameBoard):
