@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { aiService, AIResponse } from '../services/aiService';
-import { Button, Card, Space, Typography, Divider, Row, Col, Alert } from 'antd';
+import { Button, Card, Space, Typography, Divider, Row, Col, Alert, Drawer } from 'antd';
 import { CloseOutlined, RobotOutlined, ThunderboltOutlined, PlayCircleOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
 interface AIOverlayProps {
-    onAIMove: () => void;
+    visible: boolean;
     onClose: () => void;
+    currentPrompt?: string;
+    onGeneratePrompt: () => void;
+    onAIMove: () => void;
 }
 
-export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
+export const AIOverlay: React.FC<AIOverlayProps> = ({ visible, onGeneratePrompt, currentPrompt, onClose, onAIMove }) => {
     const [aiResponse, setAIResponse] = useState<AIResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -48,7 +51,7 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
 
     return (
         <Card
-            style={{position: 'fixed', top: 80, left: 220, width: 320, maxHeight: 'calc(100vh - 100px)', borderRadius: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', zIndex: 1001, overflow: 'hidden', border: 'none'}}
+            style={{position: 'fixed', top: 80, left: 220, width: 320, maxHeight: 'calc(100vh - 100px)', borderRadius: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', zIndex: 2147483647, overflow: 'hidden', border: 'none'}}
             title={
                 <Space>
                     <RobotOutlined style={{ color: '#722ED1' }} />
