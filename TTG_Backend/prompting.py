@@ -19,6 +19,8 @@ def generate_ai_prompt(challenge_id: int):
     challenge_description = f"""
     Challenge: {challenge['id']}
     Description: {challenge['description']}
+    Output: {challenge['expectedOutput']}
+    avalableParts: {challenge['availableParts']}
     Board Layout: {BoardEncoder._encode_board_layout(challenge['board'])}
     Red Marbles: {challenge['red_marbles']}
     Blue Marbles: {challenge['blue_marbles']}

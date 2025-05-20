@@ -232,48 +232,54 @@ CHALLENGES = {
         "board": create_challenge_17_board(),
         "red_marbles": 3,
         "blue_marbles": 3,
-        "description": "Make the pattern blue, blue, blue, red, red, red",
-        "expectedOutput": []
+        "Description": "Make the pattern blue, blue, blue, red, red, red",
+        "expectedOutput": ['blue', 'blue', 'blue', 'red', 'red', 'red'],
+        "availableParts": "[ItemType.RampLeft]: 999"
     },
     "18": {
         "id":  "18",
         "board": create_challenge_18_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "If the top bit AND the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
-        "expectedOutput": []
+        "Description": "If the top bit AND the bottom bit start pointed to the right, put a ball in the left interceptor. Else, put a ball in the right interceptor.",
+        "expectedOutput": [],
+        "availableParts": "[ItemType.RampLeft]: 7"
     },
     "19": {
         "id":  "19",
         "board": create_challenge_19_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
-        "expectedOutput": []
+        "Description": "If the top bit AND the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
+        "expectedOutput": [],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2"
     },
     "20": {
         "id":  "20",
         "board": create_challenge_20_board(),
         "red_marbles": 0,
         "blue_marbles": 8,
-        "description": "If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
-        "expectedOutput": []
+        "Description": "If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
+        "expectedOutput": [],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2"
     },
     "21": {
         "id":  "21",
         "board": create_challenge_21_board(),
         "red_marbles": 0,
         "blue_marbles": 15,
-        "description": "Use register A to count the number of blue balls.",
-        "expectedOutput": []
+        "Description": "Use register A to count the number of blue balls.",
+        "expectedOutput": [],
+        "availableParts": "[ItemType.RampLeft]: 5"
     },
     "22": {
         "id":  "22",
         "board": create_challenge_22_board(),
         "red_marbles": 0,
         "blue_marbles": 15,
-        "description": "Make all of the blue marbles (and only the blue marbles) reach the end.",
-        "expectedOutput": []
+        "Description": "Register A starts at 15. Subtract the number of blue balls from the register.",
+        "expectedOutput": [],
+        "availableParts": "[ItemType.RampLeft]: 4"
     },
 
 

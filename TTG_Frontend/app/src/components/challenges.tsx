@@ -185,20 +185,6 @@ export const CHALLENGES: Challenge[] = [
         expectedOutput: []
     },
     {
-        id: '20',
-        name: 'Challenge 20: Symbiosis',
-        description: 'If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
-        objectives: [
-            'Complete the circuit as described',
-        ],
-        availableParts: {
-            [ItemType.RampLeft]: 999,
-            [ItemType.Crossover]: 2
-        },
-        initialBoard: [],
-        expectedOutput: []
-    },
-    {
         id: '21',
         name: 'Challenge 21: Quantum Number',
         description: 'Use register A to count the number of blue balls.',

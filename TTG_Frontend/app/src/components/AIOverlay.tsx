@@ -6,14 +6,11 @@ import { CloseOutlined, RobotOutlined, ThunderboltOutlined, PlayCircleOutlined }
 const { Title, Text } = Typography;
 
 interface AIOverlayProps {
-    visible: boolean;
-    onClose: () => void;
-    currentPrompt?: string;
-    onGeneratePrompt: () => void;
     onAIMove: () => void;
+    onClose: () => void;
 }
 
-export const AIOverlay: React.FC<AIOverlayProps> = ({ visible, onGeneratePrompt, currentPrompt, onClose, onAIMove }) => {
+export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
     const [aiResponse, setAIResponse] = useState<AIResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
