@@ -22,11 +22,11 @@ def generate_ai_prompt(challenge_id: int):
     """
 
     # Define dynamic values
-    toolbox_code = """functions"""
+    matrix_functions = """functions"""
 
     # Fill the template
     filled_prompt = template.render(
-        toolbox=toolbox_code,
+        toolbox=matrix_functions,
         question=challenge_description
     )
     print(filled_prompt)
