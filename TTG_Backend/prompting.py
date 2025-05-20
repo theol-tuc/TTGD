@@ -18,6 +18,9 @@ def generate_ai_prompt(challenge_id: int):
     # Prepare the challenge description for the prompt
     challenge_description = f"""
     Challenge: {challenge['id']}
+    Description: {challenge['description']}
+    Output: {challenge['expectedOutput']}
+    avalableParts: {challenge['availableParts']}
     Board Layout: {BoardEncoder._encode_board_layout(challenge['board'])}
     """
 

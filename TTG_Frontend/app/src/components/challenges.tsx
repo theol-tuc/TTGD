@@ -159,21 +159,7 @@ export const CHALLENGES: Challenge[] = [
     {
         id: '19',
         name: 'Challenge 19: Entanglement',
-        description: ': If the top bit AND the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
-        objectives: [
-            'Complete the circuit as described',
-        ],
-        availableParts: {
-            [ItemType.RampLeft]: 999,
-            [ItemType.Crossover]: 2
-        },
-        initialBoard: [],
-        expectedOutput: []
-    },
-    {
-        id: '20',
-        name: 'Challenge 20: Symbiosis',
-        description: 'If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
+        description: 'If the top bit AND the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.',
         objectives: [
             'Complete the circuit as described',
         ],
