@@ -4,7 +4,7 @@ from board_encoder import BoardEncoder
 
 def generate_ai_prompt(challenge_id: int):
     # Load the template
-    template = Template(filename="TemplateLibrary.md")
+    template = Template(filename="TemplateMatrix.md")
     print(CHALLENGES.keys())
 
     # Get the challenge details
@@ -18,7 +18,11 @@ def generate_ai_prompt(challenge_id: int):
     # Prepare the challenge description for the prompt
     challenge_description = f"""
     Challenge: {challenge['id']}
+    Description: {challenge['description']}
     Board Layout: {BoardEncoder._encode_board_layout(challenge['board'])}
+    Red Marbles: {challenge['red_marbles']}
+    Blue Marbles: {challenge['blue_marbles']}
+    Expected Output: {challenge['expectedOutput']}
     """
 
     # Define dynamic values
@@ -31,4 +35,5 @@ def generate_ai_prompt(challenge_id: int):
     )
     print(filled_prompt)
     return filled_prompt
-prompt = generate_ai_prompt(2)
+
+prompt = generate_ai_prompt(1)
