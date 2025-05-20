@@ -305,55 +305,82 @@ CHALLENGES = {
         "id":  "7",
         "board": create_challenge_7_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "Create a path for the blue balls to reach the output with only 6 ramps.",
+        "expectedOutput": ['blue', 'blue', 'blue','blue', 'blue', 'blue','blue','blue'],
+        "availableParts": "[ItemType.RampLeft]: 6"
     },
     "8": {
         "id":  "8",
         "board": create_challenge_8_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "Make the pattern blue, red, blue, red, blue, red...",
+        "expectedOutput": ['red','blue', 'red', 'blue', 'red', 'blue', 'red','blue'],
+        "availableParts": "[ItemType.RampLeft]: 14"
     },
     "9": {
         "id":  "9",
         "board": create_challenge_9_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "Make the pattern blue, blue, red, blue, blue, red...",
+        "expectedOutput": ['red','blue','blue', 'red','blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 18"
     },
     "10": {
         "id":  "10",
         "board": create_challenge_10_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "Make the pattern blue, blue, red, red, blue, blue, red, red...",
+        "expectedOutput": ['red','red','blue','blue', 'red','red','blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 22"
     },
     "11": {
         "id":  "11",
         "board": create_challenge_11_board(),
         "red_marbles": 0,
-        "blue_marbles": 2
+        "blue_marbles": 2,
+        "description": "Flip bits 2 and 5 to the right.",
+        "expectedOutput": ['blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 15"
     },
     "12": {
         "id":  "12",
         "board": create_challenge_12_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "Intercept a blue ball. Start with trigger Left",
+        "expectedOutput": ['blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 3"
     },
     "13": {
         "id":  "13",
         "board": create_challenge_13_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "Intercept a red ball. Start with trigger Left",
+        "expectedOutput": ['blue'],
+        "availableParts": "[ItemType.RampLeft]: 12"
     },
     "14": {
         "id":  "14",
         "board": create_challenge_14_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "If the game starts with bit A pointing to the left, intercept a blue ball. Otherwise, intercept a red ball.",
+        "expectedOutput": ['blue'],
+        "availableParts": "[ItemType.RampLeft]: 20"
     },
     "15": {
         "id":  "15",
         "board": create_challenge_15_board(),
         "red_marbles": 8,
-        "blue_marbles": 8
+        "blue_marbles": 8,
+        "description": "If bit A starts to the left, intercept a blue ball. If bit A starts to the right, intercept a red ball.",
+        "expectedOutput": ['blue'],
+        "availableParts": "[ItemType.RampLeft]: 11, [ItemType.Crossover]: 2"
     },
     "16": {
         "id":  "16",

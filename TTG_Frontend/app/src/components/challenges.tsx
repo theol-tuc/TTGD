@@ -224,7 +224,7 @@ export const CHALLENGES: Challenge[] = [
     {
         id: '14',
         name: 'Challenge 14: Duality - Part 3',
-        description: 'If the machine starts with bit A pointing to the left, intercept a blue ball. Otherwise, intercept a red ball.',
+        description: 'If the game starts with bit A pointing to the left, intercept a blue ball. Otherwise, intercept a red ball.',
         objectives: [
             'Complete the circuit as described',
         ],

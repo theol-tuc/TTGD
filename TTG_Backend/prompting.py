@@ -34,7 +34,7 @@ def generate_ai_prompt(challenge_id: int):
         toolbox=matrix_functions,
         question=challenge_description
     )
-    print(filled_prompt)
+    #print(filled_prompt)
     return filled_prompt
 
 prompt = generate_ai_prompt(1)
