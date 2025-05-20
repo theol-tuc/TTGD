@@ -37,7 +37,7 @@ The functions in the library are used to place the named Part on the actual boar
 
 ## Library
 Solve the challenge using the following function:
-   
+```{python}   
  def add_component(self, type: ComponentType, x: int, y: int) -> None:
     
     """Adds a component of the specified type to the board at position (x, y),
@@ -47,6 +47,7 @@ Solve the challenge using the following function:
     if 0 <= x < self.width and 0 <= y < self.height:
     
         self.components[y][x] = Component(type, x, y)
+```        
 The available component types are defined and named previously ItemType, and the board dimensions are `self.width`(15) × `self.height`(17).
 
 ## Challenge
@@ -56,6 +57,7 @@ The challenge you need to solve using the library is: ${question}
 The Output should be a collection of the functions from the library to be executed in the order they are needed to solve the challenge. 
 The output should be a list of function call strings, each using the following format:
 "add_component(type=ItemType.COMPONENT_NAME, x=INT, y=INT)".
+
 Output example: [
 "add_component(type=ItemType.RAMP_LEFT, x=4, y=0)",
 "add_component(type=ItemType.BIT_LEFT, x=5, y=1)",
