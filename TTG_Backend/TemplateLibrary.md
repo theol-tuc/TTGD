@@ -11,9 +11,9 @@ Parts:
 
 Ball guides:
 
--Ramps (ItemType.RAMP_LEFT or ItemType.RAMP_RIGHT): Direct the ball left or right.
+-Ramps (ItemType.RAMP_LEFT respresented as / or ItemType.RAMP_RIGHT represented as \): Direct the ball left or right.
 
--Crossovers(ItemType.CROSSOVER): Allow balls coming from the left to go right, and vice versa.
+-Crossovers(ItemType.CROSSOVER ): Allow balls coming from the left to go right, and vice versa.
 
 Bits (ItemType.BIT_LEFT or ItemType.BIT_RIGHT):
 
@@ -34,6 +34,24 @@ Capture block (ItemType.INTERCEPTOR):
 -Captures balls and stops the sequence.
 
 The functions in the library are used to place the named Part on the actual board, which is then executed by a parser. The position is a tuple of two integers, representing the x and y coordinates on the board.
+Empty sppaces are where you can place bits, ramps, interceptor, crossover and gear bits.
+Gray spaces are where you can place gears
+
+| Component Type              | Symbol |
+| --------------------------- | ------ |
+| `ComponentType.EMPTY`       | `.`    |
+| `ComponentType.GEAR`        | `G`    |
+| `ComponentType.BIT_LEFT`    | `L`    |
+| `ComponentType.BIT_RIGHT`   | `R`    |
+| `ComponentType.RAMP_LEFT`   | `\`    |
+| `ComponentType.RAMP_RIGHT`  | `/`    |
+| `ComponentType.CROSSOVER`   | `X`    |
+| `ComponentType.INTERCEPTOR` | `I`    |
+| `ComponentType.LAUNCHER`    | `S`    |
+| `ComponentType.LEVER_BLUE`  | `B`    |
+| `ComponentType.LEVER_RED`   | `r`    |
+| `ComponentType.GRAY_SPACE`  | `#`    |
+
 
 ## Library
 Solve the challenge using the following function:
@@ -54,7 +72,7 @@ The available component types are defined and named previously ItemType, and the
 The challenge you need to solve using the library is: ${question}
 
 ## Output
-The Output should be a collection of the functions from the library to be executed in the order they are needed to solve the challenge. 
+The Output should be a collection of the functions from the library to be executed in the order they are needed to solve the challenge. The output should be just the newly added parts, and not a reconstruction of the whole board.
 The output should be a list of function call strings, each using the following format:
 "add_component(type=ItemType.COMPONENT_NAME, x=INT, y=INT)".
 
