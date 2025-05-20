@@ -1,19 +1,18 @@
 # Template 1 for using library
 ## What is Turing Tumble?
-Turing Tumble is a mechanical puzzle game that simulates computational logic through the interaction of falling marbles (balls) and configurable parts (blocks) placed on a board. It visually and physically demonstrates basic computational principles and binary logic.
-On a game board, falling balls are guided by plug-in building blocks. Individual blocks (bits) can switch between two positions (1, 2), thereby changing the path for subsequent balls. Only one ball is in motion at any time. Balls are released from one of two reservoirs located at the top: blue balls from the left reservoir, red balls from the right reservoir. 
-Each reservoir is controlled by a lever at the bottom edge of the game board. The left lever releases a ball from the left reservoir, and the right lever from the right reservoir. Initially, one lever is manually activated. The currently configured path then directs the falling ball toward one of the two levers, which automatically triggers the next ball from the corresponding reservoir. 
-The process stops when either the reservoir supposed to supply the next ball is empty, or when a ball lands in a capture block and thus cannot trigger a new ball.
+Turing Tumble is a mechanical puzzle game that simulates computational logic through the interaction of falling marbles (balls) and configurable parts (blocks) placed on a board.
+On a game board, falling balls are guided by plug-in building blocks. Individual blocks (bits) can switch between two states (0, 1), thereby changing the path for subsequent balls. Only one ball is in motion at any time. Balls are released from one of two launchers located at the top: blue balls from the left launcher, red balls from the right launcher. 
+Each launcher is controlled by a lever at the bottom edge of the game board. The left lever releases a ball from the left launcher, and the right lever from the right launcher. Initially, one lever is manually activated. The currently configured path then directs the falling ball toward one of the two levers, which automatically triggers the next ball from the corresponding launcher.
 
-The objective of the game may be to produce a predefined pattern of blue and red balls in the collection trough at the bottom, or to reach specific configurations of blocks that change their position. These blocks with two positions can be interpreted as bits, thus acting as memory or counters.
+The game has a predetermined number of marbles to complete challenges and the objective of the game may be to produce a predefined pattern of blue and red balls in the collection trough at the bottom, or to reach specific configurations of blocks that change their position. When the expectedOutput of a challenge is empty, it means to just follow the instruction in the description.
 
 Parts:
 
 Ball guides:
 
--Ramps (ItemType.RAMP_LEFT respresented as / or ItemType.RAMP_RIGHT represented as \): Direct the ball left or right.
+-Ramps (ItemType.RAMP_LEFT or ItemType.RAMP_RIGHT): Direct the ball left or right. These are placed on the board in the initial state to the left and can be flipped.
 
--Crossovers(ItemType.CROSSOVER ): Allow balls coming from the left to go right, and vice versa.
+-Crossovers (ItemType.CROSSOVER ): Allow balls coming from the left to go right, and vice versa.
 
 Bits (ItemType.BIT_LEFT or ItemType.BIT_RIGHT):
 
@@ -21,7 +20,7 @@ Bits (ItemType.BIT_LEFT or ItemType.BIT_RIGHT):
 
 -Direct balls left or right depending on their current state. A bit flipped to the left will direct the ball to the right, while a bit flipped to the right will direct the ball to the left.
 
--Switch states each time a ball passes through.
+-Switches states each time a ball passes through. These are placed on the board in the initial state to the left and can be flipped.
 
 Gear bits (ItemType.GEAR_BIT_LEFT or ItemType.GEAR_BIT_RIGHT) and gears (ItemType.GEAR):
 
@@ -33,9 +32,9 @@ Capture block (ItemType.INTERCEPTOR):
 
 -Captures balls and stops the sequence.
 
-The functions in the library are used to place the named Part on the actual board, which is then executed by a parser. The position is a tuple of two integers, representing the x and y coordinates on the board.
-Empty sppaces are where you can place bits, ramps, interceptor, crossover and gear bits.
-Gray spaces are where you can place gears
+The function in the library is used to place the named Part on the actual board. The position is a tuple of two integers, representing the x and y coordinates on the board.
+Empty spaces are where you can place bits, ramps, interceptor, crossover and gear bits.
+Gray spaces are where you can place gears. The list of functions is later executed by a parser.
 
 | Component Type              | Symbol |
 | --------------------------- | ------ |
