@@ -29,14 +29,32 @@ export const analyzeWithVila = async (file: File): Promise<AIResponse> => {
   formData.append('file', file);
 
   try {
-    const response = await axios.post('http://localhost:8000/analyze-board', formData, {
+    console.log('Sending file to analyze:', file.name, file.size, 'bytes');
+    const response = await axios.post(`${API_URL}/analyze-board`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
-    return response.data;
+
+    console.log('Received response:', response.data);
+    
+    if (!response.data || (!response.data.status && !response.data.analysis)) {
+      throw new Error('Invalid response format from server');
+    }
+
+    return {
+      status: response.data.status || 'error',
+      analysis: response.data.analysis || 'No analysis available'
+    };
   } catch (error) {
     console.error('Error analyzing with VILA:', error);
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.detail || error.message;
+      console.error('Error details:', errorMessage);
+      throw new Error(errorMessage);
+    }
     throw error;
   }
 };

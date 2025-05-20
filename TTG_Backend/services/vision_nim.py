@@ -1,6 +1,6 @@
 import requests
 
-NIM_API_KEY = "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"  # کلید واقعی‌ات رو بذار اینجا
+NIM_API_KEY = "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"  # کلید واقعی‌ات رو بذار اینجا
 
 ASSET_URL = "https://api.nvcf.nvidia.com/v2/nvcf/assets"
 INFER_URL = "https://ai.api.nvidia.com/v1/vlm/nvidia/vila"
@@ -16,7 +16,7 @@ def upload_asset(file: bytes, filename: str, content_type: str):
         ASSET_URL,
         headers=headers,
         json={"contentType": content_type, "description": "Uploaded via FastAPI"},
-        timeout=30,
+        timeout=300, # 5 minutes timeout for asset creation
     )
     response.raise_for_status()
     upload_url = response.json()["uploadUrl"]

@@ -3,8 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
-from services.vision_nim import send_to_vila
+from TTG_Backend.services.vision_nim import send_to_vila
 import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 app = FastAPI()
 
@@ -133,18 +139,27 @@ async def get_counts():
 
 @app.post("/analyze-board")
 async def analyze_board(file: UploadFile = File(...)):
+    """Analyze the board image using VILA"""
     try:
-        content_type = file.content_type
-        if not content_type.startswith('image/'):
-            raise HTTPException(status_code=400, detail="File must be an image")
+        if not file:
+            logging.error("No file provided")
+            raise HTTPException(status_code=400, detail="No file provided")
         
+        logging.info(f"Received file: {file.filename}, size: {file.size} bytes")
         contents = await file.read()
+        
+        if not contents:
+            logging.error("File is empty")
+            raise HTTPException(status_code=400, detail="File is empty")
+            
+        logging.info("Starting VILA analysis...")
         result = send_to_vila(contents, file.filename)
+        logging.info(f"VILA analysis completed: {result[:100]}...")  # Log first 100 chars of result
         
         return {
-            "analysis": result["choices"][0]["message"]["content"],
-            "status": "success"
+            "status": "success",
+            "analysis": result
         }
     except Exception as e:
-        logging.error(f"Error analyzing board: {str(e)}")
+        logging.error(f"Error during board analysis: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

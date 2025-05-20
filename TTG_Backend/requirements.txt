@@ -1,3 +1,6 @@
 fastapi==0.95.2
 uvicorn==0.21.1
-pydantic==1.10.7 
+pydantic==1.10.7
+hypercorn>=0.17.3
+python-multipart
+requests>=2.31.0
