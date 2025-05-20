@@ -5,7 +5,7 @@ export enum ItemType {
     BitRight = "bit_right",
     BitLeft = "bit_left",
     Crossover = "crossover",
-    Intercept = "intercept",
+    Intercept = "interceptor",
     Invalid = "invalid",
     GraySpace = "gray_space",
     BallBlue = "ball_blue",

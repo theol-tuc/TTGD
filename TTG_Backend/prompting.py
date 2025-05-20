@@ -5,7 +5,6 @@ from board_encoder import BoardEncoder
 def generate_ai_prompt(challenge_id: int):
     # Load the template
     template = Template(filename="TemplateLibrary.md")
-    print(CHALLENGES.keys())
 
     # Get the challenge details
     challenge_key = str(challenge_id)  # Convert the challenge ID to a string
@@ -13,22 +12,26 @@ def generate_ai_prompt(challenge_id: int):
     if not challenge:
         raise ValueError(f"Challenge with ID {challenge_id} not found")
 
-    print(f"Challenge details: {challenge}")  # Debugging
-
     # Prepare the challenge description for the prompt
     challenge_description = f"""
     Challenge: {challenge['id']}
+    Description: {challenge['description']}
+    availableParts: {challenge['availableParts']}
     Board Layout: {BoardEncoder._encode_board_layout(challenge['board'])}
+    Red Marbles: {challenge['red_marbles']}
+    Blue Marbles: {challenge['blue_marbles']}
+    Expected Output: {challenge['expectedOutput']}
     """
 
     # Define dynamic values
-    toolbox_code = """functions"""
+    matrix_functions = """functions"""
 
     # Fill the template
     filled_prompt = template.render(
-        toolbox=toolbox_code,
+        toolbox=matrix_functions,
         question=challenge_description
     )
     print(filled_prompt)
     return filled_prompt
-prompt = generate_ai_prompt(1)
+
+prompt = generate_ai_prompt(6)
