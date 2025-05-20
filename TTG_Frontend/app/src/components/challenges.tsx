@@ -116,6 +116,142 @@ export const CHALLENGES: Challenge[] = [
         initialBoard: [],
         expectedOutput: ['red','blue', 'red', 'blue', 'red', 'blue', 'red','blue']
     },
+    {
+        id: '7',
+        name: 'Challenge 7: Path of Least Resistance',
+        description: 'Create a path for the blue balls to reach the output with only 6 ramps.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 6,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue','blue', 'blue', 'blue','blue','blue']
+    },
+    {
+        id: '8',
+        name: 'Challenge 8: Depolarization',
+        description: 'Make the pattern blue, red, blue, red, blue, red...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 14,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red','blue', 'red', 'blue', 'red', 'blue', 'red','blue']
+    },
+    {
+        id: '9',
+        name: 'Challenge 9: Dimers',
+        description: 'Make the pattern blue, blue, red, blue, blue, red...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 18,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red','blue','blue', 'red','blue', 'blue']
+    },
+    {
+        id: '10',
+        name: 'Challenge 10: Double Bond',
+        description: 'Make the pattern blue, blue, red, red, blue, blue, red, red...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 22,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red','red','blue','blue', 'red','red','blue', 'blue']
+    },
+    {
+        id: '11',
+        name: 'Challenge 11: Selectivity',
+        description: 'Flip bits 2 and 5 to the right.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 15,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue']
+    },
+    {
+        id: '12',
+        name: 'Challenge 12: Duality',
+        description: 'Intercept a blue ball. Start with trigger Left',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 3,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['red']
+    },
+    {
+        id: '13',
+        name: 'Challenge 13: Duality - Part 2',
+        description: 'Intercept a red ball. Start with trigger Left',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 12,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['blue']
+    },
+    {
+        id: '14',
+        name: 'Challenge 14: Duality - Part 3',
+        description: 'If the machine starts with bit A pointing to the left, intercept a blue ball. Otherwise, intercept a red ball.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 20,
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['blue']
+    },
+    {
+        id: '15',
+        name: 'Challenge 15: Inversion',
+        description: 'If bit A starts to the left, intercept a blue ball. If bit A starts to the right, intercept a red ball.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 11,
+            [ItemType.Crossover]: 2
+
+
+        },
+        initialBoard: [],
+        expectedOutput: ['blue']
+    },
     // ... other challenges
     {
         id: '16',
