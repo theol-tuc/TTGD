@@ -110,7 +110,7 @@ const App: React.FC = () => {
             try {
                 // Fetch the default challenge from the backend
                 const backendChallenge = await fetchChallengeById('default');
-                console.log("Backend Challenge:", backendChallenge); // Debugging
+                //console.log("Backend Challenge:", backendChallenge); // Debugging
                 if (!backendChallenge) {
                     throw new Error('Failed to fetch default challenge');
                 }
@@ -299,7 +299,7 @@ const App: React.FC = () => {
     const handleMarbleOutput = async () => {
             try {
                 const output = await getMarbleOutput();
-                console.log("Fetched Marble Outputs:", output); // Debugging
+                //console.log("Fetched Marble Outputs:", output); // Debugging
                 setMarbleOutput(output || []); // Ensure it sets an array
             } catch (error) {
                 console.error("Error fetching marble outputs:", error);
@@ -315,7 +315,7 @@ const App: React.FC = () => {
     }, [isRunning]);
 
     const renderMarbleOutputs = () => {
-        console.log("Rendering Marble Outputs:", marbleOutput); // Debugging
+        //console.log("Rendering Marble Outputs:", marbleOutput); // Debugging
         if (!Array.isArray(marbleOutput)) {
             console.error("marbleOutput is not an array:", marbleOutput);
             return null;

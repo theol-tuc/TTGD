@@ -5,15 +5,12 @@ from board_encoder import BoardEncoder
 def generate_ai_prompt(challenge_id: int):
     # Load the template
     template = Template(filename="TemplateLibrary.md")
-    print(CHALLENGES.keys())
 
     # Get the challenge details
     challenge_key = str(challenge_id)  # Convert the challenge ID to a string
     challenge = CHALLENGES.get(challenge_key)  # Retrieve the challenge object
     if not challenge:
         raise ValueError(f"Challenge with ID {challenge_id} not found")
-
-    print(f"Challenge details: {challenge}")  # Debugging
 
     # Prepare the challenge description for the prompt
     challenge_description = f"""
@@ -37,4 +34,4 @@ def generate_ai_prompt(challenge_id: int):
     print(filled_prompt)
     return filled_prompt
 
-prompt = generate_ai_prompt(1)
+prompt = generate_ai_prompt(6)
