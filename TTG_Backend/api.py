@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
-from TTG_Backend.services.vision_nim import send_to_vila
+from services.vision_nim import send_to_vila
+
 import logging
 
 # Configure logging
@@ -153,8 +154,15 @@ async def analyze_board(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="File is empty")
             
         logging.info("Starting VILA analysis...")
+
         result = send_to_vila(contents, file.filename)
-        logging.info(f"VILA analysis completed: {result[:100]}...")  # Log first 100 chars of result
+
+        
+        content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+       
+        logging.info(f"VILA analysis completed: {content[:100]}...")
+        # Log first 100 chars of result
         
         return {
             "status": "success",
