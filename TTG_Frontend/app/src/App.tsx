@@ -30,7 +30,7 @@ const App: React.FC = () => {
     const { currentChallenge, setCurrentChallenge, resetToDefault } = useChallenge();
     const [infoPanelVisible, setInfoPanelVisible] = useState(false);
     const [api, contextHolder] = notification.useNotification();
-    const boardRef = useRef<HTMLDivElement>(null);  // ✅ ref برای گرفتن عکس
+    const boardRef = useRef<HTMLDivElement>(null);  
 
     useEffect(() => {
         const initializeApp = async () => {

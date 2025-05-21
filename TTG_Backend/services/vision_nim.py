@@ -107,20 +107,30 @@ def send_to_vila(image_bytes: bytes, filename: str):
         "The available component types are defined and named previously ItemType, and the board dimensions are `self.width`(15) × `self.height`(17).\n"
         "\n"
         "## Challenge\n"
-        "The challenge you need to solve using the library is: ${question}\n"
+        "The challenge you need to solve using the library is: \"id\":  \"1\",\n"
+        "board\": board = GameBoard(8,8)\n"
+        "board.set_number_of_marbles(8, 8)\n"
+        "board.add_component(ComponentType.RAMP_RIGHT, 5, 3)\n"
+        "board.add_component(ComponentType.RAMP_RIGHT, 6, 4)\n"
+        "board.add_component(ComponentType.RAMP_RIGHT, 7, 5)\n"
+        "board.add_component(ComponentType.RAMP_RIGHT, 8, 6)\n"
+        "board.add_component(ComponentType.RAMP_RIGHT, 9, 7)\n"
+        "board.add_component(ComponentType.RAMP_RIGHT, 10, 8),\n"
+        "red_marbles\": 8,\n"
+        "blue_marbles\": 8,\n"
+        "description\": \"Make all of the blue marbles (and only the blue marbles) reach the end.\",\n"
+        "expectedOutput\": ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],\n"
+        "availableParts\": \"[ItemType.RampLeft]: 4\"\n"
         "\n"
         "## Output\n"
         "The Output should be a collection of the functions from the library to be executed in the order they are needed to solve the challenge. The output should be just the newly added parts, and not a reconstruction of the whole board.\n"
         "The output should be a list of function call strings, each using the following format:\n"
         "\"add_component(type=ItemType.COMPONENT_NAME, x=INT, y=INT)\".\n"
         "\n"
-        "Output example: [\n"
-        "\"add_component(type=ItemType.RAMP_LEFT, x=4, y=0)\",\n"
-        "\"add_component(type=ItemType.BIT_LEFT, x=5, y=1)\",\n"
-        "\"add_component(type=ItemType.INTERCEPTOR, x=6, y=9)\"\n"
+        
         "]"
     )
-}]
+   }]
 
 
     headers = {
@@ -134,7 +144,7 @@ def send_to_vila(image_bytes: bytes, filename: str):
     payload = {
         "model": "nvidia/vila",
         "messages": messages,
-        "temperature": 0.2,
+        "temperature": 0.3,
         "top_p": 0.7,
         "max_tokens": 1024,
         "seed": 50

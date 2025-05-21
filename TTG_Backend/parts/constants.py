@@ -1,0 +1,15 @@
+from enum import Enum
+
+class ItemType(Enum):
+    EMPTY = "EMPTY"
+    GEAR = "GEAR"
+    BIT_LEFT = "BIT_LEFT"
+    BIT_RIGHT = "BIT_RIGHT"
+    RAMP_LEFT = "RAMP_LEFT"
+    RAMP_RIGHT = "RAMP_RIGHT"
+    CROSSOVER = "CROSSOVER"
+    INTERCEPTOR = "INTERCEPTOR"
+    LAUNCHER = "LAUNCHER"
+    LEVER_BLUE = "LEVER_BLUE"
+    LEVER_RED = "LEVER_RED"
+    GRAY_SPACE = "GRAY_SPACE"

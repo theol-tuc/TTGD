@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from game_logic import GameBoard, ComponentType, Marble
 from services.vision_nim import send_to_vila
+from services.parser import parse_and_apply_commands
+import re
 
 import logging
 
@@ -138,36 +140,45 @@ async def get_counts():
     """Get marble counts"""
     return board.get_marble_counts()
 
+
 @app.post("/analyze-board")
 async def analyze_board(file: UploadFile = File(...)):
-    """Analyze the board image using VILA"""
+    """Analyze the board image using VILA and apply suggested components to the game board."""
     try:
         if not file:
             logging.error("No file provided")
             raise HTTPException(status_code=400, detail="No file provided")
         
-        logging.info(f"Received file: {file.filename}, size: {file.size} bytes")
         contents = await file.read()
-        
+
         if not contents:
             logging.error("File is empty")
             raise HTTPException(status_code=400, detail="File is empty")
-            
+        
+        with open("debug1_uploaded_board.png", "wb") as f:
+            f.write(contents)
+
+
+        logging.info(f"Received file: {file.filename}, size: {len(contents)} bytes")
         logging.info("Starting VILA analysis...")
 
         result = send_to_vila(contents, file.filename)
 
-        
         content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-
-       
         logging.info(f"VILA analysis completed: {content[:100]}...")
-        # Log first 100 chars of result
-        
+
+        # Extract list of add_component(...) commands from content
+        matches = re.findall(r'add_component\(.*?\)', content)
+
+        # Apply extracted components to the game board
+        parse_and_apply_commands(board, matches)
+
         return {
             "status": "success",
-            "analysis": result
+            "executed_components": matches,
+            "raw_response": result
         }
+
     except Exception as e:
         logging.error(f"Error during board analysis: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
