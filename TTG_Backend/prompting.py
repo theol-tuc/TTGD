@@ -17,7 +17,8 @@ def generate_ai_prompt(challenge_id: int):
     Challenge: {challenge['id']}
     Description: {challenge['description']}
     availableParts: {challenge['availableParts']}
-    Board Layout: {BoardEncoder._encode_board_layout(challenge['board'])}
+    Board Layout:
+{BoardEncoder._encode_board_layout(challenge['board'])}
     Red Marbles: {challenge['red_marbles']}
     Blue Marbles: {challenge['blue_marbles']}
     Expected Output: {challenge['expectedOutput']}
@@ -31,7 +32,7 @@ def generate_ai_prompt(challenge_id: int):
         toolbox=matrix_functions,
         question=challenge_description
     )
-    print(filled_prompt)
+    #print(filled_prompt)
     return filled_prompt
 
-prompt = generate_ai_prompt(6)
+prompt = generate_ai_prompt(1)

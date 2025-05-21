@@ -66,7 +66,6 @@ class GameBoard:
         """Set the number of marbles for each color"""
         self.red_marbles = red
         self.blue_marbles = blue
-        print(f"Red marbles: {self.red_marbles}, Blue marbles: {self.blue_marbles}")
 
     def initialize_board(self) -> None:
         """Initialize the board with empty components"""
@@ -212,7 +211,6 @@ class GameBoard:
                 if not self.check_collision(x, y):
                     self.marbles.append(Marble(color, x, y, direction))
                     self.components[y][x].is_occupied = True
-                    print(f"Launched marble at ({x}, {y}) with direction {direction}")
         else:
             print(f"Cannot launch marble: {color} marbles are not available")
 
@@ -255,10 +253,8 @@ class GameBoard:
         # Flip gear bits
         if component.type == ComponentType.GEAR_BIT_LEFT:
             component.type = ComponentType.GEAR_BIT_RIGHT
-            print(f"Flipped gear bit at ({x}, {y}) from LEFT to RIGHT")
         elif component.type == ComponentType.GEAR_BIT_RIGHT:
             component.type = ComponentType.GEAR_BIT_LEFT
-            print(f"Flipped gear bit at ({x}, {y}) from RIGHT to LEFT")
 
         # Check adjacent cells (up, right, down, left)
         directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
@@ -278,8 +274,6 @@ class GameBoard:
         for marble in self.marbles:
             if not marble.is_moving:
                 continue
-
-            print(f"Marble at ({marble.x}, {marble.y}) is moving {marble.direction}")
 
             current_component = self.components[marble.y][marble.x]
 
