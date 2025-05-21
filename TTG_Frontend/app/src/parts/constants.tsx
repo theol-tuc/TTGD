@@ -49,19 +49,19 @@ export const IMAGE_FILENAMES: Record<ItemType, string> = {
 };
 
 export const ITEM_COLORS: Record<ItemType, string> = {
-    [ItemType.Empty]: '#ffffff', // white
-    [ItemType.RampRight]: '#60bb46', // green
-    [ItemType.RampLeft]: '#a9ff18', // light green
-    [ItemType.BitRight]: '#1649b2', // dark blue
-    [ItemType.BitLeft]: '#006fff', // blue
-    [ItemType.Crossover]: '#fa9d00', // orange
-    [ItemType.Intercept]: '#34302f', // dark gray
-    [ItemType.GraySpace]: '#e0e0e0', // light gray
-    [ItemType.Invalid]: '#000000', // black
-    [ItemType.BallBlue]: '#6495ED', // cornflowerblue
-    [ItemType.BallRed]: '#FF7F50', // coral
-    [ItemType.LeverBlue]: '#87CEFA', // lightskyblue
-    [ItemType.LeverRed]: '#FFB6C1', // lightpink
+    [ItemType.Empty]: '#ffffff',
+    [ItemType.RampRight]: '#60bb46',
+    [ItemType.RampLeft]: '#a9ff18',
+    [ItemType.BitRight]: '#1649b2',
+    [ItemType.BitLeft]: '#006fff',
+    [ItemType.Crossover]: '#fa9d00',
+    [ItemType.Intercept]: '#34302f',
+    [ItemType.GraySpace]: '#e0e0e0',
+    [ItemType.Invalid]: '#000000',
+    [ItemType.BallBlue]: '#6495ED',
+    [ItemType.BallRed]: '#FF7F50',
+    [ItemType.LeverBlue]: '#87CEFA',
+    [ItemType.LeverRed]: '#FFB6C1',
     [ItemType.BorderVertical]: '#946635',
     [ItemType.BorderHorizontal]: '#49331b',
     [ItemType.BorderDiagonalLeft]: '#88694a',
@@ -73,3 +73,27 @@ export const ITEM_COLORS: Record<ItemType, string> = {
     [ItemType.GearBitRight]: '#006fff',
 };
 
+export const ASCII_SYMBOLS: Record<ItemType, string> = {
+    [ItemType.Empty]: '.',
+    [ItemType.RampRight]: '/',
+    [ItemType.RampLeft]: '\\',
+    [ItemType.BitRight]: 'R',
+    [ItemType.BitLeft]: 'L',
+    [ItemType.Crossover]: 'X',
+    [ItemType.Intercept]: 'I',
+    [ItemType.GraySpace]:'#',
+    [ItemType.Invalid]: ' ',
+    [ItemType.BallBlue]: 'b',
+    [ItemType.BallRed]: 'r',
+    [ItemType.LeverBlue]: 'B',
+    [ItemType.LeverRed]: 'R',
+    [ItemType.BorderVertical]: '|',
+    [ItemType.BorderHorizontal]: '_',
+    [ItemType.BorderDiagonalLeft]: '-',
+    [ItemType.BorderDiagonalRight]: '-',
+    [ItemType.CornerLeft]: '<',
+    [ItemType.CornerRight]: '>',
+    [ItemType.Gear]: 'G',
+    [ItemType.GearBitRight]: 'GR',
+    [ItemType.GearBitLeft]: 'GL',
+};
