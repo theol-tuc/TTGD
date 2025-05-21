@@ -345,7 +345,125 @@ export const CHALLENGES: Challenge[] = [
         },
         initialBoard: [],
         expectedOutput: []
-    }
+    },
+    {
+        id: '23',
+        name: 'Challenge 23: Tetraed',
+        description: 'Let exactly 4 blue balls reach the end. (Intercept the 5th.)',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'blue']
+    },
+    {
+        id: '24',
+        name: 'Challenge 24: Ennead',
+        description: 'Let exactly 9 blue balls reach the end. (Intercept the 10th.)',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 14,
+            [ItemType.Intercept]: 1
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue']
+    },
+    {
+        id: '25',
+        name: 'Challenge 25: Regular Expression',
+        description: 'Generate the required pattern: red, red, red, blue, blue, blue, blue, blue, blue...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999, 
+            [ItemType.Intercept]: 1, 
+            [ItemType.BitLeft]: 5
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue']
+    },
+    {
+        id: '26',
+        name: 'Challenge 26: Nucleus',
+        description: 'Generate the required pattern: blue, blue, blue, blue, red, blue, blue, blue, blue...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999, 
+            [ItemType.Crossover]: 2, 
+            [ItemType.BitLeft]: 2
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'blue', 'red', 'blue', 'blue', 'blue', 'blue']
+    },
+    {
+        id: '27',
+        name: 'Challenge 27: Reflection',
+        description: 'Reverse the direction of each of the 9 starting bits, regardless of the direction they point to start.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999, 
+            [ItemType.Intercept]: 1, 
+            [ItemType.BitLeft]: 1
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
+    {
+        id: '28',
+        name: 'Challenge 28: Latch',
+        description: 'Release only the blue balls.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 1, 
+            [ItemType.Gear]: 1, 
+            [ItemType.GearBitLeft]: 1
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'red', 'red']
+    },
+    {
+        id: '29',
+        name: 'Challenge 29: One-Shot Switch',
+        description: 'Generate the required pattern: blue, blue, blue, blue, blue, blue, red, blue...',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 999, 
+            [ItemType.Crossover]: 1, 
+            [ItemType.GearBitLeft]: 1,
+            [ItemType.Gear]: 1
+        },
+        initialBoard: [],
+        expectedOutput: ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'red', 'blue']
+    },
+    {
+        id: '30',
+        name: 'Challenge 30: Overflow',
+        description: 'Count the blue balls in the register formed by the three bits. If there are more than 7, gear bit that already exists on the board at the start of the challenge must flip right (and stay right) to indicate the overflow.',
+        objectives: [
+            'Complete the circuit as described',
+        ],
+        availableParts: {
+            [ItemType.RampLeft]: 14, 
+            [ItemType.GearBitLeft]: 1, 
+            [ItemType.Gear]: 1
+        },
+        initialBoard: [],
+        expectedOutput: []
+    },
     
 ];
 

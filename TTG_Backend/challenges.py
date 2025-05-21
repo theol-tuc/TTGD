@@ -238,6 +238,88 @@ def create_challenge_22_board():
     board.add_component(ComponentType.RAMP_RIGHT, 6, 12)
     return board
 
+def create_challenge_23_board():
+    board = GameBoard(8, 8)
+    board.add_component(ComponentType.BIT_LEFT, 5, 3)
+    board.add_component(ComponentType.BIT_LEFT, 5, 5)
+    board.add_component(ComponentType.BIT_LEFT, 5, 7)
+    board.add_component(ComponentType.RAMP_RIGHT, 3, 5)
+    board.add_component(ComponentType.RAMP_RIGHT, 3, 7)
+    board.add_component(ComponentType.RAMP_RIGHT, 3, 9)
+    board.add_component(ComponentType.RAMP_RIGHT, 3, 11)
+    board.add_component(ComponentType.RAMP_LEFT, 4, 4)
+    board.add_component(ComponentType.RAMP_LEFT, 4, 6)
+    board.add_component(ComponentType.RAMP_LEFT, 4, 8)
+    board.add_component(ComponentType.RAMP_LEFT, 4, 10)
+    board.add_component(ComponentType.RAMP_LEFT, 4, 12)
+    board.add_component(ComponentType.RAMP_LEFT, 6, 4)
+    board.add_component(ComponentType.RAMP_LEFT, 6, 6)
+    board.add_component(ComponentType.INTERCEPTOR, 6, 8)
+    return board
+
+def create_challenge_24_board():
+    board = GameBoard(8, 8)
+    board.add_component(ComponentType.BIT_LEFT, 5, 3)
+    board.add_component(ComponentType.BIT_LEFT, 5, 5)
+    board.add_component(ComponentType.BIT_LEFT, 5, 7)
+    board.add_component(ComponentType.BIT_LEFT, 5, 9)
+    return board
+
+def create_challenge_25_board():
+    board = GameBoard(8, 8)
+    return board
+
+def create_challenge_26_board():
+    board = GameBoard(10, 10)
+    board.add_component(ComponentType.BIT_LEFT, 9, 3)
+    board.add_component(ComponentType.INTERCEPTOR, 10, 4)
+    return board
+
+def create_challenge_27_board():
+    board = GameBoard(8, 8)
+    board.add_component(ComponentType.BIT_LEFT, 4, 4)
+    board.add_component(ComponentType.BIT_LEFT, 4, 6)
+    board.add_component(ComponentType.BIT_LEFT, 4, 8)
+    board.add_component(ComponentType.BIT_LEFT, 4, 10)
+    board.add_component(ComponentType.BIT_LEFT, 7, 5)
+    board.add_component(ComponentType.BIT_LEFT, 7, 7)
+    board.add_component(ComponentType.BIT_LEFT, 7, 9)
+    board.add_component(ComponentType.BIT_LEFT, 7, 11)
+    board.add_component(ComponentType.BIT_LEFT, 10, 4)
+    return board
+
+def create_challenge_28_board():
+    board = GameBoard(8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 3)
+    board.add_component(ComponentType.RAMP_RIGHT, 6, 4)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 3)
+    board.add_component(ComponentType.RAMP_LEFT, 8, 4)
+    board.add_component(ComponentType.GEAR_BIT_RIGHT, 7, 5)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 7)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 9)
+    board.add_component(ComponentType.RAMP_RIGHT, 5, 11)
+    board.add_component(ComponentType.RAMP_LEFT, 6, 8)
+    board.add_component(ComponentType.RAMP_LEFT, 6, 10)
+    board.add_component(ComponentType.RAMP_LEFT, 6, 12)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 8)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 10)
+    board.add_component(ComponentType.RAMP_RIGHT, 8, 12)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 7)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 9)
+    board.add_component(ComponentType.RAMP_LEFT, 9, 11)
+    return board
+
+def create_challenge_29_board():
+    board = GameBoard(8, 8)
+    board.add_component(ComponentType.GEAR_BIT_LEFT, 5, 3)
+    return board
+
+def create_challenge_30_board():
+    board = GameBoard(8, 8)
+    board.add_component(ComponentType.BIT_LEFT, 5, 3)
+    board.add_component(ComponentType.BIT_LEFT, 5, 5)
+    board.add_component(ComponentType.BIT_LEFT, 5, 7)
+    board.add_component(ComponentType.GEAR_BIT_LEFT, 4, 7)
 
 CHALLENGES = {
     "default": {
@@ -446,6 +528,78 @@ CHALLENGES = {
         "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 4"
     },
+    "23": {
+        "id":  "23",
+        "board": create_challenge_23_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8,
+        "Description": "Let exactly 4 blue balls reach the end. (Intercept the 5th.)",
+        "expectedOutput": ['blue', 'blue', 'blue', 'blue'],
+        "availableParts": "none"
+    },
+    "24": {
+        "id":  "24",
+        "board": create_challenge_24_board(),
+        "red_marbles": 12,
+        "blue_marbles": 12,
+        "Description": " Let exactly 9 blue balls reach the end. (Intercept the 10th.)",
+        "expectedOutput": ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 14, [ItemType.Intercept]: 1"
+    },
+    "25": {
+        "id":  "25",
+        "board": create_challenge_25_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8,
+        "Description": "Generate the required pattern.",
+        "expectedOutput": ['red', 'red', 'red', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Intercept]: 1, [ItemType.BitLeft]: 5"
+    },
+    "26": {
+        "id":  "26",
+        "board": create_challenge_26_board(),
+        "red_marbles": 10,
+        "blue_marbles": 10,
+        "Description": "Generate the required pattern.",
+        "expectedOutput": ['blue', 'blue', 'blue', 'blue', 'red', 'blue', 'blue', 'blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2, [ItemType.BitLeft]: 2"
+    },
+    "27": {
+        "id":  "27",
+        "board": create_challenge_27_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8,
+        "Description": "Reverse the direction of each of the 9 starting bits, regardless of the direction they point to start.",
+        "expectedOutput": [],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Intercept]: 1, [ItemType.BitLeft]: 1"
+    },
+    "28": {
+        "id":  "28",
+        "board": create_challenge_28_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8,
+        "Description": "Generate the required pattern.",
+        "expectedOutput": ['blue', 'blue', 'blue', 'blue', 'red', 'blue', 'blue', 'blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2, [ItemType.BitLeft]: 2"
+    },
+    "29": {
+        "id":  "29",
+        "board": create_challenge_29_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8,
+        "Description": "Generate the required pattern.",
+        "expectedOutput": ['blue', 'blue', 'blue', 'blue', 'red', 'blue', 'blue', 'blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2, [ItemType.BitLeft]: 2"
+    },
+    "30": {
+        "id":  "30",
+        "board": create_challenge_30_board(),
+        "red_marbles": 8,
+        "blue_marbles": 8,
+        "Description": "Generate the required pattern.",
+        "expectedOutput": ['blue', 'blue', 'blue', 'blue', 'red', 'blue', 'blue', 'blue', 'blue'],
+        "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2, [ItemType.BitLeft]: 2"
+    }
 
 
 

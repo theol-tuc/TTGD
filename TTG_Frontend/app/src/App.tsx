@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Layout, Dropdown, Menu, Space, Button, Drawer, Typography, notification } from 'antd';
+import {Layout, Dropdown, Menu, Space, Button, Drawer, Typography, notification, Empty } from 'antd';
 import Board, { BoardCell } from "./board/board";
 import { Toolbar } from "./ui/toolbar";
 import { PartsPanel } from "./ui/partsPanel";
@@ -382,7 +382,7 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        if (currentChallenge?.expectedOutput && marbleOutput.length > 0 && !completedChallenges.has(currentChallenge.id)) {
+        if (currentChallenge?.expectedOutput && currentChallenge.expectedOutput.length > 0 && marbleOutput.length > 0 && !completedChallenges.has(currentChallenge.id)) {
             const outputStr = marbleOutput.join(',');
             const expectedStr = currentChallenge.expectedOutput.join(',');
 
