@@ -130,6 +130,24 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
                     <>
                         <Divider style={{ margin: '8px 0' }} />
 
+                        {aiResponse.text_representation && (
+                            <Card
+                                title="Current Board State"
+                                size="small"
+                                style={{ borderRadius: 8, marginBottom: 16 }}
+                            >
+                                <pre style={{ 
+                                    margin: 0, 
+                                    whiteSpace: 'pre-wrap',
+                                    fontFamily: 'monospace',
+                                    fontSize: '12px',
+                                    lineHeight: '1.2'
+                                }}>
+                                    {aiResponse.text_representation}
+                                </pre>
+                            </Card>
+                        )}
+
                         <Card
                             title="AI's Move"
                             size="small"

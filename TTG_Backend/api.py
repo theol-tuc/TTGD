@@ -27,7 +27,7 @@ GameBoardRef = Optional['GameBoard']
 
 # Initialize game board
 board = GameBoard(8, 8)
-
+board.initialize_board()  # Explicitly call initialize_board to set up the board structure
 
 class ComponentRequest(BaseModel):
     type: str
@@ -188,7 +188,7 @@ async def get_ai_move(request: Dict[str, Any]):
     Get AI's next move based on current game state and challenge context.
     """
     try:
-        print("Received request:", request)
+        #print("Received request:", request)
         game_state = request.get('gameState')
         challenge_id = request.get('challengeId')
         
@@ -212,7 +212,7 @@ async def get_ai_move(request: Dict[str, Any]):
             "blue_marbles": game_state['blue_marbles'],
             "active_launcher": game_state['active_launcher']
         }
-        print("Processed board state:", board_state)
+        #print("Processed board state:", board_state)
         move = ai_manager.get_ai_move(board_state, challenge_id)
         return move
     except HTTPException as he:

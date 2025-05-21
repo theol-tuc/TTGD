@@ -12,6 +12,7 @@ class AIManager:
         """
         # Create new board
         board = GameBoard(8, 8)  # Standard 8x8 board
+        board.initialize_board()  # Initialize the board structure
 
         # Set marbles
         board.set_number_of_marbles(
@@ -30,7 +31,7 @@ class AIManager:
                     if component and component.get('type'):
                         try:
                             comp_type = ComponentType(component['type'])
-                            board.add_component(comp_type, row_idx, col_idx)
+                            board.add_component(comp_type, col_idx, row_idx)  # Fixed x,y order
                         except ValueError:
                             print(f"Invalid component type: {component['type']}")
 
@@ -42,7 +43,7 @@ class AIManager:
         """
         try:
             # Debug print
-            print("Received game state:", game_state)
+            #print("Received game state:", game_state)
             
             # Convert game state to board
             board = self.convert_game_state_to_board(game_state)

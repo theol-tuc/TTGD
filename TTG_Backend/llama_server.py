@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Dict, Any, Optional
 import subprocess
 import json
 import os
@@ -20,6 +21,13 @@ app.add_middleware(
 
 class GenerateRequest(BaseModel):
     prompt: str
+    board_state: Dict[str, Any]
+
+
+class ExplainRequest(BaseModel):
+    prompt: str
+    board_state: Dict[str, Any]
+    move: Dict[str, Any]
 
 
 def extract_json(response_text: str) -> str:
@@ -38,8 +46,8 @@ def extract_json(response_text: str) -> str:
     return None
 
 
-@app.post("/generate")
-async def generate(request: GenerateRequest):
+def call_llm(prompt: str) -> str:
+    """Call the LLM server with the given prompt."""
     try:
         # Create a temporary script with the prompt
         script_content = f"""#!/bin/bash
@@ -49,7 +57,7 @@ export PYTHONPATH=$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH
 export PIP_CACHE_DIR=/tmp/mtko19/pip-cache
 
 cd /tmp/mtko19/llama.cpp/build
-PROMPT="{request.prompt}"
+PROMPT="{prompt}"
 ./bin/llama-cli -m /tmp/mtko19/models/llama-2-13b-chat/llama-2-13b-chat.Q4_K_M.gguf -p "$PROMPT" -n 200
 """
 
@@ -71,21 +79,93 @@ PROMPT="{request.prompt}"
         os.remove("temp_llama.sh")
 
         if result.returncode != 0:
-            raise HTTPException(status_code=500, detail=f"LLAMA error: {result.stderr}")
+            raise Exception(f"LLAMA error: {result.stderr}")
 
         # Extract the response (everything after the prompt)
-        response = result.stdout.split(request.prompt)[-1].strip()
+        response = result.stdout.split(prompt)[-1].strip()
+        return response
 
-        # Try to extract and validate JSON
+    except Exception as e:
+        raise Exception(f"Error calling LLM: {str(e)}")
+
+
+@app.post("/generate")
+async def generate_move(request: GenerateRequest):
+    try:
+        # Format the prompt for the LLM
+        formatted_prompt = f"""
+{request.prompt}
+
+Current board state:
+{json.dumps(request.board_state, indent=2)}
+
+Please provide a move in the following JSON format:
+{{
+    "action": "add_component",
+    "parameters": {{
+        "type": "<component_type>",
+        "x": <x_coordinate>,
+        "y": <y_coordinate>
+    }},
+    "explanation": "<explanation>",
+    "text_representation": "<human_readable_description>"
+}}
+
+Your response should be a valid JSON object following the format above.
+"""
+
+        # Call the LLM
+        response = call_llm(formatted_prompt)
+
+        # Extract and validate JSON
         json_str = extract_json(response)
-        if json_str:
-            try:
-                parsed_json = json.loads(json_str)
-                return {"response": parsed_json}
-            except json.JSONDecodeError:
-                raise HTTPException(status_code=500, detail="Invalid JSON in LLM response")
-        else:
+        if not json_str:
             raise HTTPException(status_code=500, detail="No valid JSON found in LLM response")
+
+        try:
+            parsed_json = json.loads(json_str)
+            return parsed_json
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="Invalid JSON in LLM response")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/explain")
+async def explain_move(request: ExplainRequest):
+    try:
+        # Format the prompt for the LLM
+        formatted_prompt = f"""
+{request.prompt}
+
+Current board state:
+{json.dumps(request.board_state, indent=2)}
+
+Move to explain:
+{json.dumps(request.move, indent=2)}
+
+Please provide an explanation for this move in the following JSON format:
+{{
+    "explanation": "<detailed_explanation_of_the_move>"
+}}
+
+Your response should be a valid JSON object following the format above.
+"""
+
+        # Call the LLM
+        response = call_llm(formatted_prompt)
+
+        # Extract and validate JSON
+        json_str = extract_json(response)
+        if not json_str:
+            raise HTTPException(status_code=500, detail="No valid JSON found in LLM response")
+
+        try:
+            parsed_json = json.loads(json_str)
+            return parsed_json
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="Invalid JSON in LLM response")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
