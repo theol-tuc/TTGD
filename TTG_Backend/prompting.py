@@ -35,4 +35,4 @@ def generate_ai_prompt(challenge_id: int):
     #print(filled_prompt)
     return filled_prompt
 
-prompt = generate_ai_prompt(6)
+prompt = generate_ai_prompt(1)

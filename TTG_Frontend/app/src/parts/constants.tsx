@@ -82,7 +82,7 @@ export const ASCII_SYMBOLS: Record<ItemType, string> = {
     [ItemType.Crossover]: 'X', //
     [ItemType.Intercept]: 'I', //
     [ItemType.GraySpace]:'#', //
-    [ItemType.Invalid]: ' ',
+    [ItemType.Invalid]: 'i',
     [ItemType.BallBlue]: 'b',
     [ItemType.BallRed]: 'r',
     [ItemType.LeverBlue]: 'B', //

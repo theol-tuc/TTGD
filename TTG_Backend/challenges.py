@@ -319,7 +319,8 @@ def create_challenge_30_board():
     board.add_component(ComponentType.BIT_LEFT, 5, 3)
     board.add_component(ComponentType.BIT_LEFT, 5, 5)
     board.add_component(ComponentType.BIT_LEFT, 5, 7)
-    board.add_component(ComponentType.GEAR_BIT_LEFT, 4, 7)
+    board.add_component(ComponentType.GEAR_BIT_LEFT, 4, 8)
+    return board
 
 CHALLENGES = {
     "default": {
