@@ -74,26 +74,26 @@ export const ITEM_COLORS: Record<ItemType, string> = {
 };
 
 export const ASCII_SYMBOLS: Record<ItemType, string> = {
-    [ItemType.Empty]: '.',
-    [ItemType.RampRight]: '/',
-    [ItemType.RampLeft]: '\\',
-    [ItemType.BitRight]: 'R',
-    [ItemType.BitLeft]: 'L',
-    [ItemType.Crossover]: 'X',
-    [ItemType.Intercept]: 'I',
-    [ItemType.GraySpace]:'#',
+    [ItemType.Empty]: '.', //
+    [ItemType.RampRight]: '\\', //
+    [ItemType.RampLeft]: '/',//
+    [ItemType.BitRight]: 'R', //
+    [ItemType.BitLeft]: 'L', //
+    [ItemType.Crossover]: 'X', //
+    [ItemType.Intercept]: 'I', //
+    [ItemType.GraySpace]:'#', //
     [ItemType.Invalid]: ' ',
     [ItemType.BallBlue]: 'b',
     [ItemType.BallRed]: 'r',
-    [ItemType.LeverBlue]: 'B',
-    [ItemType.LeverRed]: 'R',
-    [ItemType.BorderVertical]: '|',
-    [ItemType.BorderHorizontal]: '_',
-    [ItemType.BorderDiagonalLeft]: '-',
-    [ItemType.BorderDiagonalRight]: '-',
-    [ItemType.CornerLeft]: '<',
-    [ItemType.CornerRight]: '>',
-    [ItemType.Gear]: 'G',
-    [ItemType.GearBitRight]: 'GR',
-    [ItemType.GearBitLeft]: 'GL',
+    [ItemType.LeverBlue]: 'B', //
+    [ItemType.LeverRed]: 'R', //
+    [ItemType.BorderVertical]: '|', //
+    [ItemType.BorderHorizontal]: '_', //
+    [ItemType.BorderDiagonalLeft]: '-', //
+    [ItemType.BorderDiagonalRight]: '-', //
+    [ItemType.CornerLeft]: '<', //
+    [ItemType.CornerRight]: '>', //
+    [ItemType.Gear]: 'G', //
+    [ItemType.GearBitRight]: 'GR', //
+    [ItemType.GearBitLeft]: 'GL' //
 };

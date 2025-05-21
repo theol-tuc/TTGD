@@ -43,9 +43,9 @@ Possible Actions:
                 elif component.type == ComponentType.BIT_RIGHT:
                     row.append("R")
                 elif component.type == ComponentType.RAMP_LEFT:
-                    row.append("\\")
-                elif component.type == ComponentType.RAMP_RIGHT:
                     row.append("/")
+                elif component.type == ComponentType.RAMP_RIGHT:
+                    row.append("\\")
                 elif component.type == ComponentType.CROSSOVER:
                     row.append("X")
                 elif component.type == ComponentType.INTERCEPTOR:
@@ -55,11 +55,25 @@ Possible Actions:
                 elif component.type == ComponentType.LEVER_BLUE:
                     row.append("B")
                 elif component.type == ComponentType.LEVER_RED:
-                    row.append("r")
+                    row.append("R")
                 elif component.type == ComponentType.GRAY_SPACE:
                     row.append("#")
+                elif component.type == ComponentType.BORDER_VERTICAL:
+                    row.append("|")
+                elif component.type == ComponentType.BORDER_HORIZONTAL:
+                    row.append("_")
+                elif component.type == ComponentType.BORDER_DIAGONAL_LEFT or component.type == ComponentType.BORDER_DIAGONAL_RIGHT:
+                    row.append("-")
+                elif component.type == ComponentType.CORNER_LEFT:
+                    row.append("<")
+                elif component.type == ComponentType.CORNER_RIGHT:
+                    row.append(">")
+                elif component.type == ComponentType.GEAR_BIT_LEFT:
+                    row.append("GL")
+                elif component.type == ComponentType.GEAR_BIT_RIGHT:
+                    row.append("GR")
                 else:
-                    row.append(" ")
+                    row.append("i")
             layout.append("".join(row))
         return "\n".join(layout)
 
