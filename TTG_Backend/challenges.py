@@ -388,7 +388,7 @@ CHALLENGES = {
         "board": create_challenge_7_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "Create a path for the blue balls to reach the output with only 6 ramps.",
+        "description": "Create a path for the blue marbles to reach the output with only 6 ramps.",
         "expectedOutput": ['blue', 'blue', 'blue','blue', 'blue', 'blue','blue','blue'],
         "availableParts": "[ItemType.RampLeft]: 6"
     },
@@ -424,8 +424,8 @@ CHALLENGES = {
         "board": create_challenge_11_board(),
         "red_marbles": 0,
         "blue_marbles": 2,
-        "description": "Flip bits 2 and 5 to the right.",
-        "expectedOutput": ['blue', 'blue'],
+        "description": "Flip the bits with the coordinates (3,9) and (11,9) to the right.",
+        "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 15"
     },
     "12": {
@@ -433,8 +433,8 @@ CHALLENGES = {
         "board": create_challenge_12_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "Intercept a blue ball. Start with trigger Left",
-        "expectedOutput": ['blue', 'blue'],
+        "description": "Intercept a blue marble.",
+        "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 3"
     },
     "13": {
@@ -442,7 +442,7 @@ CHALLENGES = {
         "board": create_challenge_13_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "Intercept a red ball. Start with trigger Left",
+        "description": "Intercept a red marble. Start with trigger Left",
         "expectedOutput": ['blue'],
         "availableParts": "[ItemType.RampLeft]: 12"
     },
@@ -451,8 +451,8 @@ CHALLENGES = {
         "board": create_challenge_14_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "If the game starts with bit A pointing to the left, intercept a blue ball. Otherwise, intercept a red ball.",
-        "expectedOutput": ['blue'],
+        "description": "If the challenge starts with the bit pointing to the left, intercept a blue marble. Otherwise, intercept a red marble.",
+        "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 20"
     },
     "15": {
@@ -460,8 +460,8 @@ CHALLENGES = {
         "board": create_challenge_15_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "If bit A starts to the left, intercept a blue ball. If bit A starts to the right, intercept a red ball.",
-        "expectedOutput": ['blue'],
+        "description": "If the bit with the coordinates (7,11) starts to the left, intercept a blue marble. Otherwise, intercept a red marble.",
+        "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 11, [ItemType.Crossover]: 2"
     },
     "16": {
@@ -469,8 +469,8 @@ CHALLENGES = {
         "board": create_challenge_16_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "description": "Let only 3 blue balls reach the bottom and catch the 4th ball in the interceptor.",
-        "expectedOutput": [],
+        "description": "Let only 3 blue marbles reach the bottom and catch the 4th marble in the interceptor.",
+        "expectedOutput": ['blue', 'blue', 'blue'],
         "availableParts": "[ItemType.RampLeft]: 10"
 
     },
@@ -488,7 +488,7 @@ CHALLENGES = {
         "board": create_challenge_18_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "Description": "If the top bit AND the bottom bit start pointed to the right, put a ball in the left interceptor. Else, put a ball in the right interceptor.",
+        "Description": "If the top bit AND the bottom bit start pointed to the right, put a marble in the left interceptor. Else, put a marble in the right interceptor.",
         "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 7"
     },
@@ -497,7 +497,7 @@ CHALLENGES = {
         "board": create_challenge_19_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "Description": "If the top bit AND the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
+        "Description": "If the top bit AND the bottom bit start pointed to the right, intercept a blue marble. Otherwise, intercept a red marble.",
         "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2"
     },
@@ -506,7 +506,7 @@ CHALLENGES = {
         "board": create_challenge_20_board(),
         "red_marbles": 0,
         "blue_marbles": 8,
-        "Description": "If the top bit OR the bottom bit start pointed to the right, intercept a blue ball. Otherwise, intercept a red ball.",
+        "Description": "If the top bit OR the bottom bit start pointed to the right, intercept a blue marble. Otherwise, intercept a red marble.",
         "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 999, [ItemType.Crossover]: 2"
     },
@@ -515,7 +515,7 @@ CHALLENGES = {
         "board": create_challenge_21_board(),
         "red_marbles": 0,
         "blue_marbles": 15,
-        "Description": "Use register A to count the number of blue balls.",
+        "Description": "On a Turing Tumble board, each bit component has two states—left and right—which represent binary 0 and 1. When you align multiple bits vertically and let marbles flow through them from top to bottom, the structure behaves like a binary register. You can simulate binary increment and decrement using vertical bit registers on a Turing Tumble board. Each operation involves flipping bits from the LSB upward, with carry for incrementing and borrow for decrementing, just like in standard binary arithmetic. Use the marble’s path and bit flipping behavior to implement these transformations physically. Use the register formed by the bits on the board to count the number of blue marbles.",
         "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 5"
     },
@@ -524,7 +524,7 @@ CHALLENGES = {
         "board": create_challenge_22_board(),
         "red_marbles": 0,
         "blue_marbles": 15,
-        "Description": "Register A starts at 15. Subtract the number of blue balls from the register.",
+        "Description": "On a Turing Tumble board, each bit component has two states—left and right—which represent binary 0 and 1. When you align multiple bits vertically and let marbles flow through them from top to bottom, the structure behaves like a binary register. You can simulate binary increment and decrement using vertical bit registers on a Turing Tumble board. Each operation involves flipping bits from the LSB upward, with carry for incrementing and borrow for decrementing, just like in standard binary arithmetic. Use the marble’s path and bit flipping behavior to implement these transformations physically. The register formed by the bits on the board starts at the value 15. Subtract the number of blue marbles from the register.",
         "expectedOutput": [],
         "availableParts": "[ItemType.RampLeft]: 4"
     },
@@ -533,7 +533,7 @@ CHALLENGES = {
         "board": create_challenge_23_board(),
         "red_marbles": 8,
         "blue_marbles": 8,
-        "Description": "Let exactly 4 blue balls reach the end. (Intercept the 5th.)",
+        "Description": "Let exactly 4 blue marbles reach the end. (Intercept the 5th.)",
         "expectedOutput": ['blue', 'blue', 'blue', 'blue'],
         "availableParts": "none"
     },
@@ -542,7 +542,7 @@ CHALLENGES = {
         "board": create_challenge_24_board(),
         "red_marbles": 12,
         "blue_marbles": 12,
-        "Description": " Let exactly 9 blue balls reach the end. (Intercept the 10th.)",
+        "Description": " Let exactly 9 blue marbles reach the end. (Intercept the 10th.)",
         "expectedOutput": ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue'],
         "availableParts": "[ItemType.RampLeft]: 14, [ItemType.Intercept]: 1"
     },
