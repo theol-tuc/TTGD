@@ -36,20 +36,29 @@ The function in the library is used to place the named Part on the actual board.
 Empty spaces are where you can place bits, ramps, interceptor, crossover and gear bits.
 Gray spaces are where you can place gears. The list of functions is later executed by a parser.
 
-| Component Type              | Symbol |
-| --------------------------- | ------ |
-| `ComponentType.EMPTY`       | `.`    |
-| `ComponentType.GEAR`        | `G`    |
-| `ComponentType.BIT_LEFT`    | `L`    |
-| `ComponentType.BIT_RIGHT`   | `R`    |
-| `ComponentType.RAMP_LEFT`   | `\`    |
-| `ComponentType.RAMP_RIGHT`  | `/`    |
-| `ComponentType.CROSSOVER`   | `X`    |
-| `ComponentType.INTERCEPTOR` | `I`    |
-| `ComponentType.LAUNCHER`    | `S`    |
-| `ComponentType.LEVER_BLUE`  | `B`    |
-| `ComponentType.LEVER_RED`   | `r`    |
-| `ComponentType.GRAY_SPACE`  | `#`    |
+| Component Type                    | Symbol |
+| -------------------------------- | ------ |
+| `ComponentType.EMPTY`            | `.`    |
+| `ComponentType.GEAR`             | `G`    |
+| `ComponentType.BIT_LEFT`         | `L`    |
+| `ComponentType.BIT_RIGHT`        | `R`    |
+| `ComponentType.RAMP_LEFT`        | `/`    |
+| `ComponentType.RAMP_RIGHT`       | `\`    |
+| `ComponentType.CROSSOVER`        | `X`    |
+| `ComponentType.INTERCEPTOR`      | `I`    |
+| `ComponentType.LAUNCHER`         | `S`    |
+| `ComponentType.LEVER_BLUE`       | `B`    |
+| `ComponentType.LEVER_RED`        | `R`    |
+| `ComponentType.GRAY_SPACE`       | `#`    |
+| `ComponentType.BORDER_VERTICAL`  | `|`    |
+| `ComponentType.BORDER_HORIZONTAL`| `_`    |
+| `ComponentType.BORDER_DIAGONAL_LEFT` / `ComponentType.BORDER_DIAGONAL_RIGHT` | `-` |
+| `ComponentType.CORNER_LEFT`      | `<`    |
+| `ComponentType.CORNER_RIGHT`     | `>`    |
+| `ComponentType.GEAR_BIT_LEFT`    | `GL`   |
+| `ComponentType.GEAR_BIT_RIGHT`   | `GR`   |
+| `ComponentType.GEAR_BIT_RIGHT`   | `i`    |
+
 
 
 ## Library
