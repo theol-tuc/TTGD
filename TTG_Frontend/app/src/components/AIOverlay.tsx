@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { aiService, AIResponse } from '../services/aiService';
-import { Button, Card, Space, Typography, Divider, Row, Col, Alert, Drawer } from 'antd';
+import { Button, Card, Space, Typography, Divider, Row, Col, Alert } from 'antd';
 import { CloseOutlined, RobotOutlined, ThunderboltOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useChallenge } from './challengeContext';
 import { getBoardState } from '../services/api';
@@ -65,7 +65,7 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
 
     return (
         <Card
-            style={{position: 'fixed', top: 80, left: 220, width: 320, maxHeight: 'calc(100vh - 100px)', borderRadius: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', zIndex: 2147483647, overflow: 'hidden', border: 'none'}}
+            style={{position: 'fixed', top: 80, left: 100, width: 320, maxHeight: 'calc(100vh - 100px)', borderRadius: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', zIndex: 1001, overflow: 'hidden', border: 'none'}}
             title={
                 <Space>
                     <RobotOutlined style={{ color: '#722ED1' }} />
@@ -129,24 +129,6 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
                 {aiResponse?.action && (
                     <>
                         <Divider style={{ margin: '8px 0' }} />
-
-                        {aiResponse.text_representation && (
-                            <Card
-                                title="Current Board State"
-                                size="small"
-                                style={{ borderRadius: 8, marginBottom: 16 }}
-                            >
-                                <pre style={{ 
-                                    margin: 0, 
-                                    whiteSpace: 'pre-wrap',
-                                    fontFamily: 'monospace',
-                                    fontSize: '12px',
-                                    lineHeight: '1.2'
-                                }}>
-                                    {aiResponse.text_representation}
-                                </pre>
-                            </Card>
-                        )}
 
                         <Card
                             title="AI's Move"

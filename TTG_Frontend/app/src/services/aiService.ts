@@ -3,9 +3,8 @@ import { BoardState } from './api';
 
 export interface AIResponse {
     action: string;
-    parameters?: any;
-    explanation?: string;
-    text_representation?: string;
+    parameters: Record<string, any>;
+    explanation: string;
 }
 
 export const aiService = {

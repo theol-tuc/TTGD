@@ -27,7 +27,7 @@ GameBoardRef = Optional['GameBoard']
 
 # Initialize game board
 board = GameBoard(8, 8)
-board.initialize_board()  # Explicitly call initialize_board to set up the board structure
+
 
 class ComponentRequest(BaseModel):
     type: str

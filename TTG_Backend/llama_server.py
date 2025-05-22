@@ -1,11 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
 import subprocess
 import json
 import os
 import re
+from datetime import datetime
 
 app = FastAPI()
 
@@ -18,156 +18,100 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Constants
+LLAMA_CLI_PATH = "/tmp/mtko19/llama.cpp/build/bin/llama-cli"
+LOG_DIR = "/tmp/mtko19/llama_logs"
 
 class GenerateRequest(BaseModel):
     prompt: str
-    board_state: Dict[str, Any]
 
 
-class ExplainRequest(BaseModel):
-    prompt: str
-    board_state: Dict[str, Any]
-    move: Dict[str, Any]
+def extract_json(raw_output: str) -> dict:
+    """
+    Extract and validate JSON from LLM output using multiple strategies.
+    Returns the first valid JSON object that matches our expected format.
+    """
+    # Log raw output to file for debugging
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    os.makedirs(LOG_DIR, exist_ok=True)
+    log_file = os.path.join(LOG_DIR, f"llama_output_{timestamp}.txt")
+    
+    with open(log_file, "w", encoding="utf-8") as f:
+        f.write("=== Raw LLM Output ===\n")
+        f.write(raw_output)
+        f.write("\n=== End Raw Output ===\n")
 
-
-def extract_json(response_text: str) -> str:
-    """Extract the first valid JSON object from the response text."""
-    # First try to find a complete JSON object
-    match = re.search(r'\{[^{}]*\}', response_text)
-    if match:
+    # Strategy 1: Look for JSON between delimiters
+    delimiter_match = re.search(r"\[START_JSON\](.*?)\[END_JSON\]", raw_output, re.DOTALL)
+    if delimiter_match:
         try:
-            # Validate that it's actually JSON
-            json.loads(match.group(0))
-            return match.group(0)
+            json_str = delimiter_match.group(1).strip()
+            parsed = json.loads(json_str)
+            if all(k in parsed for k in ["action", "parameters", "explanation"]):
+                return parsed
         except json.JSONDecodeError:
             pass
 
-    # If no valid JSON found, return None
+    # Strategy 2: Find all JSON-like objects
+    json_matches = re.findall(r"{[^{}]*}", raw_output)
+    for json_str in json_matches:
+        try:
+            parsed = json.loads(json_str)
+            if all(k in parsed for k in ["action", "parameters", "explanation"]):
+                return parsed
+        except json.JSONDecodeError:
+            continue
+
+    # Strategy 3: Look for the largest JSON object
+    large_json_match = re.search(r"{.*}", raw_output, re.DOTALL)
+    if large_json_match:
+        try:
+            json_str = large_json_match.group(0)
+            parsed = json.loads(json_str)
+            if all(k in parsed for k in ["action", "parameters", "explanation"]):
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
     return None
 
 
-def call_llm(prompt: str) -> str:
-    """Call the LLM server with the given prompt."""
+@app.post("/generate")
+async def generate(request: GenerateRequest):
     try:
-        # Create a temporary script with the prompt
-        script_content = f"""#!/bin/bash
-export PYTHONUSERBASE=/tmp/mtko19/python-lib
-export PATH=$PYTHONUSERBASE/bin:$PATH
-export PYTHONPATH=$PYTHONUSERBASE/lib/python3.12/site-packages:$PYTHONPATH
-export PIP_CACHE_DIR=/tmp/mtko19/pip-cache
+        # Verify llama-cli exists
+        if not os.path.exists(LLAMA_CLI_PATH):
+            raise HTTPException(
+                status_code=500,
+                detail=f"llama-cli not found at {LLAMA_CLI_PATH}"
+            )
 
-cd /tmp/mtko19/llama.cpp/build
-PROMPT="{prompt}"
-./bin/llama-cli -m /tmp/mtko19/models/llama-2-13b-chat/llama-2-13b-chat.Q4_K_M.gguf -p "$PROMPT" -n 200
-"""
-
-        # Write the script to a temporary file
-        with open("temp_llama.sh", "w") as f:
-            f.write(script_content)
-
-        # Make it executable
-        os.chmod("temp_llama.sh", 0o755)
-
-        # Run the script and capture output
-        result = subprocess.run(
-            ["bash", "temp_llama.sh"],
-            capture_output=True,
+        # Run llama-cli with the prompt
+        process = subprocess.Popen(
+            [LLAMA_CLI_PATH, "generate", "--prompt", request.prompt],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True
         )
-
-        # Clean up
-        os.remove("temp_llama.sh")
-
-        if result.returncode != 0:
-            raise Exception(f"LLAMA error: {result.stderr}")
-
-        # Extract the response (everything after the prompt)
-        response = result.stdout.split(prompt)[-1].strip()
-        return response
-
-    except Exception as e:
-        raise Exception(f"Error calling LLM: {str(e)}")
-
-
-@app.post("/generate")
-async def generate_move(request: GenerateRequest):
-    try:
-        # Format the prompt for the LLM
-        formatted_prompt = f"""
-{request.prompt}
-
-Current board state:
-{json.dumps(request.board_state, indent=2)}
-
-Please provide a move in the following JSON format:
-{{
-    "action": "add_component",
-    "parameters": {{
-        "type": "<component_type>",
-        "x": <x_coordinate>,
-        "y": <y_coordinate>
-    }},
-    "explanation": "<explanation>",
-    "text_representation": "<human_readable_description>"
-}}
-
-Your response should be a valid JSON object following the format above.
-"""
-
-        # Call the LLM
-        response = call_llm(formatted_prompt)
+        
+        stdout, stderr = process.communicate()
+        
+        if process.returncode != 0:
+            print(f"[LLaMA Error] {stderr}")
+            raise HTTPException(status_code=500, detail=f"LLaMA process error: {stderr}")
 
         # Extract and validate JSON
-        json_str = extract_json(response)
-        if not json_str:
-            raise HTTPException(status_code=500, detail="No valid JSON found in LLM response")
-
-        try:
-            parsed_json = json.loads(json_str)
-            return parsed_json
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=500, detail="Invalid JSON in LLM response")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/explain")
-async def explain_move(request: ExplainRequest):
-    try:
-        # Format the prompt for the LLM
-        formatted_prompt = f"""
-{request.prompt}
-
-Current board state:
-{json.dumps(request.board_state, indent=2)}
-
-Move to explain:
-{json.dumps(request.move, indent=2)}
-
-Please provide an explanation for this move in the following JSON format:
-{{
-    "explanation": "<detailed_explanation_of_the_move>"
-}}
-
-Your response should be a valid JSON object following the format above.
-"""
-
-        # Call the LLM
-        response = call_llm(formatted_prompt)
-
-        # Extract and validate JSON
-        json_str = extract_json(response)
-        if not json_str:
-            raise HTTPException(status_code=500, detail="No valid JSON found in LLM response")
-
-        try:
-            parsed_json = json.loads(json_str)
-            return parsed_json
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=500, detail="Invalid JSON in LLM response")
+        parsed_json = extract_json(stdout)
+        if parsed_json:
+            return {"response": parsed_json}
+        else:
+            raise HTTPException(
+                status_code=500, 
+                detail="No valid JSON found in LLM response. Check llama_logs directory for raw output."
+            )
 
     except Exception as e:
+        print(f"[LLaMA Server Error] {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
