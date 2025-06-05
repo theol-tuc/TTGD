@@ -1,4 +1,8 @@
 import requests
+from datasets import load_dataset, DatasetDict
+from transformers import AutoProcessor
+from PIL import Image
+import os
 
 NIM_API_KEY = "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"  # کلید واقعی‌ات رو بذار اینجا
 
@@ -129,12 +133,17 @@ def send_to_vila(image_bytes: bytes, filename: str):
         "availableParts\": \"[ItemType.RampLeft]: 4\"\n"
         "\n"
         "## Output\n"
-        "The Output should be a collection of the functions from the library to be executed in the order they are needed to solve the challenge. The output should be just the newly added parts, and not a reconstruction of the whole board.\n"
-        "The output should be a list of function call strings, each using the following format:\n"
-        "\"add_component(type=ItemType.COMPONENT_NAME, x=INT, y=INT)\".\n"
-        "\n"
-        
-        "]"
+        "The Output should be a single function call that places the next closest and most logical component required to advance the ball’s path.\n"
+        "The component must be returned using this format:\n"
+        "\"add_component(type=ItemType.COMPONENT_NAME, x=INT, y=INT)\"\n"
+        "Only return one function call, and make sure it is the **nearest useful move** to where the ball currently is or will be next.\n"
+        "Think step-by-step: consider the current ball path and suggest the next component that would help continue the computation correctly.\n"
+        "Do not return multiple moves or future steps. Just the immediate next helpful placement.\n"
+        "Do not reconstruct the entire board.\n"
+        "Ignore arrows or symbols that are not part of official game components.\n"
+
+
+    "]"
     )
    }]
 
@@ -164,3 +173,96 @@ def send_to_vila(image_bytes: bytes, filename: str):
     print("VILA API response:", result)
 
     return result
+
+# Import necessary libraries
+# from datasets import load_dataset, DatasetDict
+# from transformers import AutoProcessor
+# from PIL import Image
+# import os
+
+# Step 1: Load the dataset
+# Assuming the dataset is stored in a folder with images and a JSONL file
+def load_turing_tumble_dataset(dataset_path: str) -> DatasetDict:
+    """
+    Loads the Turing Tumble dataset from a folder containing images and a JSONL file.
+
+    Args:
+        dataset_path (str): Path to the dataset folder.
+
+    Returns:
+        DatasetDict: A Hugging Face DatasetDict object containing the dataset.
+    """
+    # Load the JSONL file as a Hugging Face dataset
+    dataset = load_dataset("json", data_files=os.path.join(dataset_path, "data.jsonl"))
+
+    # Add the image paths to the dataset
+    def add_image_path(example):
+        example["image"] = os.path.join(dataset_path, example["image_file"])
+        return example
+
+    dataset = dataset.map(add_image_path)
+    return dataset
+
+# Step 2: Preprocess the dataset
+def preprocess_dataset(dataset: DatasetDict, processor: AutoProcessor) -> DatasetDict:
+    """
+    Preprocesses the dataset by tokenizing the instructions and processing the images.
+
+    Args:
+        dataset (DatasetDict): The dataset to preprocess.
+        processor (AutoProcessor): The processor for the VILA model.
+
+    Returns:
+        DatasetDict: The preprocessed dataset.
+    """
+    def preprocess(example):
+        # Load the image
+        image = Image.open(example["image"]).convert("RGB")
+
+        # Tokenize the instruction and process the image
+        inputs = processor(
+            text=example["instruction"],
+            images=image,
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=512
+        )
+
+        # Add the expected output as labels
+        inputs["labels"] = processor.tokenizer(
+            example["expected_output"],
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=128
+        )["input_ids"]
+
+        return {
+            "pixel_values": inputs["pixel_values"].squeeze(0),
+            "input_ids": inputs["input_ids"].squeeze(0),
+            "attention_mask": inputs["attention_mask"].squeeze(0),
+            "labels": inputs["labels"].squeeze(0),
+        }
+
+    # Apply preprocessing to the dataset
+    return dataset.map(preprocess, remove_columns=["image", "instruction", "expected_output", "image_file"])
+
+# Step 3: Main script
+if __name__ == "__main__":
+    # Path to the dataset folder
+    dataset_path = "./turing_tumble_dataset"
+
+    # Load the dataset
+    dataset = load_turing_tumble_dataset(dataset_path)
+
+    # Load the processor for the VILA model
+    processor = AutoProcessor.from_pretrained("nvidia/vila")
+
+    # Preprocess the dataset
+    processed_dataset = preprocess_dataset(dataset, processor)
+
+    # Save the processed dataset for later use
+    processed_dataset.save_to_disk("./processed_turing_tumble_dataset")
+
+    print("Dataset loaded and preprocessed successfully!")
