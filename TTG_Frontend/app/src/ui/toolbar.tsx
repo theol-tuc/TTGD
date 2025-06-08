@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button, Space, Divider, Tooltip } from 'antd';
+import React, { useState } from 'react';
+import { Button, Space, Divider, Tooltip, Typography, Card } from 'antd';
 import {
     ZoomInOutlined,
     ZoomOutOutlined,
@@ -10,8 +10,15 @@ import {
     CaretLeftOutlined,
     CaretRightOutlined,
     PlayCircleOutlined,
-    RobotOutlined
+    RobotOutlined,
+    PauseCircleOutlined,
+    ReloadOutlined,
+    DeleteOutlined,
+    RocketOutlined
 } from '@ant-design/icons';
+import { captureAndAnalyzeBoard, VilaAnalysis } from '../services/vilaService';
+
+const { Text } = Typography;
 
 interface ToolbarProps {
     onZoomIn: () => void;
@@ -26,10 +33,71 @@ interface ToolbarProps {
     isRunning: boolean;
     currentSpeed: number;
     isAIVisible: boolean;
+    onRun: () => void;
+    onPause: () => void;
+    onReset: () => void;
+    onClear: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({onZoomIn, onZoomOut, onSlowDown, onSpeedUp, onClearBoard, onResetMarbles, onTriggerLeft, onTriggerRight,onToggleAI, isRunning, currentSpeed, isAIVisible}) => {
+export const Toolbar: React.FC<ToolbarProps> = ({
+    onZoomIn,
+    onZoomOut,
+    onSlowDown,
+    onSpeedUp,
+    onClearBoard,
+    onResetMarbles,
+    onTriggerLeft,
+    onTriggerRight,
+    onToggleAI,
+    isRunning,
+    currentSpeed,
+    isAIVisible,
+    onRun,
+    onPause,
+    onReset,
+    onClear
+}) => {
     const speedOptions = [0.5, 1, 2, 5];
+    const [vilaAnalysisResult, setVilaAnalysisResult] = useState<VilaAnalysis | null>(null);
+
+    const handleVilaAnalysis = async () => {
+        try {
+            // Get the board element
+            const boardElement = document.querySelector('.board-container');
+            if (!boardElement) {
+                throw new Error('Board element not found');
+            }
+
+            // Show loading state
+            const button = document.querySelector('.vila-analysis-button');
+            if (button) {
+                button.setAttribute('disabled', 'true');
+                button.textContent = 'Analyzing...';
+            }
+
+            // Capture and analyze
+            const analysis = await captureAndAnalyzeBoard(boardElement as HTMLElement);
+
+            // Show results
+            if (analysis.status === 'success') {
+                setVilaAnalysisResult(analysis);
+            } else {
+                throw new Error('Analysis failed');
+            }
+        } catch (error) {
+            console.error('VILA analysis error:', error);
+            alert('Failed to analyze board with VILA. Please try again.');
+            setVilaAnalysisResult(null); // Clear previous results on error
+        } finally {
+            // Reset button state
+            const button = document.querySelector('.vila-analysis-button');
+            if (button) {
+                button.removeAttribute('disabled');
+                button.textContent = 'Analyze with VILA';
+            }
+        }
+    };
+
     return (
         <div style={{ padding: '8px' }}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
@@ -133,26 +201,47 @@ export const Toolbar: React.FC<ToolbarProps> = ({onZoomIn, onZoomOut, onSlowDown
                             icon={<CaretRightOutlined />}
                             block
                             onClick={onTriggerRight}
-                            danger
+                            type="primary"
                             ghost
                         >
                             Trigger Right
                         </Button>
                     </Tooltip>
 
-                    <Divider style={{ margin: '12px 0' }} />
-
-                    <Tooltip title={isAIVisible ? "Hide AI Assistant" : "Show AI Assistant"}>
+                    <Tooltip title="Toggle AI Assistant (experimental)">
                         <Button
                             icon={<RobotOutlined />}
                             block
                             onClick={onToggleAI}
-                            type={isAIVisible ? 'primary' : 'default'}
-                            style={{ marginTop: 8 }}
                         >
-                            {isAIVisible ? 'Hide AI' : 'AI Assistant'}
+                            AI Assistant
                         </Button>
                     </Tooltip>
+
+                    <Divider style={{ margin: '12px 0' }} />
+
+                    <Tooltip title="Analyze current board state with NVIDIA VILA">
+                        <Button
+                            className="vila-analysis-button"
+                            onClick={handleVilaAnalysis}
+                            type="primary"
+                            style={{ backgroundColor: '#76b900' }}  // NVIDIA green
+                            block
+                        >
+                            Analyze with VILA
+                        </Button>
+                    </Tooltip>
+
+                    {vilaAnalysisResult && (
+                        <Card
+                            title="VILA Analysis"
+                            size="small"
+                            style={{ width: '100%', marginTop: '10px' }}
+                        >
+                            <Text>Recommended Move: {vilaAnalysisResult.recommended_move || 'N/A'}</Text><br/>
+                            <Text>Confidence: {vilaAnalysisResult.confidence !== undefined ? `${vilaAnalysisResult.confidence}%` : 'N/A'}</Text>
+                        </Card>
+                    )}
                 </Space>
             </Space>
         </div>

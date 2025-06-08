@@ -70,6 +70,14 @@ const App: React.FC = () => {
     const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
     const [showCompletion, setShowCompletion] = useState(false);
 
+    const handleRun = () => {
+        setIsRunning(true);
+    };
+
+    const handlePause = () => {
+        setIsRunning(false);
+    };
+
     const buildBoard = (state: any): BoardCell[][] => {
         const newBoard: BoardCell[][] = Array.from({ length: numRows }, () =>
             Array.from({ length: numCols }, () => ({ type: ItemType.Empty }))
@@ -546,10 +554,14 @@ const App: React.FC = () => {
                         onResetMarbles={handleResetMarbles}
                         onTriggerLeft={handleTriggerLeft}
                         onTriggerRight={handleTriggerRight}
+                        onToggleAI={() => setIsAIVisible(!isAIVisible)}
                         isRunning={isRunning}
                         currentSpeed={currentSpeed}
-                        onToggleAI={handleToggleAI}
                         isAIVisible={isAIVisible}
+                        onRun={handleRun}
+                        onPause={handlePause}
+                        onReset={handleResetMarbles}
+                        onClear={handleClearBoard}
                     />
                     {isAIVisible && <div style={{ position: 'relative' }}> <AIOverlay onAIMove={handleAIMove} onClose={handleCloseAI}/></div>}
                 </Sider>
