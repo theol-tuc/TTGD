@@ -1,127 +1,150 @@
-# AI Challenge Solver using a fine-tuned GPT-2 and symbolic board planner
-
-import os
-import re
+# AI-based puzzle solver using fine-tuned models for Turing Tumble challenges
 import torch
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments, TextDataset, DataCollatorForLanguageModeling
-from TTG_Backend.game_logic import GameBoard, ComponentType, BLUE
-from TTG_Backend.board_encoder import BoardEncoder
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from typing import List, Dict, Optional
+import numpy as np
+from .game_logic import GameBoard, ComponentType, BLUE, RED
 
-# AI Planner powered by GPT-2 for generating move plans
-class TransformerPlanner:
-    def __init__(self, model_path=None):
-        print("Initializing the AI planner using GPT-2...")
-        local_gpt2_path = "TTG_Backend/models/gpt2"
-        if model_path and os.path.exists(model_path):
-            print(f"Loading fine-tuned model from: {model_path}")
-            self.tokenizer = GPT2Tokenizer.from_pretrained(model_path)
-            self.model = GPT2LMHeadModel.from_pretrained(model_path)
-        elif os.path.exists(local_gpt2_path):
-            print(f"Loading GPT-2 from local path: {local_gpt2_path}")
-            self.tokenizer = GPT2Tokenizer.from_pretrained(local_gpt2_path)
-            self.model = GPT2LMHeadModel.from_pretrained(local_gpt2_path)
-        else:
-            self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-            self.model = GPT2LMHeadModel.from_pretrained("gpt2")
-
-    def plan(self, input_text: str):
-        print("Generating plan from board state...")
-        input_ids = self.tokenizer.encode(input_text, return_tensors='pt')
-        output = self.model.generate(input_ids, max_length=50, num_return_sequences=1)
-        return self.tokenizer.decode(output[0], skip_special_tokens=True)
-
-    def parse_plan(self, plan_text: str):
-        print("Parsing generated plan...")
-        pattern = r"(RAMP_LEFT|RAMP_RIGHT) at \((\d+), (\d+)\)"
-        matches = re.findall(pattern, plan_text)
-        steps = []
-        for direction, x, y in matches:
-            comp_type = ComponentType[direction]  # Convert text to ComponentType enum
-            steps.append((comp_type, int(x), int(y)))
-        return steps
-
-# Optional: Train GPT-2 on example board-plan pairs
-def fine_tune_model(train_file: str, output_dir: str, epochs=3):
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    model = GPT2LMHeadModel.from_pretrained("gpt2")
-
-    dataset = TextDataset(tokenizer=tokenizer, file_path=train_file, block_size=128)
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
-
-    training_args = TrainingArguments(
-        output_dir=output_dir,
-        overwrite_output_dir=True,
-        num_train_epochs=epochs,
-        per_device_train_batch_size=2,
-        save_steps=5000,
-        save_total_limit=2,
-        logging_dir=os.path.join(output_dir, 'logs')
-    )
-
-    trainer = Trainer(model=model, args=training_args, data_collator=data_collator, train_dataset=dataset)
-    print("Starting fine-tuning process...")
-    trainer.train()
-    model.save_pretrained(output_dir)
-    tokenizer.save_pretrained(output_dir)
-    print("Model fine-tuning complete. Saved to:", output_dir)
-
-# Define a simple challenge board layout
-def setup_challenge() -> GameBoard:
-    board = GameBoard()  # Default 15x17 size
-    print("Setting up the puzzle board...")
-    
-    # Add some test components
-    board.set_component(7, 5, ComponentType.RAMP_LEFT)
-    board.set_component(7, 7, ComponentType.RAMP_RIGHT)
-    board.set_component(7, 3, ComponentType.CROSSOVER)
-    board.set_component(6, 4, ComponentType.INTERCEPTOR)
-    
-    return board
-
-# Run the AI Solver: Encode board → Plan moves → Apply → Simulate
-def run_solver():
-    try:
-        print("Starting solver...")
-        # Create and setup the board
-        board = setup_challenge()
-        print("Board created successfully")
+# Main solver class using fine-tuned GPT-2 for puzzle solving
+class AIChallengeSolver:
+    def __init__(self, model_path: Optional[str] = None):
+        # Initialize the GPT-2 model and tokenizer for puzzle solving
+        self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        self.model = GPT2LMHeadModel.from_pretrained("gpt2")
         
-        # Create board encoder
-        encoder = BoardEncoder()
-        print("Encoder created successfully")
+        # Load fine-tuned weights if provided
+        if model_path:
+            self.model.load_state_dict(torch.load(model_path))
         
-        # Encode and print the board state
-        print("\nInitial Board State:")
-        board.print_board()
+        # Set model to evaluation mode
+        self.model.eval()
         
-        print("\nEncoded Board State:")
-        encoded_text = encoder.encode_board(board)
-        print(encoded_text)
+        # Initialize game board for puzzle solving
+        self.board = GameBoard()
         
-        # Drop a blue marble
-        print("\nDropping a blue marble...")
-        board.drop_marble(7, BLUE)
+        # Track solution steps for analysis
+        self.solution_steps = []
         
-        print("\nBoard State After Marble Drop:")
-        board.print_board()
-        
-        print("\nMarble Outputs:")
-        print(f"Blue marble outputs: {board.outputs[BLUE]}")
-        
-        print("\nGame Rules:")
-        print(encoder.encode_game_rules())
-        
-    except Exception as e:
-        print(f"Error occurred: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        # Track success rate metrics
+        self.success_count = 0
+        self.total_attempts = 0
 
-if __name__ == '__main__':
-    print("Script started")
-    print("CUDA available:", torch.cuda.is_available())
-    print("Number of GPUs:", torch.cuda.device_count())
-    if torch.cuda.is_available():
-        print("GPU Name:", torch.cuda.get_device_name(0))
-    print("Using device:", torch.cuda.current_device())
-    run_solver()
-    print("Script completed")
+    # Convert board state to model input format
+    def prepare_input(self, board_state: np.ndarray) -> torch.Tensor:
+        # Flatten board state and convert to tensor for model input
+        flattened = board_state.flatten()
+        return torch.tensor(flattened, dtype=torch.float32)
+
+    # Generate next move based on current board state
+    def generate_move(self, board_state: np.ndarray) -> Dict:
+        with torch.no_grad():
+            # Prepare input tensor
+            input_tensor = self.prepare_input(board_state)
+            
+            # Generate prediction using model
+            outputs = self.model(input_tensor.unsqueeze(0))
+            
+            # Process output to get move
+            move = self._process_model_output(outputs)
+            
+            return move
+
+    # Process model output to extract move information
+    def _process_model_output(self, outputs) -> Dict:
+        # Convert model logits to probabilities
+        probs = torch.softmax(outputs.logits, dim=-1)
+        
+        # Get most likely move from probabilities
+        move_idx = torch.argmax(probs).item()
+        
+        # Convert index to move format (position and color)
+        return {
+            'type': 'drop_marble',
+            'position': move_idx % self.board.width,
+            'color': BLUE if move_idx < self.board.width else RED
+        }
+
+    # Solve a specific challenge using the AI model
+    def solve_challenge(self, challenge_config: Dict) -> List[Dict]:
+        # Clear board for new challenge
+        self.board.clear()
+        
+        # Set up challenge configuration
+        self._setup_challenge(challenge_config)
+        
+        # Initialize solution tracking
+        self.solution_steps = []
+        
+        # Set maximum attempts to prevent infinite loops
+        max_attempts = 100
+        attempts = 0
+        
+        while attempts < max_attempts:
+            # Get current board state
+            current_state = self.board.get_board_state()
+            
+            # Generate and apply next move
+            move = self.generate_move(current_state)
+            self._apply_move(move)
+            
+            # Record solution step
+            self.solution_steps.append(move)
+            
+            # Check if challenge is solved
+            if self._check_solution(challenge_config):
+                self.success_count += 1
+                break
+            
+            attempts += 1
+        
+        self.total_attempts += 1
+        return self.solution_steps
+
+    # Set up the board according to challenge configuration
+    def _setup_challenge(self, config: Dict) -> None:
+        # Configure number of marbles for the challenge
+        self.board.set_number_of_marbles(
+            config.get('red_marbles', 0),
+            config.get('blue_marbles', 0)
+        )
+        
+        # Place initial components on the board
+        for comp in config.get('components', []):
+            self.board.add_component(
+                ComponentType[comp['type']],
+                comp['x'],
+                comp['y']
+            )
+
+    # Apply a move to the board
+    def _apply_move(self, move: Dict) -> None:
+        # Handle marble drops
+        if move['type'] == 'drop_marble':
+            self.board.drop_marble(
+                move['position'],
+                move['color']
+            )
+        
+        # Update board state after move
+        self.board.update()
+
+    # Check if current board state satisfies challenge conditions
+    def _check_solution(self, challenge_config: Dict) -> bool:
+        # Get current outputs from the board
+        current_outputs = self.board.outputs
+        
+        # Compare with expected outputs from challenge
+        expected_outputs = challenge_config.get('expected_outputs', {})
+        
+        return current_outputs == expected_outputs
+
+    # Calculate and return success rate
+    def get_success_rate(self) -> float:
+        if self.total_attempts == 0:
+            return 0.0
+        return self.success_count / self.total_attempts
+
+    # Reset success statistics
+    def reset_stats(self) -> None:
+        self.success_count = 0
+        self.total_attempts = 0

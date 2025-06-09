@@ -1,5 +1,5 @@
+# Graph-based puzzle solver implementation combining LLaVA (visual understanding) and GNN (graph processing)
 import os
-import re
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -8,22 +8,25 @@ from torch_geometric.data import Data
 import numpy as np
 from .game_logic import GameBoard, ComponentType, BLUE
 from .board_encoder import BoardEncoder
-import sys
-sys.path.append('../LLaVA')
-from llava.model import LlavaLlamaForCausalLM
-from llava.conversation import conv_templates
-from llava.utils import disable_torch_init
-from llava.mm_utils import process_images, tokenizer_image_token
-from PIL import Image
-import networkx as nx
 from typing import List, Dict, Tuple
 from enum import Enum
 from challenges import CHALLENGES
+
+# Optional LLaVA import
+try:
+    from llava.model import LlavaLlamaForCausalLM
+    from llava.conversation import conv_templates
+    from llava.utils import disable_torch_init
+    from llava.mm_utils import process_images, tokenizer_image_token
+    llava_available = True
+except ImportError:
+    llava_available = False
 
 # Set device to CUDA if available, otherwise use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
+# Enum defining all possible component types in the Turing Tumble puzzle
 class ComponentType(Enum):
     EMPTY = 0
     RAMP = 1
@@ -33,11 +36,14 @@ class ComponentType(Enum):
     OR_GATE = 5
     BIT = 6
 
+# Graph Neural Network for processing puzzle component relationships
 class GraphNeuralNetwork(nn.Module):
     def __init__(self, num_node_features: int, num_classes: int):
         super(GraphNeuralNetwork, self).__init__()
+        # Two GCN layers for processing component relationships
         self.conv1 = GCNConv(num_node_features, 64)
         self.conv2 = GCNConv(64, 32)
+        # Classifier for predicting component types and states
         self.classifier = nn.Sequential(
             nn.Linear(32, 16),
             nn.ReLU(),
@@ -46,6 +52,7 @@ class GraphNeuralNetwork(nn.Module):
         )
     
     def forward(self, x, edge_index, batch):
+        # Process graph through GCN layers
         x = self.conv1(x, edge_index)
         x = torch.relu(x)
         x = self.conv2(x, edge_index)
@@ -53,10 +60,11 @@ class GraphNeuralNetwork(nn.Module):
         x = self.classifier(x)
         return x
 
+# Main solver class combining LLaVA and GNN approaches
 class GraphSolver:
     def __init__(self, llava_model=None):
         print("Initializing Graph Solver...")
-        # Initialize LLaVA for visual understanding
+        # Initialize LLaVA for visual understanding of the board
         if llava_model and os.path.exists(llava_model):
             print(f"Loading LLaVA model from: {llava_model}")
             disable_torch_init()
@@ -70,7 +78,7 @@ class GraphSolver:
         else:
             raise ValueError("LLaVA model path not provided or invalid")
         
-        # Initialize Graph Neural Network
+        # Initialize Graph Neural Network for structural analysis
         self.gnn = GraphNeuralNetwork(
             num_node_features=10,  # Features per node (component type, position, etc.)
             num_classes=len(ComponentType)  # Number of possible component types
@@ -78,8 +86,8 @@ class GraphSolver:
         
         print(f"Models loaded on {device}")
 
+    # Convert board state to graph representation with enhanced features
     def board_to_graph(self, board) -> Data:
-        """Convert board state to graph representation with enhanced features"""
         num_nodes = len(board.components)
         node_features = []
         edge_index = []
@@ -122,8 +130,8 @@ class GraphSolver:
         
         return Data(x=x, edge_index=edge_index)
     
+    # Check if two components are logically connected based on proximity
     def _is_connected(self, comp1, comp2) -> bool:
-        """Check if two components are logically connected"""
         if not hasattr(comp1, 'position') or not hasattr(comp2, 'position'):
             return False
         
@@ -132,15 +140,15 @@ class GraphSolver:
                       (comp1.position[1] - comp2.position[1])**2)
         return dist <= 2  # Components within 2 units are considered connected
     
+    # Analyze the board using LLaVA for visual understanding
     def analyze_board(self, board_image_path: str = None) -> str:
-        """Analyze the board using LLaVA if available"""
         if self.llava_model and board_image_path:
             # Use LLaVA for visual analysis
             return self.llava_model.analyze_image(board_image_path)
         return "Board analysis not available"
     
+    # Generate solution using both GNN and LLaVA approaches
     def generate_solution(self, board, board_image_path: str = None) -> List[Dict]:
-        """Generate solution using both GNN and LLaVA"""
         # Convert board to graph
         graph_data = self.board_to_graph(board)
         
@@ -159,8 +167,8 @@ class GraphSolver:
         solution = self._combine_predictions(predictions, llava_analysis, board)
         return solution
     
+    # Combine GNN predictions with LLaVA analysis into a comprehensive solution
     def _combine_predictions(self, predictions, llava_analysis: str, board) -> List[Dict]:
-        """Combine GNN predictions with LLaVA analysis"""
         solution = []
         
         # Process GNN predictions
@@ -184,8 +192,8 @@ class GraphSolver:
         
         return solution
     
+    # Convert solution to human-readable format
     def parse_solution(self, solution: List[Dict]) -> str:
-        """Convert solution to human-readable format"""
         steps = []
         for item in solution:
             if item['type'] == 'ANALYSIS':
@@ -196,8 +204,8 @@ class GraphSolver:
                 )
         return "\n".join(steps)
 
+# Main function to solve a challenge using the GraphSolver
 def solve_challenge(board, board_image_path: str = None, llava_model_path: str = None):
-    """Main function to solve a challenge"""
     try:
         print("Starting challenge solver...")
         
@@ -219,6 +227,7 @@ def solve_challenge(board, board_image_path: str = None, llava_model_path: str =
         traceback.print_exc()
         return None
 
+# Example usage and testing
 if __name__ == '__main__':
     print("Script started")
     print("CUDA available:", torch.cuda.is_available())
