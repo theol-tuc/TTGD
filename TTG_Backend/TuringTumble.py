@@ -91,11 +91,11 @@ def main():
     # Construct the full path to the puzzle file
     puzzle_path = os.path.join(script_dir, "puzzle08.gv")
 
-    if not os.path.exists("C:\Users\rohit\OneDrive\Desktop\TuringTumble\Challenges\puzzle08n.gv"):
-        print(f"Puzzle file not found: {"C:\Users\rohit\OneDrive\Desktop\TuringTumble\Challenges\puzzle08n.gv"}")
+    if not os.path.exists(r"C:\Users\rohit\OneDrive\Desktop\TuringTumble\Challenges\puzzle08n.gv"):
+        print(f"Puzzle file not found: {r"C:\Users\rohit\OneDrive\Desktop\TuringTumble\Challenges\puzzle08n.gv"}")
         return
 
-    graph = load_puzzle_graph("C:\Users\rohit\OneDrive\Desktop\TuringTumble\Challenges\puzzle08n.gv")
+    graph = load_puzzle_graph(r"C:\Users\rohit\OneDrive\Desktop\TuringTumble\Challenges\puzzle08n.gv")
     agent = HybridPuzzleAgent()
     plan = agent.solve(graph)
 

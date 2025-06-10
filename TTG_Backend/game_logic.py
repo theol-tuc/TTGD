@@ -26,6 +26,7 @@ class Marble:
         self.color = color
         self.position = position
         self.direction = (0, 1)  # Initial direction is downward
+        self.active = True       # Add active attribute
 
 # Base class for all board components with their properties and states
 class Component:
@@ -140,6 +141,32 @@ class GameBoard:
             x, y = comp.position
             state[y, x] = comp.type.value
         return state
+
+    def send_to_mcp(self) -> dict:
+        """
+        Send the current board state to the Model Context Protocol (MCP).
+        Returns a dictionary containing the board state, marbles, and outputs.
+        """
+        return {
+            'board_state': self.get_board_state().tolist(),
+            'marbles': [{
+                'color': m.color,
+                'position': m.position,
+                'direction': m.direction
+            } for m in self.marbles],
+            'outputs': self.outputs,
+            'components': [{
+                'type': comp.type.name,
+                'position': comp.position,
+                'state': comp.state,
+                'rotation': comp.rotation,
+                'is_active': comp.is_active,
+                'connections': comp.connections,
+                'value': comp.value,
+                'is_output': comp.is_output,
+                'is_input': comp.is_input
+            } for comp in self.components]
+        }
 
     # Reset the board to its initial state
     def reset(self) -> None:

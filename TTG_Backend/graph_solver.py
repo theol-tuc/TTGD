@@ -1,208 +1,107 @@
-# Graph-based puzzle solver implementation combining LLaVA (visual understanding) and GNN (graph processing)
-import os
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch_geometric.nn import GCNConv, global_mean_pool
-from torch_geometric.data import Data
+"""
+Graph-based solver for Turing Tumble puzzles.
+Uses graph algorithms to find optimal solutions.
+"""
+
+from typing import List, Dict, Tuple, Optional
+from game_logic import GameBoard, ComponentType, BLUE, RED
+import networkx as nx
 import numpy as np
-from .game_logic import GameBoard, ComponentType, BLUE
-from .board_encoder import BoardEncoder
-from typing import List, Dict, Tuple
-from enum import Enum
-from challenges import CHALLENGES
+import torch
 
-# Optional LLaVA import
-try:
-    from llava.model import LlavaLlamaForCausalLM
-    from llava.conversation import conv_templates
-    from llava.utils import disable_torch_init
-    from llava.mm_utils import process_images, tokenizer_image_token
-    llava_available = True
-except ImportError:
-    llava_available = False
-
-# Set device to CUDA if available, otherwise use CPU
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Using device: {device}")
-
-# Enum defining all possible component types in the Turing Tumble puzzle
-class ComponentType(Enum):
-    EMPTY = 0
-    RAMP = 1
-    GEAR = 2
-    CROSSOVER = 3
-    AND_GATE = 4
-    OR_GATE = 5
-    BIT = 6
-
-# Graph Neural Network for processing puzzle component relationships
-class GraphNeuralNetwork(nn.Module):
-    def __init__(self, num_node_features: int, num_classes: int):
-        super(GraphNeuralNetwork, self).__init__()
-        # Two GCN layers for processing component relationships
-        self.conv1 = GCNConv(num_node_features, 64)
-        self.conv2 = GCNConv(64, 32)
-        # Classifier for predicting component types and states
-        self.classifier = nn.Sequential(
-            nn.Linear(32, 16),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(16, num_classes)
-        )
-    
-    def forward(self, x, edge_index, batch):
-        # Process graph through GCN layers
-        x = self.conv1(x, edge_index)
-        x = torch.relu(x)
-        x = self.conv2(x, edge_index)
-        x = torch.relu(x)
-        x = self.classifier(x)
-        return x
-
-# Main solver class combining LLaVA and GNN approaches
 class GraphSolver:
-    def __init__(self, llava_model=None):
-        print("Initializing Graph Solver...")
-        # Initialize LLaVA for visual understanding of the board
-        if llava_model and os.path.exists(llava_model):
-            print(f"Loading LLaVA model from: {llava_model}")
-            disable_torch_init()
-            self.llava_model = LlavaLlamaForCausalLM.from_pretrained(
-                llava_model,
-                torch_dtype=torch.float16,
-                device_map="auto"
-            )
-            self.tokenizer = self.llava_model.get_tokenizer()
-            self.image_processor = self.llava_model.get_image_processor()
-        else:
-            raise ValueError("LLaVA model path not provided or invalid")
+    def __init__(self):
+        """Initialize the graph solver."""
+        self.graph = nx.DiGraph()
+        self.solution_path = []
         
-        # Initialize Graph Neural Network for structural analysis
-        self.gnn = GraphNeuralNetwork(
-            num_node_features=10,  # Features per node (component type, position, etc.)
-            num_classes=len(ComponentType)  # Number of possible component types
-        ).to(device)
+    def solve(self, board: GameBoard) -> List[Dict]:
+        """
+        Solve the puzzle using graph-based approach.
+        Returns a list of moves to solve the puzzle.
+        """
+        # Build the graph representation of the board
+        self._build_graph(board)
         
-        print(f"Models loaded on {device}")
-
-    # Convert board state to graph representation with enhanced features
-    def board_to_graph(self, board) -> Data:
-        num_nodes = len(board.components)
-        node_features = []
-        edge_index = []
+        # Find the optimal path
+        path = self._find_optimal_path(board)
         
-        # Create node features with enhanced information
-        for i, component in enumerate(board.components):
-            features = [
-                component.position[0] / board.width,  # Normalized x position
-                component.position[1] / board.height,  # Normalized y position
-                component.type.value / len(ComponentType),  # Normalized type
-                component.state if hasattr(component, 'state') else 0,  # Component state
-                component.rotation if hasattr(component, 'rotation') else 0,  # Rotation
-                component.is_active if hasattr(component, 'is_active') else 0,  # Active state
-                component.connections.count(True) / 8 if hasattr(component, 'connections') else 0,  # Connection density
-                component.value if hasattr(component, 'value') else 0,  # Value (for bits)
-                component.is_output if hasattr(component, 'is_output') else 0,  # Output status
-                component.is_input if hasattr(component, 'is_input') else 0,  # Input status
-            ]
-            node_features.append(features)
+        # Convert path to moves
+        moves = self._path_to_moves(path, board)
         
-        # Create edges based on component connections and board layout
-        for i, component in enumerate(board.components):
-            # Add edges for physical connections
-            if hasattr(component, 'connections'):
-                for j, connected in enumerate(component.connections):
-                    if connected:
-                        edge_index.append([i, j])
-                        edge_index.append([j, i])  # Bidirectional
+        return moves
+    
+    def _build_graph(self, board: GameBoard) -> None:
+        """Build a graph representation of the board."""
+        self.graph.clear()
+        
+        # Add nodes for each component
+        for comp in board.components:
+            self.graph.add_node(comp.position, type=comp.type)
+        
+        # Add edges based on component connections
+        for comp in board.components:
+            x, y = comp.position
+            # Add edges based on component type
+            if comp.type == ComponentType.RAMP_LEFT:
+                if x > 0:
+                    self.graph.add_edge(comp.position, (x-1, y+1))
+            elif comp.type == ComponentType.RAMP_RIGHT:
+                if x < board.width - 1:
+                    self.graph.add_edge(comp.position, (x+1, y+1))
+            elif comp.type == ComponentType.CROSSOVER:
+                if x > 0 and x < board.width - 1:
+                    self.graph.add_edge(comp.position, (x-1, y+1))
+                    self.graph.add_edge(comp.position, (x+1, y+1))
+    
+    def _find_optimal_path(self, board: GameBoard) -> List[Tuple[int, int]]:
+        """Find the optimal path through the graph."""
+        # Find all possible start positions (top row)
+        start_positions = [(x, 0) for x in range(board.width)]
+        
+        # Find all possible end positions (bottom row)
+        end_positions = [(x, board.height-1) for x in range(board.width)]
+        
+        # Try to find a path from any start to any end
+        for start in start_positions:
+            for end in end_positions:
+                try:
+                    path = nx.shortest_path(self.graph, start, end)
+                    return path
+                except nx.NetworkXNoPath:
+                    continue
+        
+        return []
+    
+    def _path_to_moves(self, path: List[Tuple[int, int]], board: GameBoard) -> List[Dict]:
+        """Convert a path to a list of moves."""
+        moves = []
+        if not path:
+            return moves
+        
+        # Add initial marble drop
+        start_x = path[0][0]
+        moves.append({
+            'type': 'drop_marble',
+            'position': start_x,
+            'color': BLUE
+        })
+        
+        # Add component interactions
+        for i in range(len(path)-1):
+            current = path[i]
+            next_pos = path[i+1]
             
-            # Add edges for logical connections (for gates)
-            if component.type in [ComponentType.AND_GATE, ComponentType.OR_GATE]:
-                for j, other in enumerate(board.components):
-                    if other.is_input and self._is_connected(component, other):
-                        edge_index.append([i, j])
-                        edge_index.append([j, i])
-        
-        # Convert to PyTorch tensors
-        x = torch.tensor(node_features, dtype=torch.float)
-        edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
-        
-        return Data(x=x, edge_index=edge_index)
-    
-    # Check if two components are logically connected based on proximity
-    def _is_connected(self, comp1, comp2) -> bool:
-        if not hasattr(comp1, 'position') or not hasattr(comp2, 'position'):
-            return False
-        
-        # Check physical proximity
-        dist = np.sqrt((comp1.position[0] - comp2.position[0])**2 + 
-                      (comp1.position[1] - comp2.position[1])**2)
-        return dist <= 2  # Components within 2 units are considered connected
-    
-    # Analyze the board using LLaVA for visual understanding
-    def analyze_board(self, board_image_path: str = None) -> str:
-        if self.llava_model and board_image_path:
-            # Use LLaVA for visual analysis
-            return self.llava_model.analyze_image(board_image_path)
-        return "Board analysis not available"
-    
-    # Generate solution using both GNN and LLaVA approaches
-    def generate_solution(self, board, board_image_path: str = None) -> List[Dict]:
-        # Convert board to graph
-        graph_data = self.board_to_graph(board)
-        
-        # Get GNN predictions
-        with torch.no_grad():
-            predictions = self.gnn(
-                graph_data.x,
-                graph_data.edge_index,
-                torch.zeros(len(graph_data.x), dtype=torch.long)
-            )
-        
-        # Get LLaVA analysis if available
-        llava_analysis = self.analyze_board(board_image_path)
-        
-        # Combine predictions and analysis
-        solution = self._combine_predictions(predictions, llava_analysis, board)
-        return solution
-    
-    # Combine GNN predictions with LLaVA analysis into a comprehensive solution
-    def _combine_predictions(self, predictions, llava_analysis: str, board) -> List[Dict]:
-        solution = []
-        
-        # Process GNN predictions
-        pred_indices = torch.topk(predictions, k=3)[1]
-        for idx in pred_indices:
-            component_type = ComponentType(idx.item())
-            if component_type != ComponentType.EMPTY:
-                solution.append({
-                    'type': component_type.name,
-                    'confidence': predictions[0][idx].item(),
-                    'source': 'GNN'
+            # Find the component at the current position
+            comp = next((c for c in board.components if c.position == current), None)
+            if comp:
+                moves.append({
+                    'type': 'interact',
+                    'component': comp.type.name,
+                    'position': current
                 })
         
-        # Add LLaVA insights if available
-        if llava_analysis != "Board analysis not available":
-            solution.append({
-                'type': 'ANALYSIS',
-                'content': llava_analysis,
-                'source': 'LLaVA'
-            })
-        
-        return solution
-    
-    # Convert solution to human-readable format
-    def parse_solution(self, solution: List[Dict]) -> str:
-        steps = []
-        for item in solution:
-            if item['type'] == 'ANALYSIS':
-                steps.append(f"Analysis: {item['content']}")
-            else:
-                steps.append(
-                    f"Place {item['type']} (confidence: {item['confidence']:.2f})"
-                )
-        return "\n".join(steps)
+        return moves
 
 # Main function to solve a challenge using the GraphSolver
 def solve_challenge(board, board_image_path: str = None, llava_model_path: str = None):
@@ -210,15 +109,15 @@ def solve_challenge(board, board_image_path: str = None, llava_model_path: str =
         print("Starting challenge solver...")
         
         # Initialize the solver
-        solver = GraphSolver(llava_model_path)
+        solver = GraphSolver()
         
         # Generate and parse solution
-        solution = solver.generate_solution(board, board_image_path)
+        solution = solver.solve(board)
         print("Generated Solution:")
-        print(solver.parse_solution(solution))
+        print(solution)
         
         return {
-            "solution": solver.parse_solution(solution)
+            "solution": solution
         }
         
     except Exception as e:
