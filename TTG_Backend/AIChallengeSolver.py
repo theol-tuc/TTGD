@@ -4,6 +4,7 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from typing import List, Dict, Optional
 import numpy as np
 from .game_logic import GameBoard, ComponentType, BLUE, RED
+from .TuringTumble import TransformerPlanner
 
 # Main solver class using fine-tuned GPT-2 for puzzle solving
 class AIChallengeSolver:
@@ -28,6 +29,9 @@ class AIChallengeSolver:
         # Track success rate metrics
         self.success_count = 0
         self.total_attempts = 0
+        
+        # Initialize TransformerPlanner for enhanced planning
+        self.planner = TransformerPlanner()
 
     # Convert board state to model input format
     def prepare_input(self, board_state: np.ndarray) -> torch.Tensor:
@@ -46,6 +50,10 @@ class AIChallengeSolver:
             
             # Process output to get move
             move = self._process_model_output(outputs)
+            
+            # Use TransformerPlanner to enhance the move
+            symbolic_output = self.planner.generate_plan(outputs.logits)
+            move['plan'] = symbolic_output
             
             return move
 
