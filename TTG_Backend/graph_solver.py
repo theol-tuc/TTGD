@@ -4,104 +4,144 @@ Uses graph algorithms to find optimal solutions.
 """
 
 from typing import List, Dict, Tuple, Optional
-from game_logic import GameBoard, ComponentType, BLUE, RED
+from TTG_Backend.game_logic import GameBoard, ComponentType, BLUE, RED
 import networkx as nx
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
+
+class GraphNeuralNetwork(nn.Module):
+    def __init__(self, input_dim: int, hidden_dim: int = 64, output_dim: int = 32):
+        super(GraphNeuralNetwork, self).__init__()
+        self.conv1 = GCNConv(input_dim, hidden_dim)
+        self.conv2 = GCNConv(hidden_dim, hidden_dim)
+        self.conv3 = GCNConv(hidden_dim, output_dim)
+    
+    def forward(self, x, edge_index):
+        x = F.relu(self.conv1(x, edge_index))
+        x = F.relu(self.conv2(x, edge_index))
+        x = self.conv3(x, edge_index)
+        return x
 
 class GraphSolver:
     def __init__(self):
         """Initialize the graph solver."""
         self.graph = nx.DiGraph()
         self.solution_path = []
+        self.model = GraphNeuralNetwork(input_dim=32)  # 32 features per node
         
-    def solve(self, board: GameBoard) -> List[Dict]:
-        """
-        Solve the puzzle using graph-based approach.
-        Returns a list of moves to solve the puzzle.
-        """
-        # Build the graph representation of the board
-        self._build_graph(board)
+    def solve(self, board: GameBoard) -> List[str]:
+        """Solve the puzzle using graph neural network"""
+        # Convert board to graph
+        graph = self._board_to_graph(board)
         
-        # Find the optimal path
-        path = self._find_optimal_path(board)
+        # Get node features and edge indices
+        x, edge_index = self._prepare_graph_data(graph)
         
-        # Convert path to moves
-        moves = self._path_to_moves(path, board)
+        # Get model predictions
+        with torch.no_grad():
+            predictions = self.model(x, edge_index)
         
-        return moves
+        # Convert predictions to solution steps
+        solution = self._predictions_to_steps(predictions, graph)
+        return solution
     
-    def _build_graph(self, board: GameBoard) -> None:
-        """Build a graph representation of the board."""
-        self.graph.clear()
+    def _board_to_graph(self, board: GameBoard) -> nx.Graph:
+        """Convert board state to graph representation"""
+        graph = nx.Graph()
         
         # Add nodes for each component
-        for comp in board.components:
-            self.graph.add_node(comp.position, type=comp.type)
+        for i in range(8):
+            for j in range(8):
+                component = board.get_component(i, j)
+                if component is not None:
+                    node_id = f"{i},{j}"
+                    graph.add_node(node_id, type=component)
         
-        # Add edges based on component connections
-        for comp in board.components:
-            x, y = comp.position
-            # Add edges based on component type
-            if comp.type == ComponentType.RAMP_LEFT:
-                if x > 0:
-                    self.graph.add_edge(comp.position, (x-1, y+1))
-            elif comp.type == ComponentType.RAMP_RIGHT:
-                if x < board.width - 1:
-                    self.graph.add_edge(comp.position, (x+1, y+1))
-            elif comp.type == ComponentType.CROSSOVER:
-                if x > 0 and x < board.width - 1:
-                    self.graph.add_edge(comp.position, (x-1, y+1))
-                    self.graph.add_edge(comp.position, (x+1, y+1))
+        # Add edges between connected components
+        for i in range(8):
+            for j in range(8):
+                if board.get_component(i, j) is not None:
+                    # Check adjacent positions
+                    for di, dj in [(0,1), (1,0), (0,-1), (-1,0)]:
+                        ni, nj = i + di, j + dj
+                        if 0 <= ni < 8 and 0 <= nj < 8:
+                            if board.get_component(ni, nj) is not None:
+                                graph.add_edge(f"{i},{j}", f"{ni},{nj}")
+        
+        return graph
     
-    def _find_optimal_path(self, board: GameBoard) -> List[Tuple[int, int]]:
-        """Find the optimal path through the graph."""
-        # Find all possible start positions (top row)
-        start_positions = [(x, 0) for x in range(board.width)]
+    def _prepare_graph_data(self, graph: nx.Graph) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Prepare graph data for the neural network"""
+        # Convert node features to tensor
+        node_features = []
+        for node in graph.nodes():
+            component = graph.nodes[node]['type']
+            features = self._component_to_features(component)
+            node_features.append(features)
         
-        # Find all possible end positions (bottom row)
-        end_positions = [(x, board.height-1) for x in range(board.width)]
+        x = torch.tensor(node_features, dtype=torch.float)
         
-        # Try to find a path from any start to any end
-        for start in start_positions:
-            for end in end_positions:
-                try:
-                    path = nx.shortest_path(self.graph, start, end)
-                    return path
-                except nx.NetworkXNoPath:
-                    continue
+        # Convert edge indices to tensor
+        edge_index = []
+        for edge in graph.edges():
+            source = list(graph.nodes()).index(edge[0])
+            target = list(graph.nodes()).index(edge[1])
+            edge_index.append([source, target])
+            edge_index.append([target, source])  # Add reverse edge
         
-        return []
+        edge_index = torch.tensor(edge_index, dtype=torch.long).t()
+        
+        return x, edge_index
     
-    def _path_to_moves(self, path: List[Tuple[int, int]], board: GameBoard) -> List[Dict]:
-        """Convert a path to a list of moves."""
-        moves = []
-        if not path:
-            return moves
+    def _component_to_features(self, component: ComponentType) -> List[float]:
+        """Convert component type to feature vector"""
+        # One-hot encoding of component types
+        features = [0.0] * 32
+        type_idx = component.value
+        features[type_idx] = 1.0
+        return features
+    
+    def _predictions_to_steps(self, predictions: torch.Tensor, graph: nx.Graph) -> List[str]:
+        """Convert model predictions to solution steps"""
+        steps = []
+        node_list = list(graph.nodes())
         
-        # Add initial marble drop
-        start_x = path[0][0]
-        moves.append({
-            'type': 'drop_marble',
-            'position': start_x,
-            'color': BLUE
-        })
+        # Process predictions to generate steps
+        for i in range(len(node_list)):
+            node = node_list[i]
+            pred = predictions[i]
+            if torch.max(pred) > 0.5:  # If node is predicted to be part of solution
+                x, y = map(int, node.split(','))
+                component = graph.nodes[node]['type']
+                steps.append(f"Move ball to position ({x}, {y})")
         
-        # Add component interactions
-        for i in range(len(path)-1):
-            current = path[i]
-            next_pos = path[i+1]
-            
-            # Find the component at the current position
-            comp = next((c for c in board.components if c.position == current), None)
-            if comp:
-                moves.append({
-                    'type': 'interact',
-                    'component': comp.type.name,
-                    'position': current
-                })
+        return steps
+    
+    def verify_solution(self, board: GameBoard, steps: List[str]) -> bool:
+        """Verify if the solution steps are valid"""
+        # Create a copy of the board to simulate moves
+        test_board = GameBoard()
+        for i in range(8):
+            for j in range(8):
+                test_board.set_component(i, j, board.get_component(i, j))
         
-        return moves
+        # Simulate each step
+        for step in steps:
+            # Parse step to get position
+            # This is a simplified version - you'll need to implement proper parsing
+            try:
+                x, y = map(int, step.split('(')[1].split(')')[0].split(','))
+                if not (0 <= x < 8 and 0 <= y < 8):
+                    return False
+                if test_board.get_component(x, y) is None:
+                    return False
+            except:
+                return False
+        
+        return True
 
 # Main function to solve a challenge using the GraphSolver
 def solve_challenge(board, board_image_path: str = None, llava_model_path: str = None):

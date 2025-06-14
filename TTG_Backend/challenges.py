@@ -1,6 +1,8 @@
 from TTG_Backend.game_logic import GameBoard, ComponentType, Marble
 from TTG_Backend.graph_parser import update_challenges_with_gv
-from typing import Dict, Any
+from typing import Dict, Any, List
+import json
+import os
 
 def create_default_board():
     board = GameBoard()
@@ -155,3 +157,39 @@ def get_challenge(challenge_id: str) -> Dict[str, Any]:
 def list_challenges() -> Dict[str, Dict[str, Any]]:
     """List all available challenges"""
     return CHALLENGES
+
+def load_challenge(challenge_num: int) -> Dict:
+    """Load a challenge configuration from file"""
+    challenge_file = os.path.join(os.path.dirname(__file__), 'Challenges', f'challenge_{challenge_num:02d}.json')
+    try:
+        with open(challenge_file, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Warning: Challenge {challenge_num:02d} not found")
+        return None
+
+# Load all challenges from JSON files
+CHALLENGES = []
+for i in range(1, 9):  # Challenges 1-8
+    challenge = load_challenge(i)
+    if challenge:
+        CHALLENGES.append(challenge)
+
+# If no challenges were loaded from files, use the default ones
+if not CHALLENGES:
+    print("No challenge files found, using default challenges")
+    CHALLENGES = [
+        {
+            "name": "Simple Ramp Challenge",
+            "description": "Create a path for the blue marble using ramps",
+            "components": [
+                {"type": "RAMP_LEFT", "position": [7, 5]},
+                {"type": "RAMP_RIGHT", "position": [7, 7]},
+                {"type": "CROSSOVER", "position": [7, 3]},
+                {"type": "INTERCEPTOR", "position": [6, 4]}
+            ],
+            "start_position": [0, 0],
+            "goal_position": [7, 7],
+            "ball_color": "BLUE"
+        }
+    ]

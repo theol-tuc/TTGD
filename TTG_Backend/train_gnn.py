@@ -1,13 +1,17 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch_geometric.loader import DataLoader
-from graph_solver import GraphNeuralNetwork, GraphSolver
-from challenges import CHALLENGES
-import numpy as np
-from tqdm import tqdm
-import matplotlib.pyplot as plt
+from torch.utils.data import Dataset, DataLoader
 import os
+import json
+import networkx as nx
+from typing import Dict, List, Tuple
+from tqdm import tqdm
+import numpy as np
+import matplotlib.pyplot as plt
+from TTG_Backend.game_logic import ComponentType
+from TTG_Backend.graph_solver import GraphNeuralNetwork, GraphSolver
+from TTG_Backend.challenges import CHALLENGES
 
 def create_training_dataset():
     """Create a dataset from the challenges"""

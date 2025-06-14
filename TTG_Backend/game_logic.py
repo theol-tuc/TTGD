@@ -41,6 +41,40 @@ class Component:
         self.is_output = False
         self.is_input = False
 
+    def update(self, marble: Marble) -> Optional[Tuple[int, int]]:
+        """Update the component state based on marble interaction"""
+        if not self.is_active:
+            return None
+
+        x, y = self.position
+        if self.type == ComponentType.RAMP_LEFT:
+            return (x - 1, y + 1)
+        elif self.type == ComponentType.RAMP_RIGHT:
+            return (x + 1, y + 1)
+        elif self.type == ComponentType.CROSSOVER:
+            return (x, y + 1)
+        elif self.type == ComponentType.INTERCEPTOR:
+            marble.active = False
+            return None
+        elif self.type == ComponentType.GEAR:
+            self.rotation = (self.rotation + 1) % 4
+            return (x, y + 1)
+        elif self.type == ComponentType.BIT_LEFT:
+            self.state = 1
+            return (x - 1, y + 1)
+        elif self.type == ComponentType.BIT_RIGHT:
+            self.state = 0
+            return (x + 1, y + 1)
+        elif self.type == ComponentType.AND_GATE:
+            if self.state == 1:
+                return (x, y + 1)
+            return None
+        elif self.type == ComponentType.OR_GATE:
+            if self.state == 1:
+                return (x + 1, y + 1)
+            return (x - 1, y + 1)
+        return None
+
 # Main game board class managing the state and interactions
 class GameBoard:
     def __init__(self, width: int = 15, height: int = 17):

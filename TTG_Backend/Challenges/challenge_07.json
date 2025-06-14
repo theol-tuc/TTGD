@@ -1,0 +1,25 @@
+{
+    "name": "Challenge #7: Polarization",
+    "description": "Make the pattern blue, red, blue, red, blue, red…",
+    "components": [
+        {
+            "type": "RAMP_LEFT",
+            "position": [7, 5]
+        },
+        {
+            "type": "RAMP_RIGHT",
+            "position": [7, 7]
+        },
+        {
+            "type": "CROSSOVER",
+            "position": [7, 3]
+        },
+        {
+            "type": "INTERCEPTOR",
+            "position": [6, 4]
+        }
+    ],
+    "start_position": [0, 0],
+    "goal_position": [7, 7],
+    "ball_color": "BLUE"
+}
