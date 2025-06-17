@@ -41,21 +41,6 @@ You must respond with a valid JSON object in the following format:
     },
     "explanation": "Your detailed explanation of the move"
 }
-
-IMPORTANT: Wrap your response in [START_JSON] and [END_JSON] tags.
-Example:
-[START_JSON]
-{
-    "action": "place_component",
-    "parameters": {
-        "type": "gear",
-        "x": 3,
-        "y": 2,
-        "rotation": 0
-    },
-    "explanation": "I am placing a gear at position (3,2) to..."
-}
-[END_JSON]
 """
         
         # Add challenge context if provided
@@ -63,7 +48,6 @@ Example:
         if challenge_id and challenge_id in CHALLENGES:
             challenge = CHALLENGES[challenge_id]
             try:
-                # Directly use the board object, not a dict
                 board_layout = BoardEncoder._encode_board_layout(challenge['board'])
                 challenge_context = f"""
 Current Challenge ID: {challenge_id}
@@ -85,8 +69,15 @@ Objective: {challenge.get('objective', 'No objective specified')}
 [Error: Could not encode board layout]
 """
         
-        # Format the prompt
-        prompt = f"""
+        # Format the prompt with LLaMA 3 chat format
+        system_prompt = """You are an AI assistant playing the Turing Tumble marble game. 
+Your goal is to help solve challenges by placing and manipulating components on the board.
+You must respond with valid JSON that describes your next move."""
+        
+        prompt = f"""<s>[INST] <<SYSTEM>>
+{system_prompt}
+<</SYSTEM>>
+
 {template}
 
 {challenge_context}
@@ -97,7 +88,7 @@ Current Game State:
 {json_format}
 
 Please analyze the current state and provide your next move in the specified JSON format.
-"""
+[/INST]"""
         
         return prompt
 

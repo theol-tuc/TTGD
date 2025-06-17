@@ -1,121 +1,48 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import subprocess
-import json
+from llama_cpp import Llama
 import os
-import re
-from datetime import datetime
 
 app = FastAPI()
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Constants
-LLAMA_CLI_PATH = "/tmp/mtko19/llama.cpp/build/bin/llama-cli"
-LOG_DIR = "/tmp/mtko19/llama_logs"
+# Initialize the LLaMA model
+model_path = "/scratch/mtko19/models/llama3/llama-pro-8b-instruct.Q4_K_M.gguf"
+print(f"🤖 Loading model from: {model_path}")
+llm = Llama(model_path=model_path, n_ctx=2048)
 
 class GenerateRequest(BaseModel):
     prompt: str
-
-
-def extract_json(raw_output: str) -> dict:
-    """
-    Extract and validate JSON from LLM output using multiple strategies.
-    Returns the first valid JSON object that matches our expected format.
-    """
-    # Log raw output to file for debugging
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    os.makedirs(LOG_DIR, exist_ok=True)
-    log_file = os.path.join(LOG_DIR, f"llama_output_{timestamp}.txt")
-    
-    with open(log_file, "w", encoding="utf-8") as f:
-        f.write("=== Raw LLM Output ===\n")
-        f.write(raw_output)
-        f.write("\n=== End Raw Output ===\n")
-
-    # Strategy 1: Look for JSON between delimiters
-    delimiter_match = re.search(r"\[START_JSON\](.*?)\[END_JSON\]", raw_output, re.DOTALL)
-    if delimiter_match:
-        try:
-            json_str = delimiter_match.group(1).strip()
-            parsed = json.loads(json_str)
-            if all(k in parsed for k in ["action", "parameters", "explanation"]):
-                return parsed
-        except json.JSONDecodeError:
-            pass
-
-    # Strategy 2: Find all JSON-like objects
-    json_matches = re.findall(r"{[^{}]*}", raw_output)
-    for json_str in json_matches:
-        try:
-            parsed = json.loads(json_str)
-            if all(k in parsed for k in ["action", "parameters", "explanation"]):
-                return parsed
-        except json.JSONDecodeError:
-            continue
-
-    # Strategy 3: Look for the largest JSON object
-    large_json_match = re.search(r"{.*}", raw_output, re.DOTALL)
-    if large_json_match:
-        try:
-            json_str = large_json_match.group(0)
-            parsed = json.loads(json_str)
-            if all(k in parsed for k in ["action", "parameters", "explanation"]):
-                return parsed
-        except json.JSONDecodeError:
-            pass
-
-    return None
-
+    max_tokens: int = 512
+    temperature: float = 0.3
 
 @app.post("/generate")
-async def generate(request: GenerateRequest):
+async def generate(req: GenerateRequest):
     try:
-        # Verify llama-cli exists
-        if not os.path.exists(LLAMA_CLI_PATH):
-            raise HTTPException(
-                status_code=500,
-                detail=f"llama-cli not found at {LLAMA_CLI_PATH}"
-            )
-
-        # Run llama-cli with the prompt
-        process = subprocess.Popen(
-            [LLAMA_CLI_PATH, "generate", "--prompt", request.prompt],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
+        print(f"\n⏳ Prompt received:\n{req.prompt}\n")
+        
+        output = llm(
+            req.prompt,
+            max_tokens=req.max_tokens,
+            temperature=req.temperature,
+            stop=["</s>"],
+            echo=False
         )
         
-        stdout, stderr = process.communicate()
+        print(f"\n🧠 Raw output:\n{output}")
         
-        if process.returncode != 0:
-            print(f"[LLaMA Error] {stderr}")
-            raise HTTPException(status_code=500, detail=f"LLaMA process error: {stderr}")
-
-        # Extract and validate JSON
-        parsed_json = extract_json(stdout)
-        if parsed_json:
-            return {"response": parsed_json}
-        else:
-            raise HTTPException(
-                status_code=500, 
-                detail="No valid JSON found in LLM response. Check llama_logs directory for raw output."
-            )
-
+        if not output or not output.get("choices"):
+            raise HTTPException(status_code=500, detail="No output generated")
+            
+        response_text = output["choices"][0]["text"]
+        print(f"\n✨ Final response:\n{response_text}")
+        
+        return {"output": response_text}
+        
     except Exception as e:
-        print(f"[LLaMA Server Error] {str(e)}")
+        print(f"\n❌ Error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 if __name__ == "__main__":
     import uvicorn
-
+    print("\n🚀 Starting LLaMA server on http://localhost:8001")
     uvicorn.run(app, host="0.0.0.0", port=8001)

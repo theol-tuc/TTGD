@@ -1,7 +1,6 @@
 import requests
 import json
 import os
-import random
 from typing import Dict, Any, Optional
 from board_encoder import BoardEncoder
 from game_logic import GameBoard
@@ -14,66 +13,9 @@ class AIService:
         self.llm_server_url = llm_server_url or os.getenv("LLM_SERVER_URL", "http://localhost:8001")
         self.board_encoder = BoardEncoder()
         self.challenges = CHALLENGES
-        self.use_dummy_ai = os.getenv("USE_DUMMY_AI", "0") == "1"
         print(f"[AIService] Using LLM server at: {self.llm_server_url}")
-        if self.use_dummy_ai:
-            print("[AIService] Running in DUMMY AI mode - will return test responses")
-
-    def _get_dummy_move(self) -> Dict[str, Any]:
-        """Return a random dummy move for testing."""
-        actions = [
-            {
-                "action": "place_component",
-                "parameters": {
-                    "type": "gear",
-                    "x": random.randint(0, 7),
-                    "y": random.randint(0, 7),
-                    "rotation": 0
-                },
-                "explanation": "Placing a gear to connect components."
-            },
-            {
-                "action": "place_component",
-                "parameters": {
-                    "type": "crossover",
-                    "x": random.randint(0, 7),
-                    "y": random.randint(0, 7),
-                    "rotation": 0
-                },
-                "explanation": "Placing a crossover to allow bi-directional ball movement."
-            },
-            {
-                "action": "place_marble",
-                "parameters": {
-                    "color": random.choice(["red", "blue"]),
-                    "x": random.randint(0, 7),
-                    "y": random.randint(0, 7)
-                },
-                "explanation": "Placing a marble to simulate the start of the game."
-            },
-            {
-                "action": "rotate_component",
-                "parameters": {
-                    "x": random.randint(0, 7),
-                    "y": random.randint(0, 7),
-                    "rotation": random.choice([0, 90, 180, 270])
-                },
-                "explanation": "Rotating a component to redirect marbles."
-            }
-        ]
-        return random.choice(actions)
-
-    def _get_dummy_explanation(self, move: Dict[str, Any]) -> str:
-        """Return a dummy explanation based on the move."""
-        action = move.get("action", "unknown")
-        params = move.get("parameters", {})
-        return f"Dummy explanation for {action} with parameters: {json.dumps(params)}"
 
     def get_ai_move(self, board: GameBoard, challenge_id: str = None) -> Dict[str, Any]:
-        if self.use_dummy_ai:
-            print("[AIService] Dummy mode: returning dummy move.")
-            return self._get_dummy_move()
-
         try:
             game_state = {
                 "components": self.board_encoder.encode_board(board),
@@ -88,7 +30,7 @@ class AIService:
 
             response = requests.post(
                 f"{self.llm_server_url}/generate",
-                json={"prompt": prompt},
+                json={"prompt": prompt, "max_tokens": 512, "temperature": 0.7},
                 timeout=60
             )
 
@@ -96,28 +38,22 @@ class AIService:
                 raise Exception(f"LLM server error: {response.text}")
 
             result = response.json()
-            if "response" not in result:
-                raise Exception("No valid 'response' field from LLM")
+            if "output" not in result:
+                raise Exception("No valid 'output' field from LLM")
 
-            return result["response"]
+            return json.loads(result["output"])
 
         except requests.exceptions.Timeout:
-            print("[AIService] Timeout! Falling back to dummy move.")
-            return self._get_dummy_move()
+            print("[AIService] Timeout! Server not responding.")
+            raise Exception("LLM server timeout. Please try again.")
         except requests.exceptions.ConnectionError as e:
             print(f"[AIService] Connection error: {e}")
             raise Exception("LLM server not reachable. Is SSH tunnel active?")
         except Exception as e:
             print(f"[AIService] Unexpected error: {e}")
-            if self.use_dummy_ai:
-                return self._get_dummy_move()
             raise
 
     def get_ai_explanation(self, board: GameBoard, move: Dict[str, Any], challenge_id: str = None) -> str:
-        if self.use_dummy_ai:
-            print("[AIService] Dummy mode: returning dummy explanation.")
-            return self._get_dummy_explanation(move)
-
         try:
             game_state = {
                 "components": self.board_encoder.encode_board(board),
@@ -134,7 +70,7 @@ class AIService:
 
             response = requests.post(
                 f"{self.llm_server_url}/generate",
-                json={"prompt": prompt},
+                json={"prompt": prompt, "max_tokens": 512, "temperature": 0.7},
                 timeout=60
             )
 
@@ -142,16 +78,14 @@ class AIService:
                 raise Exception(f"LLM server error: {response.text}")
 
             result = response.json()
-            return result["response"].get("explanation", "No explanation provided")
+            return result["output"].strip()
 
         except requests.exceptions.Timeout:
-            print("[AIService] Timeout! Falling back to dummy explanation.")
-            return self._get_dummy_explanation(move)
+            print("[AIService] Timeout! Server not responding.")
+            raise Exception("LLM server timeout. Please try again.")
         except requests.exceptions.ConnectionError as e:
             print(f"[AIService] Connection error: {e}")
             raise Exception("LLM server not reachable. Is SSH tunnel active?")
         except Exception as e:
             print(f"[AIService] Unexpected error: {e}")
-            if self.use_dummy_ai:
-                return self._get_dummy_explanation(move)
             raise
