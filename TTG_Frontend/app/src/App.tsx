@@ -6,6 +6,7 @@ import { PartsPanel } from "./ui/partsPanel";
 import { ItemType } from './parts/constants';
 import { CHALLENGES, updateChallengeInitialBoard, Challenge, DEFAULT_CHALLENGE } from './components/challenges';
 import { AIOverlay } from './components/AIOverlay';
+import { ExitPageUI } from './components/ExitPageUI';
 import {
     getBoardState,
     setLauncher,
@@ -69,6 +70,7 @@ const App: React.FC = () => {
     const [isAIVisible, setIsAIVisible] = useState(false);
     const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
     const [showCompletion, setShowCompletion] = useState(false);
+    const [isExitPageUIVisible, setIsExitPageUIVisible] = useState(false);
 
     const handleRun = () => {
         setIsRunning(true);
@@ -456,6 +458,10 @@ const App: React.FC = () => {
         setIsAIVisible(false);
     };
 
+    const handleExitPageUI = () => {
+        setIsExitPageUIVisible(!isExitPageUIVisible);
+    };
+
     return (
         <Layout style={{ minHeight: '100vh', background: '#f0f0f0', overflow: 'hidden' }}>
             {contextHolder}
@@ -555,6 +561,7 @@ const App: React.FC = () => {
                         onTriggerLeft={handleTriggerLeft}
                         onTriggerRight={handleTriggerRight}
                         onToggleAI={() => setIsAIVisible(!isAIVisible)}
+                        onExitPageUI={handleExitPageUI}
                         isRunning={isRunning}
                         currentSpeed={currentSpeed}
                         isAIVisible={isAIVisible}
@@ -604,6 +611,12 @@ const App: React.FC = () => {
                     <PartsPanel />
                 </Sider>
             </Layout>
+            <ExitPageUI
+                visible={isExitPageUIVisible}
+                onClose={handleExitPageUI}
+                currentChallenge={currentChallenge}
+                boardState={board}
+            />
             <ChallengeCompleteOverlay
                 visible={showCompletion}
                 challengeName={currentChallenge?.name || ''}

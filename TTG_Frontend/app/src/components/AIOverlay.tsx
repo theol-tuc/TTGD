@@ -65,7 +65,7 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
 
     return (
         <Card
-            style={{position: 'fixed', top: 80, left: 100, width: 320, maxHeight: 'calc(100vh - 100px)', borderRadius: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', zIndex: 1001, overflow: 'hidden', border: 'none'}}
+            style={{position: 'fixed', top: 80, left: 100, width: 280, maxHeight: '400px', borderRadius: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', zIndex: 1001, overflow: 'hidden', border: 'none'}}
             title={
                 <Space>
                     <RobotOutlined style={{ color: '#722ED1' }} />
@@ -86,7 +86,7 @@ export const AIOverlay: React.FC<AIOverlayProps> = ({ onAIMove, onClose }) => {
                 />
             }
         >
-            <div style={{display: 'flex', flexDirection: 'column', gap: 16, maxHeight: 'calc(100vh - 160px)', overflowY: 'auto', padding: 8}}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '300px', overflowY: 'auto', padding: 8}}>
                 {error && (
                     <Alert
                         message={error}

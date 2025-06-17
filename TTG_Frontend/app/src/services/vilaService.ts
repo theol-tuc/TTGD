@@ -3,8 +3,6 @@ import { API_BASE_URL } from '../config';
 export interface VilaAnalysis {
     status: string;
     analysis: any;
-    recommended_move: string;
-    confidence: number;
 }
 
 export const captureAndAnalyzeBoard = async (boardElement: HTMLElement): Promise<VilaAnalysis> => {

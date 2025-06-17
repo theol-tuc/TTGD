@@ -1,19 +1,27 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+print("🔐 VILA_API_KEY loaded:", os.getenv("VILA_API_KEY"))
+VILA_API_KEY = os.getenv("VILA_API_KEY")
+VILA_API_URL = os.getenv("VILA_API_URL", "https://ai.api.nvidia.com/v1/vlm/nvidia/vila")
+
+if not VILA_API_KEY:
+    raise RuntimeError("VILA_API_KEY is not loaded — check your .env")
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional, ForwardRef, Any
 from PIL import Image
 import io
-import base64
 import requests
-import os
-from dotenv import load_dotenv
+import traceback
 
 from game_logic import GameBoard, ComponentType, Marble
 from challenges import CHALLENGES, serialize_challenge
 import ai_manager
 from ai_manager import AIManager
-import traceback
 
 from services.vision_nim import send_to_vila
 from services.parser import parse_and_apply_commands
@@ -44,12 +52,6 @@ GameBoardRef = Optional['GameBoard']
 
 # Initialize game board
 board = GameBoard(8, 8)
-
-# Add VILA API configuration
-# VILA_API_KEY = os.getenv("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") # Removed
-# VILA_API_URL = "https://api.nvcf.nvidia.com/v2/nvcf/pexec/functions/your-vila-function-id"  # Removed
-
-# load_dotenv()  # Removed
 
 class ComponentRequest(BaseModel):
     type: str
@@ -275,20 +277,18 @@ async def debug_components():
 
 @app.post("/api/vila/analyze")
 async def analyze_with_vila(board_image: UploadFile = File(...)):
+    logging.info("🎯 VILA ANALYSIS ENDPOINT CALLED")
+
     try:
         if not board_image:
             logging.error("No file provided")
             raise HTTPException(status_code=400, detail="No file provided")
-        
+
         contents = await board_image.read()
 
         if not contents:
             logging.error("File is empty")
             raise HTTPException(status_code=400, detail="File is empty")
-        
-        with open("debug1_uploaded_board.png", "wb") as f:
-            f.write(contents)
-
 
         logging.info(f"Received file: {board_image.filename}, size: {len(contents)} bytes")
         logging.info("Starting VILA analysis...")
@@ -302,22 +302,16 @@ async def analyze_with_vila(board_image: UploadFile = File(...)):
         matches = re.findall(r'add_component\(.*?\)', content)
 
         # Apply extracted components to the game board
-        parse_and_apply_commands(board, matches)
-
-        # Extract recommended_move and confidence from the content string for the frontend
-        recommended_move = "N/A"
-        confidence = 0 # Placeholder
-
         if matches:
-            recommended_move = matches[0] # Take the first suggested component as the recommended move
+            parse_and_apply_commands(board, matches)
 
-        return {
+        response_data = {
             "status": "success",
             "executed_components": matches,
-            "raw_response": result,
-            "recommended_move": recommended_move,
-            "confidence": confidence
+            "raw_response": result
         }
+
+        return response_data
 
     except Exception as e:
         logging.error(f"Error during board analysis: {str(e)}", exc_info=True)
