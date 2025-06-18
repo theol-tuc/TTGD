@@ -1,3 +1,5 @@
+import { api } from './api';
+import { BoardState } from './api';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -14,27 +16,35 @@ export interface AIMove {
 }
 
 export interface AIResponse {
-    move: AIMove;
+    action: string;
+    parameters: Record<string, any>;
     explanation: string;
 }
 
 export const aiService = {
-    async getAIMove(): Promise<AIResponse> {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/ai/move`);
-            return response.data;
-        } catch (error) {
-            console.error('Error getting AI move:', error);
-            throw error;
-        }
+    async getAIMove(gameState: BoardState, challengeId?: string): Promise<AIResponse> {
+        const requestData = {
+            gameState,
+            challengeId
+        };
+        console.log('Sending to AI (raw data):', JSON.stringify(requestData, null, 2));
+        console.log('Sending to AI (structured):', {
+            components: gameState.components,
+            marbles: gameState.marbles,
+            red_marbles: gameState.red_marbles,
+            blue_marbles: gameState.blue_marbles,
+            active_launcher: gameState.active_launcher,
+            challengeId
+        });
+        const response = await api.post('/ai/move', requestData);
+        console.log('AI response:', response.data);
+        return response.data;
     },
 
-    async executeAIMove(): Promise<void> {
-        try {
-            await axios.post(`${API_BASE_URL}/ai/execute`);
-        } catch (error) {
-            console.error('Error executing AI move:', error);
-            throw error;
-        }
+    async executeAIMove(gameState: BoardState, challengeId?: string): Promise<void> {
+        await api.post('/ai/execute', {
+            gameState,
+            challengeId
+        });
     }
 }; 

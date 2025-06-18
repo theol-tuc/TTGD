@@ -3,7 +3,7 @@ from game_logic import GameBoard, ComponentType
 
 class BoardEncoder:
     """Converts the game board state into LLM-friendly text format"""
-
+    
     @staticmethod
     def encode_board(board: GameBoard) -> str:
         """Convert the game board state to a text description"""
@@ -43,9 +43,9 @@ Possible Actions:
                 elif component.type == ComponentType.BIT_RIGHT:
                     row.append("R")
                 elif component.type == ComponentType.RAMP_LEFT:
-                    row.append("/")
-                elif component.type == ComponentType.RAMP_RIGHT:
                     row.append("\\")
+                elif component.type == ComponentType.RAMP_RIGHT:
+                    row.append("/")
                 elif component.type == ComponentType.CROSSOVER:
                     row.append("X")
                 elif component.type == ComponentType.INTERCEPTOR:
@@ -55,25 +55,11 @@ Possible Actions:
                 elif component.type == ComponentType.LEVER_BLUE:
                     row.append("B")
                 elif component.type == ComponentType.LEVER_RED:
-                    row.append("R")
+                    row.append("r")
                 elif component.type == ComponentType.GRAY_SPACE:
                     row.append("#")
-                elif component.type == ComponentType.BORDER_VERTICAL:
-                    row.append("|")
-                elif component.type == ComponentType.BORDER_HORIZONTAL:
-                    row.append("_")
-                elif component.type == ComponentType.BORDER_DIAGONAL_LEFT or component.type == ComponentType.BORDER_DIAGONAL_RIGHT:
-                    row.append("-")
-                elif component.type == ComponentType.CORNER_LEFT:
-                    row.append("<")
-                elif component.type == ComponentType.CORNER_RIGHT:
-                    row.append(">")
-                elif component.type == ComponentType.GEAR_BIT_LEFT:
-                    row.append("GL")
-                elif component.type == ComponentType.GEAR_BIT_RIGHT:
-                    row.append("GR")
                 else:
-                    row.append("i")
+                    row.append(" ")
             layout.append("".join(row))
         return "\n".join(layout)
 
@@ -84,13 +70,46 @@ Possible Actions:
         for y in range(board.height):
             for x in range(board.width):
                 component = board.components[y][x]
-                if component.type != ComponentType.EMPTY and component.type != ComponentType.GRAY_SPACE:
-                    desc = f"- {component.type.value} at position ({x}, {y})"
-                    if component.is_gear:
-                        desc += f" (rotation: {component.gear_rotation}°)"
-                    if component.is_gear_bit:
-                        desc += f" (state: {'1' if component.gear_bit_state else '0'})"
-                    components.append(desc)
+                # Skip empty spaces, gray spaces, and invalid spaces
+                if component.type in [ComponentType.EMPTY, ComponentType.GRAY_SPACE, ComponentType.INVALID]:
+                    continue
+                    
+                # Skip border components unless they're special
+                if component.type in [
+                    ComponentType.BORDER_VERTICAL,
+                    ComponentType.BORDER_HORIZONTAL,
+                    ComponentType.BORDER_DIAGONAL_LEFT,
+                    ComponentType.BORDER_DIAGONAL_RIGHT,
+                    ComponentType.CORNER_LEFT,
+                    ComponentType.CORNER_RIGHT
+                ]:
+                    continue
+                
+                # Format the component description
+                desc = f"- {component.type.value} at position ({x}, {y})"
+                
+                # Add gear-specific details
+                if component.is_gear:
+                    desc += f" (rotation: {component.gear_rotation}°)"
+                if component.is_gear_bit:
+                    desc += f" (state: {'1' if component.gear_bit_state else '0'})"
+                
+                # Add special details for other components
+                if component.type in [ComponentType.RAMP_LEFT, ComponentType.RAMP_RIGHT]:
+                    desc += " (changes marble direction)"
+                elif component.type in [ComponentType.BIT_LEFT, ComponentType.BIT_RIGHT]:
+                    desc += " (stores binary state)"
+                elif component.type == ComponentType.CROSSOVER:
+                    desc += " (allows marbles to cross paths)"
+                elif component.type == ComponentType.INTERCEPTOR:
+                    desc += " (stops marbles)"
+                elif component.type == ComponentType.LAUNCHER:
+                    desc += " (launches marbles)"
+                elif component.type in [ComponentType.LEVER_BLUE, ComponentType.LEVER_RED]:
+                    desc += " (controls marble flow)"
+                
+                components.append(desc)
+        
         return "\n".join(components) if components else "No active components"
 
     @staticmethod
@@ -98,7 +117,7 @@ Possible Actions:
         """Create a text description of all marbles"""
         if not board.marbles:
             return "No marbles on the board"
-
+        
         marbles = []
         for marble in board.marbles:
             state = "moving" if marble.is_moving else "stopped"
@@ -149,21 +168,3 @@ Possible Actions:
    - Complete the puzzle by achieving the target pattern
    - Use the minimum number of components
    - Follow any specific rules for the current puzzle"""
-
-# Example usage
-if __name__ == "__main__":
-    # Create a test board
-    board = GameBoard()
-
-    # Add some test components
-    board.add_component(ComponentType.GEAR, 7, 7)
-    board.add_component(ComponentType.BIT_LEFT, 6, 6)
-    board.add_component(ComponentType.RAMP_LEFT, 8, 8)
-
-    # Encode the board
-    encoded_state = BoardEncoder.encode_board(board)
-    print(encoded_state)
-
-    # Print game rules
-    print("\nGame Rules:")
-    print(BoardEncoder.encode_game_rules()) 
