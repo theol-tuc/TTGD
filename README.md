@@ -49,7 +49,7 @@ The backend server is now running on `http://localhost:8000`
 
 1. navigate to the "app" folder and install dependencies
 ```sh
-   npm install
+npm install
 ```
 2. In the same directory run:
 ```sh
