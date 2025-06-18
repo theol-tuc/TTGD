@@ -12,40 +12,56 @@ Turing Tumble Game Developemt
 
 [![Python][Python-img]][Python-url] <br>
 [![React][React-img]][React-url] <br>
+[![JavaScript][JavaScript-img]][JavaScript-url] <br>
+[![HTML][HTML-img]][HTML-url] <br>
 
-## Installation
+## 🔧 Installation
 
 ### Prerequisites
 
 You need to have installed:
 - Node.js
-- Python
+- Python (preferred version 3.12 or higher)
 - pip
+- Rust
 
-### Setup
+### Backend Setup
 
 1. Clone the repository:
 ```sh
 git clone https://github.com/theol-tuc/TTGD.git
 ```
-2. Access and open the repository in an IDE of ypur choice.
-3. Install dependencies
-4. Navigate to the directory in which requirements.txt is and execute:
+2. Navigate to the backend folder and start the virtual environment:
 ```sh
-npm install  OR
+venv\Scripts\activate
+```
+3. Install dependencies:
+```sh
 pip install -r requirements.txt
 ```
-5. Repeat the Steps 3 & 4 for the backend.
-6. To start the backend run:
+4. Start the backend server:
 ```sh
-python manage.py runserver
+python -m uvicorn api:app --reload
 ```
-7. Return to the Frontend to the main directory and run:
+The backend server is now running on `http://localhost:8000`
+
+### Frontend Setup
+
+1. navigate to the "app" folder and install dependencies
+```sh
+   npm install
+```
+2. In the same directory run:
 ```sh
 npm start
 ```
+The Frontend and backend are now running on `http://localhost:3000`
 
-## License
+You can now play the game!
+
+## ⚖️ License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
@@ -53,3 +69,7 @@ npm start
 [Python-url]: https://www.python.org/
 [React-img]: https://shields.io/badge/react-black?logo=react&style=for-the-badge
 [React-url]: https://www.react.dev/
+[JavaScript-img]: https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
+[JavaScript-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+[HTML-img]: https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white
+[HTML-url]: https://developer.mozilla.org/en-US/docs/Web/HTML
