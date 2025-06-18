@@ -75,11 +75,11 @@ def add_component(self, type: ComponentType, x: int, y: int) -> None:
 
 ---
 
-## 📤 Output Format
+## Output Format
 
 You must return a list of **function calls** as strings that add **only** the new parts needed to solve the challenge. Do **not** reconstruct the entire board.
 
-### ✅ Example output:
+### Example output:
 
 ```python
 [
@@ -91,44 +91,5 @@ You must return a list of **function calls** as strings that add **only** the ne
 
 ---
 
-## 🎯 CHALLENGE STARTS HERE
-
-**Challenge ID**: 1
-**Description**: Make all of the **blue marbles (and only the blue marbles)** reach the end.
-**Available Parts**:
-
-* 4× `ItemType.RAMP_LEFT`
-
-**Initial Board Layout**:
-
-```
-|i-iiiiiiiii-i|
-|ii-iiiiiii-ii|
-|iii-SiiiS-iii|
-|iii#\#i#.#iii|
-|ii#.#/#.#.#ii|
-|i#.#\#.#.#.#i|
-|i.#.#.#.#.#.i|
-|i#.#\#.#.#.#i|
-|i.#.#.#.#.#.i|
-|i#.#\#.#.#.#i|
-|i.#.#.#.#.#.i|
-|i#.#\#.#.#.#i|
-|i.#.#.#.#.#.i|
-|iiiiii.iiiiii|
-|iiBiBBiRRiRii|
-|iiiiiiiiiiiii|
-```
-
-**Marble Counts**:
-
-* Blue Marbles: 8
-* Red Marbles: 8
-
-**Expected Output**:
-
-```python
-["blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue"]
-```
-
----
+## Challenge
+The challenge you need to solve using the library is: ${question}
