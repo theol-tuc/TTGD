@@ -147,20 +147,13 @@ const App: React.FC = () => {
             // Fetch the backend challenge data
             const backendChallenge = await fetchChallengeById(challengeId);
             if (!backendChallenge) return;
-
-            // Find the frontend metadata for the challenge
             const frontendChallenge = CHALLENGES.find(challenge => challenge.id === challengeId);
             if (!frontendChallenge) return;
-
-            // Merge the backend data with the frontend metadata
             const mergedChallenge = {
                 ...frontendChallenge,
                 initialBoard: backendChallenge.initialBoard
             };
-
-            // Update backend with new board
             await resetBoard(); // clear old board
-
             // Add components one-by-one to backend
             for (let y = 0; y < mergedChallenge.initialBoard.length; y++) {
                 for (let x = 0; x < mergedChallenge.initialBoard[y].length; x++) {
@@ -170,7 +163,6 @@ const App: React.FC = () => {
                     }
                 }
             }
-
             setCurrentChallenge(mergedChallenge);
             setBoard(mergedChallenge.initialBoard);
             setMarbleCounts({
