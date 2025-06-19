@@ -4,6 +4,26 @@ import os
 from challenges import CHALLENGES
 from board_encoder import BoardEncoder
 import json
+import re
+
+def extract_json_from_response(response_text):
+    """
+    Extract JSON array from the model response, removing any explanatory text.
+    """
+    # Try to find JSON array pattern
+    json_match = re.search(r"\[\s*\"add_component.*?\]", response_text, re.DOTALL)
+    if json_match:
+        return json_match.group(0)
+    
+    # Safety net: find the last complete JSON array
+    end_index = response_text.rfind("]")
+    if end_index != -1:
+        start_index = response_text.rfind("[", 0, end_index + 1)
+        if start_index != -1:
+            return response_text[start_index:end_index + 1]
+    
+    # If no match found, return the original response
+    return response_text
 
 class PromptManager:
     def __init__(self):
@@ -27,22 +47,6 @@ class PromptManager:
         """
         template = self.templates.get(template_type, self.templates['library'])
         
-        # Add JSON format instructions
-        json_format = """
-You must respond with a valid JSON object in the following format:
-{
-    "action": "place_component" | "rotate_component" | "place_marble" | "remove_component",
-    "parameters": {
-        // Parameters specific to the action
-        // For place_component: "type", "x", "y", "rotation"
-        // For rotate_component: "x", "y", "rotation"
-        // For place_marble: "color", "x", "y"
-        // For remove_component: "x", "y"
-    },
-    "explanation": "Your detailed explanation of the move"
-}
-"""
-        
         # Add challenge context if provided
         challenge_context = ""
         if challenge_id and challenge_id in CHALLENGES:
@@ -50,45 +54,53 @@ You must respond with a valid JSON object in the following format:
             try:
                 board_layout = BoardEncoder._encode_board_layout(challenge['board'])
                 challenge_context = f"""
-Current Challenge ID: {challenge_id}
-Description: {challenge.get('description', 'No description available')}
-Objective: {challenge.get('objective', 'No objective specified')}
-Available Parts: {challenge.get('availableParts', 'No parts specified')}
+Challenge Description:
+{challenge.get('description', 'No description available')}
+
+Objective:
+{challenge.get('objective', 'No objective specified')}
+
+Available Parts:
+{challenge.get('availableParts', 'No parts specified')}
+
 Board Layout:
 {board_layout}
-Red Marbles: {challenge.get('red_marbles', 0)}
-Blue Marbles: {challenge.get('blue_marbles', 0)}
-Expected Output: {challenge.get('expectedOutput', 'No expected output specified')}
+
+Expected Output:
+{challenge.get('expectedOutput', 'No expected output specified')}
 """
             except Exception as e:
                 print(f"Error encoding challenge board: {str(e)}")
                 challenge_context = f"""
-Current Challenge ID: {challenge_id}
-Description: {challenge.get('description', 'No description available')}
-Objective: {challenge.get('objective', 'No objective specified')}
+Challenge Description:
+{challenge.get('description', 'No description available')}
+
+Objective:
+{challenge.get('objective', 'No objective specified')}
+
 [Error: Could not encode board layout]
 """
         
-        # Format the prompt with LLaMA 3 chat format
-        system_prompt = """You are an AI assistant playing the Turing Tumble marble game. 
-Your goal is to help solve challenges by placing and manipulating components on the board.
-You must respond with valid JSON that describes your next move."""
-        
-        prompt = f"""<s>[INST] <<SYSTEM>>
-{system_prompt}
-<</SYSTEM>>
+        # Force JSON-only output with strict instructions and length limit
+        prompt = f"""Only return a JSON list of at most 4 add_component function calls.
+Do NOT write any explanations, comments, functions, or extra output.
+The format must be:
 
-{template}
+[
+  "add_component(type=ItemType.RampLeft, x=6, y=6)",
+  "add_component(type=ItemType.RampLeft, x=8, y=6)"
+]
+
+Your response must start with [ and end with ].
+If you return anything else, it will crash the game.
+Now solve the following challenge:
+
+Game State:
+{json.dumps(game_state)}
 
 {challenge_context}
 
-Current Game State:
-{json.dumps(game_state, indent=2)}
-
-{json_format}
-
-Please analyze the current state and provide your next move in the specified JSON format.
-[/INST]"""
+Remember: ONLY return the JSON list with at most 4 components. Nothing else."""
         
         return prompt
 
