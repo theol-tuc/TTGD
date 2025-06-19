@@ -8,16 +8,16 @@
 
 ### 2. New Challenge Solver Script
 - Added `solve_all_challenges.py` to automatically load and solve all puzzles from the `Challenges` directory.
-- The script uses the AI pipeline (`AIChallengeSolver.py`, `BoardEncoder`, etc.) to generate solutions for each challenge.
+- The script uses the AI pipeline (`AIChallengeSolver.py`, `BoardEncoder`, etc.) to generate solutions for each challenge **using GPT-4V via API**.
 
 ### 3. Model File Handling
-- **Created a local folder**: `TTG_Backend/models/gpt2` for storing the GPT-2 model and tokenizer files.
-- **Important:** The large file `pytorch_model.bin` (over 500MB) is **not tracked by git** due to GitHub's file size limits.
-    - Instead, use [Git LFS](https://git-lfs.github.com/) for large files, or download the model manually as described below.
+- **No local model files are required.**
+- The project uses **OpenAI's GPT-4V model via API** for all AI and puzzle-solving tasks.
+- You only need to set up your OpenAI API key in the environment or configuration as described below.
 
 ### 4. .gitignore and Git LFS
 - Updated `.gitignore` to exclude large binary files (e.g., `*.bin`).
-- Configured [Git LFS](https://git-lfs.github.com/) to track large model files if needed.
+- **No need for Git LFS or local model binaries.**
 
 ### 5. Repository Cleanup
 - Removed all unnecessary or outdated files.
@@ -28,18 +28,9 @@
   ```sh
   python TTG_Backend/solve_all_challenges.py
   ```
-- **To set up the model:**  
-  - Download the GPT-2 model files from [Hugging Face](https://huggingface.co/gpt2).
-  - Place all `.json`, `.txt`, and `pytorch_model.bin` files in `TTG_Backend/models/gpt2/`.
-  - If using Git LFS, run:
-    ```sh
-    git lfs install
-    git lfs track "*.bin"
-    git add .gitattributes
-    git add TTG_Backend/models/gpt2/pytorch_model.bin
-    git commit -m "Track large model file with LFS"
-    git push origin <your-branch>
-    ```
+- **To set up the API key:**  
+  - Obtain an OpenAI API key with access to GPT-4V.
+  - Set the API key as an environment variable or in the project configuration (see `TTG_Backend/config.py`).
 
 ### 7. Branch and Repo Info
 - All changes are on the `Rohit` branch of [theol-tuc/TTGD](https://github.com/theol-tuc/TTGD/tree/Rohit).
@@ -47,5 +38,5 @@
 ---
 
 ## Note for Collaborators
-- **Do not commit large model binaries directly to git.**
-- If you clone the repo and the model file is missing, download it manually or use Git LFS.
+- **Do not commit any API keys or sensitive credentials to git.**
+- If you clone the repo, make sure to set up your own OpenAI API key for GPT-4V access.
