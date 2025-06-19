@@ -47,7 +47,7 @@ The backend server is now running on `http://localhost:8000`
 
 ### Frontend Setup
 
-1. navigate to the "app" folder and install dependencies
+1. Navigate to the "TTG_Frontend/app" folder and install dependencies
 ```sh
 npm install
 ```
