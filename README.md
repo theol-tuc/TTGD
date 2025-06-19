@@ -1,6 +1,6 @@
 # Turing Tumble Project
 
-## 📝 Project Update Summary
+##  Project Update Summary
 
 ### 1. Removed LLaVA and Vision Dependencies
 - Deleted all code and files related to LLaVA and image-based puzzle solving.
