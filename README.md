@@ -59,6 +59,16 @@ The Frontend and backend are now running on `http://localhost:3000`
 
 You can now play the game!
 
+## AI Usage
+
+If you want to use the AI features, at this moment they are in the respective branches with their name.
+
+For the usage on LLaMa3 go to the branch [llama3](llama3). For instructions read the implentation guide [IMPLEMENTATION_GUIDE.md](TTG_Backend/IMPLEMENTATION_GUIDE.md).
+
+For the usage on GPT-4V go to the branch [gpt4](gpt4).
+
+For the usage of VILA go to the branch [vila](VLM_VILA).
+
 ## ⚖️ License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
