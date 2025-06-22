@@ -1,4 +1,4 @@
-# Turing Tumble Project
+ Turing Tumble Project
 
 ##  Project Update Summary
 
@@ -40,3 +40,4 @@
 ## Note for Collaborators
 - **Do not commit any API keys or sensitive credentials to git.**
 - If you clone the repo, make sure to set up your own OpenAI API key for GPT-4V access.
+
