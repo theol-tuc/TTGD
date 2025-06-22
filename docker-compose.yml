@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./TTG_Backend
+    container_name: ttg-backend
+    env_file:
+      - ./TTG_Backend/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # Uncomment and extend for volumes, frontend, or database
+    # volumes:
+    #   - ./TTG_Backend:/app
+    # depends_on:
+    #   - frontend
+    #   - db 

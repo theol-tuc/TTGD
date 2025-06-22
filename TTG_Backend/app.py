@@ -48,7 +48,6 @@ def simulate_marble():
     # Simple simulation logic
     path = []
     x, y = start_x, 0
-    
     while y < BOARD_SIZE:
         path.append({'x': x, 'y': y})
         component = board_state[y][x]
@@ -58,7 +57,6 @@ def simulate_marble():
         elif component == 'RAMP_RIGHT':
             x += 1
         elif component == 'CROSSOVER':
-            # In a real implementation, this would be more complex
             pass
         elif component == 'INTERCEPTOR':
             break
