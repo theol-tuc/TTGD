@@ -1,0 +1,34 @@
+/*  Challenge #3: Ignition
+ *
+ *  Release one blue ball and then all of the red balls.
+ */
+
+
+digraph Challenge03 {
+    /*
+    ** attributes
+    */
+
+    /*
+    ** nodes
+    */
+
+    objective [
+    ]
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> R_bot
+    R_top -> R_bot
+
+
+    /*
+    ** graph attributes
+    */
+    graph [
+        label="Challenge #3: Ignition"
+    ]
+}

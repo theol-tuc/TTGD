@@ -1,0 +1,50 @@
+/*  Challenge #3: Ignition
+ *
+ *  Release one blue ball and then all of the red balls.
+ */
+
+#import "board.h"
+
+digraph Challenge03 {
+    /*
+    ** attributes
+    */
+    graph [ GRAPH_STYLE ]
+    node  [ NODE_STYLE  ]
+    edge  [ EDGE_STYLE  ]
+
+    /*
+    ** nodes
+    */
+    GAME_BOARD_NODES
+
+#if ShowObjective
+    objective [
+        OBJECTIVE_STYLE
+        label=$text(
+            $line(Release one blue ball and),
+            $line(then all of the red balls.))
+    ]
+#endif
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> R_bot
+    R_top -> R_bot
+
+    GAME_BOARD_EDGES
+
+    /*
+    ** graph attributes
+    */
+#if ShowGraphLabel
+    graph [
+        label="Challenge #3: Ignition"
+    ]
+#endif
+}
+
+// vim:ai:ts=4:sw=4:et:fileencoding=utf-8:syntax=dot

@@ -1,0 +1,36 @@
+/*  Challenge #5: Entropy
+ *  Challenge #6: Total Internal Reflection
+ *
+ *  Make the pattern blue, red, blue, red, blue, red…
+ */
+
+
+digraph Challenge05 {
+    /*
+    ** attributes
+    */
+
+    /*
+    ** nodes
+    */
+
+    objective [
+    ]
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> R_bot
+    R_top -> B_bot
+
+
+    /*
+    ** graph attributes
+    */
+    graph [
+        label="Challenge #5: Entropy"
+        label="Challenge #6: Total Internal Reflection"
+    ]
+}

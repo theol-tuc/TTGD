@@ -1,0 +1,39 @@
+/*  Challenge #1: Gravity
+ *  Challenge #2: Re-entry
+ *  Make all of the blue balls (and only the blue balls) reach the end.
+ *
+ *  Challenge #7: Path of Least Resistance
+ *  Create a path for the blue balls to reach the output with only 6 ramps.
+ *
+ */
+
+
+digraph Challenge01 {
+    /*
+    ** attributes
+    */
+
+    /*
+    ** nodes
+    */
+
+    objective [
+    ]
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> B_bot
+
+
+    /*
+    ** graph attributes
+    */
+    graph [
+        label="Challenge #1: Gravity"
+        label="Challenge #2: Re-entry"
+        label="Challenge #7: Path of Least Resistance"
+    ]
+}

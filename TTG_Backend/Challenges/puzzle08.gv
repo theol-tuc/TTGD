@@ -1,0 +1,55 @@
+/*  Challenge #8: Depolarization
+ *
+ *  Make the pattern blue, red, blue, red, blue, red…
+ */
+
+#import "board.h"
+
+digraph Challenge08 {
+    /*
+    ** attributes
+    */
+    graph [ GRAPH_STYLE ]
+    node  [ NODE_STYLE  ]
+    edge  [ EDGE_STYLE  ]
+
+    /*
+    ** nodes
+    */
+    GAME_BOARD_NODES
+
+#if ShowObjective
+    objective [
+        OBJECTIVE_STYLE
+        label=$text(
+            $line(Make the pattern blue, red,),
+            $line(blue, red, blue, red…))
+    ]
+#endif
+
+    bit [ BIT_STYLE label=BITLEFT ]
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> bit:nw
+    R_top -> bit:ne
+
+    bit:sw -> B_bot
+    bit:se -> R_bot
+
+    GAME_BOARD_EDGES
+
+    /*
+    ** graph attributes
+    */
+#if ShowGraphLabel
+    graph [
+        label="Challenge #8: Depolarization"
+    ]
+#endif
+}
+
+// vim:ai:ts=4:sw=4:et:fileencoding=utf-8:syntax=dot

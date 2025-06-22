@@ -1,0 +1,34 @@
+/*  Challenge #4: Fusion
+ *
+ *  Release one red ball and then all of the blue balls.
+ */
+
+
+digraph Challenge04 {
+    /*
+    ** attributes
+    */
+
+    /*
+    ** nodes
+    */
+
+    objective [
+    ]
+
+    /*
+    ** edges
+    */
+    start -> R_top
+
+    B_top -> B_bot
+    R_top -> B_bot
+
+
+    /*
+    ** graph attributes
+    */
+    graph [
+        label="Challenge #4: Fusion"
+    ]
+}

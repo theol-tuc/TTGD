@@ -1,0 +1,39 @@
+/*  Challenge #8: Depolarization
+ *
+ *  Make the pattern blue, red, blue, red, blue, red…
+ */
+
+
+digraph Challenge08 {
+    /*
+    ** attributes
+    */
+
+    /*
+    ** nodes
+    */
+
+    objective [
+    ]
+
+    bit [ label=BITLEFT ]
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> bit:nw
+    R_top -> bit:ne
+
+    bit:sw -> B_bot
+    bit:se -> R_bot
+
+
+    /*
+    ** graph attributes
+    */
+    graph [
+        label="Challenge #8: Depolarization"
+    ]
+}

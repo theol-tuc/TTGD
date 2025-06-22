@@ -25,7 +25,8 @@ app.add_middleware(
 GameBoardRef = Optional['GameBoard']
 
 # Initialize game board and AI manager
-board = GameBoard(red=3, blue=3)  # Initialize with 3 red and 3 blue marbles
+board = GameBoard()
+board.set_number_of_marbles(3, 3)  # Set 3 red and 3 blue marbles
 
 # Persistent in-memory board state
 PERSISTENT_BOARD = [['.' for _ in range(15)] for _ in range(17)]

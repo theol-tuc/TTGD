@@ -1,0 +1,50 @@
+/*  Challenge #4: Fusion
+ *
+ *  Release one red ball and then all of the blue balls.
+ */
+
+#import "board.h"
+
+digraph Challenge04 {
+    /*
+    ** attributes
+    */
+    graph [ GRAPH_STYLE ]
+    node  [ NODE_STYLE  ]
+    edge  [ EDGE_STYLE  ]
+
+    /*
+    ** nodes
+    */
+    GAME_BOARD_NODES
+
+#if ShowObjective
+    objective [
+        OBJECTIVE_STYLE
+        label=$text(
+            $line(Release one red ball and),
+            $line(then all of the blue balls.))
+    ]
+#endif
+
+    /*
+    ** edges
+    */
+    start -> R_top
+
+    B_top -> B_bot
+    R_top -> B_bot
+
+    GAME_BOARD_EDGES
+
+    /*
+    ** graph attributes
+    */
+#if ShowGraphLabel
+    graph [
+        label="Challenge #4: Fusion"
+    ]
+#endif
+}
+
+// vim:ai:ts=4:sw=4:et:fileencoding=utf-8:syntax=dot

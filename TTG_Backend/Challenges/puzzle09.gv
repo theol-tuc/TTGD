@@ -1,0 +1,55 @@
+/*  Challenge #9: Dimers
+ *
+ *  Make the pattern blue, blue, red, blue, blue, red…
+ */
+
+#import "board.h"
+
+digraph Challenge09 {
+    /*
+    ** attributes
+    */
+    graph [ GRAPH_STYLE ]
+    node  [ NODE_STYLE  ]
+    edge  [ EDGE_STYLE  ]
+
+    /*
+    ** nodes
+    */
+    GAME_BOARD_NODES
+
+#if ShowObjective
+    objective [
+        OBJECTIVE_STYLE
+        label=$text(
+            $line(Make the pattern blue, blue, red,),
+            $line(blue, blue, red…))
+    ]
+#endif
+
+    bit [ BIT_STYLE label=BITRIGHT ]
+
+    /*
+    ** edges
+    */
+    start -> B_top
+
+    B_top -> bit:n
+    R_top -> B_bot:ne
+
+    bit:sw -> B_bot
+    bit:se -> R_bot
+
+    GAME_BOARD_EDGES
+
+    /*
+    ** graph attributes
+    */
+#if ShowGraphLabel
+    graph [
+        label="Challenge #9: Dimers"
+    ]
+#endif
+}
+
+// vim:ai:ts=4:sw=4:et:fileencoding=utf-8:syntax=dot
