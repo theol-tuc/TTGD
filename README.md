@@ -65,9 +65,9 @@ If you want to use the AI features, at this moment they are in the respective br
 
 For the usage of LLaMa3 stay in this branch. For instructions read the implentation guide [IMPLEMENTATION_GUIDE.md](TTG_Backend/IMPLEMENTATION_GUIDE.md).
 
-For the usage on GPT-4V go to the branch [gpt4](gpt4).
+For the usage on GPT-4V go to the branch [gpt4](gpt4) and read the README.md file there on how to use the model.
 
-For the usage of VILA go to the branch [VLM_VILA](VLM_VILA).
+For the usage of VILA go to the branch [VLM_VILA](VLM_VILA) and read the README.md file there on how to use the model.
 
 ## ⚖️ License
 
