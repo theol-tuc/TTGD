@@ -33,7 +33,7 @@ git clone https://github.com/theol-tuc/TTGD.git
 ```
 2. Navigate to the backend folder and start the virtual environment:
 ```sh
-venv\Scripts\activate
+.venv\Scripts\activate
 ```
 3. Install dependencies:
 ```sh
@@ -67,7 +67,7 @@ For the usage on LLaMa3 go to the branch [llama3](llama3). For instructions read
 
 For the usage on GPT-4V go to the branch [gpt4](gpt4).
 
-For the usage of VILA go to the branch [vila](VLM_VILA).
+For the usage of VILA go to the branch [VLM_VILA](VLM_VILA).
 
 ## ⚖️ License
 
