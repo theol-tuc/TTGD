@@ -63,7 +63,7 @@ You can now play the game!
 
 If you want to use the AI features, at this moment they are in the respective branches with their name.
 
-For the usage on LLaMa3 go to the branch [llama3](llama3). For instructions read the implentation guide [IMPLEMENTATION_GUIDE.md](TTG_Backend/IMPLEMENTATION_GUIDE.md).
+For the usage of LLaMa3 stay in this branch. For instructions read the implentation guide [IMPLEMENTATION_GUIDE.md](TTG_Backend/IMPLEMENTATION_GUIDE.md).
 
 For the usage on GPT-4V go to the branch [gpt4](gpt4).
 
