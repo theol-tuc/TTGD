@@ -1,0 +1,96 @@
+.board-container {
+    position: relative;
+    padding: 10px;
+    background-color: gray;
+    border-radius: 8px;
+    min-height: 100%;
+    min-width: 100%;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(17, 1fr);
+    background-color: #ccc;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.board-row {
+    display: contents;
+}
+
+.board-cell {
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    aspect-ratio: 1;
+    overflow: visible;
+}
+
+.cell-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+}
+
+/* Add styles for marbles to appear on top of components */
+.board-cell[title*="ball"] .cell-image {
+    position: relative;
+    z-index: 2;
+    transform: scale(1.2);
+}
+
+.board-cell[title*="ramp_right"] .cell-image {
+    transform: scale(1.45);
+}
+
+.board-cell[title*="ramp_left"] .cell-image {
+    transform: scaleX(-1) scale(1.45);
+}
+
+.board-cell[title*="bit_right"] .cell-image {
+    transform: scaleX(-1) scale(1.45);
+}
+
+.board-cell[title*="bit_left"] .cell-image {
+    transform: scale(1.45);
+}
+
+.board-cell[title*="crossover"] .cell-image {
+    transform: scale(1.45);
+}
+
+.board-cell[title*="intercept"] .cell-image {
+    transform: scale(1.45);
+}
+
+.board-cell[title*="border_diagonal_right"] .cell-image {
+    transform: rotate(90deg);
+}
+
+.board-cell.interactive{
+    cursor:pointer;
+}
+
+.board-cell[title*="gear "] .cell-image {
+    transform: scale(1.5) rotate(10deg);
+}
+
+/* /* Container for marble outputs */
+.marble-outputs {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 5px;
+    z-index: 10;
+}
