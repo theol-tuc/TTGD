@@ -35,7 +35,7 @@ git clone https://github.com/theol-tuc/TTGD.git
 ```sh
 cd TTG_Backend
 python3 -m venv venv
-.venv\Scripts\activate
+venv\Scripts\activate
 ```
 3. Install dependencies:
 ```sh
