@@ -53,7 +53,7 @@ The backend server is now running on `http://localhost:8000`
 ```sh
 
 cd TTG_Frontend/app
-npm install
+npm install --legacy-peer-deps
 ```
 2. In the same directory run:
 ```sh
