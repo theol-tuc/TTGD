@@ -3,10 +3,10 @@ Turing Tumble Game Developemt
 
 ## Features
 
-- **Interactive Frontend & Backend** – A full web implementation of Turing Tumble  
-- **AI-Generated Challenges** – Dynamic puzzles tailored to your skill level  
-- **Intelligent Opponent** – Play against an AI that adapts to your strategies  
-- **Custom Scenario Creation** – Use AI to generate new game setups for endless possibilities
+- **Interactive Web-Based Gameplay** – lay the full Turing Tumble game directly in your browser, with a smooth and intuitive interface 
+- **Curated Challenge Set** – Tackle a selection of predefined puzzles faithfully adapted from the official Turing Tumble puzzle book  
+- **AI-Driven Move Suggestions** – Receive intelligent move recommendations powered by AI models trained to analyze board states and assist your decision-making  
+- **Model Comparison Framework** – Experiment with three distinct AI agents, each employing a different reasoning approach to evaluate and suggest moves, offering varied perspectives on each challenge
 
 ## Technologies
 
@@ -31,8 +31,10 @@ You need to have installed:
 ```sh
 git clone https://github.com/theol-tuc/TTGD.git
 ```
-2. Navigate to the backend folder and start the virtual environment:
+2. Navigate to the backend folder, create and start a virtual environment:
 ```sh
+cd TTG_Backend
+python3 -m venv venv
 .venv\Scripts\activate
 ```
 3. Install dependencies:
@@ -49,6 +51,8 @@ The backend server is now running on `http://localhost:8000`
 
 1. Navigate to the "TTG_Frontend/app" folder and install dependencies
 ```sh
+
+cd TTG_Frontend/app
 npm install
 ```
 2. In the same directory run:
