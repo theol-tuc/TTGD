@@ -21,7 +21,7 @@ Turing Tumble Game Developemt
 
 You need to have installed:
 - Node.js
-- Python (preferred version 3.12 or higher)
+- Python (preferred version 3.12.3)
 - pip
 - Rust
 
